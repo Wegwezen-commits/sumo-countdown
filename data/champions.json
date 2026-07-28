@@ -12,6 +12,18 @@
       "record": "12-3",
       "note": "Third career top-division title; earned re-promotion to Ozeki.",
       "photo": "assets/pixel/champion-medallion.png"
+    },
+    "2026-05": {
+      "champion": "Wakatakakage",
+      "record": "12-3",
+      "note": "Second career top-division title, won in a playoff over Ozeki Kirishima; with two Yokozuna and two Ozeki absent through injury, the Komusubi carried the tournament from the rank-and-file.",
+      "photo": "assets/pixel/champion-medallion.png"
+    },
+    "2026-07": {
+      "champion": "Aonishiki",
+      "record": "12-3",
+      "note": "Third career top-division title, decided in a three-way playoff with Atamifuji and Kirishima after all three finished 12-3; the win also secured Aonishiki's re-promotion to Ozeki.",
+      "photo": "assets/pixel/champion-medallion.png"
     }
   }
 }

@@ -1,6 +1,6 @@
 {
   "_comment": "Official Japan Sumo Association honbasho dates. Only confirmed/official dates belong here — anything after the last entry is generated at runtime by js/schedule.js using the six-tournament yearly cadence (Jan/Mar/May/Jul/Sep/Nov, rotating Tokyo-Osaka-Tokyo-Nagoya-Tokyo-Fukuoka). When new official dates are published, add them here (or let the weekly GitHub Action do it) and the generator will stop fabricating that slot.",
-  "lastVerified": "2026-07-27",
+  "lastVerified": "2026-07-28",
   "source": "Japan Sumo Association (sumo.or.jp)",
   "basho": [
     {
@@ -45,7 +45,11 @@
       "startDate": "2026-05-10",
       "endDate": "2026-05-24",
       "official": true,
-      "status": "completed"
+      "status": "completed",
+      "champion": "Wakatakakage",
+      "championJa": "若隆景",
+      "record": "12-3 (playoff)",
+      "runnerUp": "Kirishima"
     },
     {
       "id": "2026-07",
@@ -57,7 +61,11 @@
       "startDate": "2026-07-12",
       "endDate": "2026-07-26",
       "official": true,
-      "status": "scheduled"
+      "status": "completed",
+      "champion": "Aonishiki",
+      "championJa": "安青錦",
+      "record": "12-3 (playoff)",
+      "runnerUp": "Atamifuji"
     },
     {
       "id": "2026-09",

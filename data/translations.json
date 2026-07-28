@@ -51,7 +51,10 @@
     "reload": "Reload",
     "loading": "Loading the dohyō…",
     "music": "Ambient music",
-    "volume": "Master volume"
+    "volume": "Master volume",
+    "ultraWide": "Ultra-wide layout",
+    "currentlyIn": "Currently in",
+    "autoDetected": "auto-detected"
   },
   "ja": {
     "title": "大相撲場所カウントダウン",
@@ -105,7 +108,10 @@
     "reload": "再読み込み",
     "loading": "土俵を準備中…",
     "music": "環境音楽",
-    "volume": "音量"
+    "volume": "音量",
+    "ultraWide": "ワイドレイアウト",
+    "currentlyIn": "現在の時刻",
+    "autoDetected": "自動検出"
   },
   "nl": {
     "title": "Sumo Basho Aftelklok",
@@ -159,6 +165,9 @@
     "reload": "Herladen",
     "loading": "De dohyō wordt geladen…",
     "music": "Achtergrondmuziek",
-    "volume": "Volume"
+    "volume": "Volume",
+    "ultraWide": "Ultrabreed layout",
+    "currentlyIn": "Nu in",
+    "autoDetected": "automatisch gedetecteerd"
   }
 }
