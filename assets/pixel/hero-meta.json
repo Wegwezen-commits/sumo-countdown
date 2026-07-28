@@ -1,0 +1,17 @@
+{
+  "canvasW": 192,
+  "canvasH": 256,
+  "signBox": {
+    "x": 12,
+    "y": 68,
+    "w": 168,
+    "h": 124
+  },
+  "signPct": {
+    "left": 6.25,
+    "top": 26.56,
+    "right": 93.75,
+    "bottom": 75.0
+  },
+  "frameCount": 8
+}
