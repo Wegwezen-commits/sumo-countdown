@@ -36,24 +36,27 @@
     renderTimezones(container, startISODate) {
       // Grand sumo top-division bouts run roughly 15:00-18:00 JST; we show
       // the tournament's opening-day start referenced at a representative
-      // 08:00 JST doors-open time, converted to each zone, plus the
-      // visitor's own auto-detected zone.
+      // 08:00 JST doors-open time, converted to each zone, plus whichever
+      // zone the user selected in Settings (or their auto-detected zone,
+      // if left on "Auto") — that row is highlighted so the timezone
+      // preference visibly does something here.
       const base = new Date(startISODate + "T08:00:00+09:00");
       const zones = [
         { label: I18n.t("japan"), tz: "Asia/Tokyo" },
         { label: I18n.t("europe"), tz: "Europe/Amsterdam" },
         { label: I18n.t("usEastern"), tz: "America/New_York" }
       ];
-      let visitorTz = "UTC";
-      try { visitorTz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"; } catch (e) {}
-      if (!zones.some((z) => z.tz === visitorTz)) {
-        zones.push({ label: visitorTz.split("/").pop().replace(/_/g, " "), tz: visitorTz });
+      const effectiveTz = (global.Settings && global.Settings.effectiveTimezone()) || "UTC";
+      if (!zones.some((z) => z.tz === effectiveTz)) {
+        const label = effectiveTz.includes("/") ? effectiveTz.split("/").pop().replace(/_/g, " ") : effectiveTz;
+        zones.push({ label, tz: effectiveTz });
       }
       container.innerHTML = zones.map((z) => {
         const fmt = new Intl.DateTimeFormat(I18n.locale(), {
           weekday: "short", hour: "2-digit", minute: "2-digit", timeZone: z.tz
         });
-        return `<div class="row"><span class="k">${z.label}</span><span class="v">${fmt.format(base)}</span></div>`;
+        const isYours = z.tz === effectiveTz;
+        return `<div class="row${isYours ? " row-yours" : ""}"><span class="k">${z.label}${isYours ? " ★" : ""}</span><span class="v">${fmt.format(base)}</span></div>`;
       }).join("");
     }
   };

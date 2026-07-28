@@ -93,6 +93,21 @@
     `;
   }
 
+  function updateTzPreview() {
+    const el = document.getElementById("tzPreview");
+    if (!el) return;
+    const tz = Settings.effectiveTimezone();
+    try {
+      const fmt = new Intl.DateTimeFormat(I18n.locale(), {
+        weekday: "short", hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: tz
+      });
+      const label = Settings.prefs.timezone === "auto" ? `${tz} (${I18n.t("autoDetected")})` : tz;
+      el.innerHTML = `${I18n.t("currentlyIn")} <strong>${label}</strong>: <strong>${fmt.format(new Date())}</strong>`;
+    } catch (e) {
+      el.textContent = "—";
+    }
+  }
+
   function renderVenuesPanel() {
     const container = document.getElementById("venueCard");
     container.innerHTML = "";
@@ -158,6 +173,7 @@
     const sAudio = document.getElementById("prefAudio");
     const sMusic = document.getElementById("prefMusic");
     const sVolume = document.getElementById("prefVolume");
+    const sVolumeValue = document.getElementById("prefVolumeValue");
     const sCompact = document.getElementById("prefCompact");
     const sUltra = document.getElementById("prefUltra");
     const sTv = document.getElementById("prefTv");
@@ -169,6 +185,7 @@
     sAudio.checked = p.audio;
     sMusic.checked = p.music;
     sVolume.value = p.volume;
+    sVolumeValue.textContent = `${p.volume}%`;
     sCompact.checked = p.compact;
     sUltra.checked = p.ultra;
     sTv.checked = p.tv;
@@ -179,12 +196,15 @@
     sSakura.addEventListener("change", () => { Settings.set("sakura", sSakura.checked); if (sSakura.checked) Animations.startSakura(); else Animations.stopSakura(); });
     sAudio.addEventListener("change", () => { Settings.set("audio", sAudio.checked); SumoAudio.unlock(); });
     sMusic.addEventListener("change", () => { SumoAudio.unlock(); Settings.set("music", sMusic.checked); });
-    sVolume.addEventListener("input", () => Settings.set("volume", Number(sVolume.value)));
+    sVolume.addEventListener("input", () => {
+      Settings.set("volume", Number(sVolume.value));
+      sVolumeValue.textContent = `${sVolume.value}%`;
+    });
     sCompact.addEventListener("change", () => Settings.set("compact", sCompact.checked));
     sUltra.addEventListener("change", () => Settings.set("ultra", sUltra.checked));
     sTv.addEventListener("change", () => Settings.set("tv", sTv.checked));
     sTheme.addEventListener("change", () => Settings.set("theme", sTheme.value));
-    sTz.addEventListener("change", () => { Settings.set("timezone", sTz.value); renderVenuesPanel(); });
+    sTz.addEventListener("change", () => { Settings.set("timezone", sTz.value); renderVenuesPanel(); updateTzPreview(); });
     sLang.addEventListener("change", () => { I18n.set(sLang.value); renderAllPanels(); Countdown.render(); });
 
     document.getElementById("tvExitButton").addEventListener("click", () => {
@@ -206,6 +226,8 @@
 
     wireSettings();
     renderAllPanels();
+    updateTzPreview();
+    setInterval(updateTzPreview, 1000);
     Countdown.start();
     PWA.init();
 
