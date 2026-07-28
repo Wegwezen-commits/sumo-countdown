@@ -106,6 +106,46 @@ limitations" notes below so you know what to change and why.
 3. The layout is mobile-first and has no fixed pixel widths, so it
    resizes cleanly inside the Sites iframe.
 
+## This session's fixes (bug report follow-up)
+
+A round of real bugs was reported after the previous delivery. Root causes and fixes:
+
+- **Hero rikishi invisible, no sakura/leaf/snow particles, no loading spinner.**
+  Root cause: every `background-image: url('assets/...')` in `css/main.css`
+  was resolving relative to the CSS file's own folder (`css/`), so the
+  browser was actually requesting `css/assets/pixel/hero-idle-sheet.png`
+  (404) instead of `assets/pixel/hero-idle-sheet.png` — a plain CSS
+  relative-URL bug, confirmed by request-path testing. Fixed by changing
+  every such `url()` to `../assets/...`. This one bug explains all of
+  the "missing art" symptoms at once, since they all used the same
+  broken pattern.
+- **Timezone setting had no effect.** `Settings.effectiveTimezone()`
+  existed but nothing actually read it. Fixed: the Venues & Time Zones
+  panel now shows (and highlights, with a ★) whichever zone you've
+  selected, and the settings panel has a new live line under the
+  selector — "Currently in `<zone>`: `<time>`" — that updates every
+  second, so the setting visibly does something.
+- **Duplicate label bug.** "Ultra-wide layout" and "Large display (TV
+  mode)" both used the same translation key, so both toggles displayed
+  identical text after the page's i18n pass ran — easy to mistake for a
+  broken duplicate control. Gave Ultra-wide its own `ultraWide` key.
+- **Empty previous-basho champion/record.** Simply missing data —
+  `data/schedule.json`'s May and July 2026 entries had no
+  `champion`/`record`/`runnerUp` fields. Filled in from public reporting:
+  Natsu Basho (May) — Wakatakakage, 12-3, playoff win over Kirishima;
+  Nagoya Basho (July) — Aonishiki, 12-3, three-way playoff over
+  Atamifuji and Kirishima.
+- **Volume slider felt inert.** Added a live "NN%" readout next to it,
+  so moving it visibly confirms it's registering input even with sound
+  muted.
+- **Service worker hardening (proactive fix).** The old cache-first
+  strategy could mask a fixed deploy behind a stale cached copy of the
+  code itself if a service worker was already installed from an earlier
+  visit. HTML/CSS/JS/JSON now go network-first (falling back to cache
+  only when offline); images/audio stay cache-first for speed. Bumped
+  `CACHE_VERSION` so existing installs pick up all of the above
+  immediately.
+
 ## Known limitations / what to double-check before relying on this
 
 **Art (Workstream A)**

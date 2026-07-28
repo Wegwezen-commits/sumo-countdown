@@ -173,6 +173,9 @@
           <option value="UTC">UTC</option>
         </select>
       </div>
+      <div class="setting-row tz-preview-row">
+        <span id="tzPreview" class="tz-preview" aria-live="polite">—</span>
+      </div>
 
       <div class="setting-row">
         <label for="prefTheme" data-i18n="darkMode">Dark mode</label>
@@ -200,7 +203,10 @@
 
       <div class="setting-row">
         <label for="prefVolume" data-i18n="volume">Master volume</label>
-        <input id="prefVolume" class="pixel-range" type="range" min="0" max="100" value="60" />
+        <span class="volume-control">
+          <input id="prefVolume" class="pixel-range" type="range" min="0" max="100" value="60" />
+          <span id="prefVolumeValue" class="volume-value">60%</span>
+        </span>
       </div>
 
       <div class="setting-row">
@@ -209,7 +215,7 @@
       </div>
 
       <div class="setting-row">
-        <label for="prefUltra" data-i18n="largeDisplay">Ultra-wide layout</label>
+        <label for="prefUltra" data-i18n="ultraWide">Ultra-wide layout</label>
         <span class="switch"><input id="prefUltra" type="checkbox" /><span class="track"></span><span class="thumb"></span></span>
       </div>
 
