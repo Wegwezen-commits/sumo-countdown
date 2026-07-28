@@ -1,0 +1,51 @@
+/* Breakpoints: 320, 375, 768, 1024, 1440, 4K/ultrawide */
+
+@media (max-width: 767px) {
+  .topbar { padding: 8px 12px; gap: 10px; }
+  .controls { gap: 6px; }
+  .control-pill span:first-child, .toggle-pill span > span { display: none; }
+  .content { padding: 16px 12px 60px; }
+  .info-grid { grid-template-columns: 1fr; }
+  .panel { grid-column: span 1; }
+  .tournament-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .tournament-grid { grid-template-columns: 1fr; }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .info-grid { grid-template-columns: repeat(6, 1fr); }
+  .panel { grid-column: span 3; }
+  .panel-wide { grid-column: span 6; }
+  .tournament-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .tournament-grid { grid-template-columns: repeat(6, 1fr); }
+}
+
+@media (min-width: 1440px) {
+  .content { max-width: 1320px; }
+  .tournament-grid { grid-template-columns: repeat(6, 1fr); }
+}
+
+/* Ultrawide monitors: keep hero from stretching too tall/wide */
+@media (min-aspect-ratio: 21/9) {
+  .hero-card { max-width: 1100px; margin: 0 auto; }
+}
+
+/* 4K */
+@media (min-width: 2560px) {
+  .content { max-width: 1600px; }
+  body { font-size: 18px; }
+}
+
+/* Compact mode toggle (user preference, applied via body attribute) */
+[data-compact="true"] .panel { padding: 14px; }
+[data-compact="true"] .info-grid { gap: 10px; }
+[data-compact="true"] .content { padding-top: 14px; }
+[data-compact="true"] .clock-label { display: none; }
+
+/* Ultra-wide toggle (user preference — forces a wider max width) */
+[data-ultra="true"] .content { max-width: 1800px; }

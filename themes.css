@@ -1,0 +1,76 @@
+/* Seasonal themes — applied via [data-season] on the app shell.
+   Kept subtle: palette + glow tint only, never distracting. */
+
+[data-season="spring"] {
+  --accent: #e8749a;
+  --accent-soft: #ffe1ec;
+  --accent-deep: #c14b74;
+  --gold: #f2b6c8;
+}
+[data-season="spring"] .season-glow { background: radial-gradient(circle at 50% -10%, rgba(232,116,154,0.25), transparent 60%); }
+
+[data-season="summer"] {
+  --accent: #1f9d6b;
+  --accent-soft: #d7f5e6;
+  --accent-deep: #14724c;
+  --gold: #6fd8a8;
+}
+[data-season="summer"] .season-glow { background: radial-gradient(circle at 50% -10%, rgba(31,157,107,0.22), transparent 60%); }
+
+[data-season="autumn"] {
+  --accent: #d1701f;
+  --accent-soft: #ffe6cc;
+  --accent-deep: #9c4d10;
+  --gold: #e8a33e;
+}
+[data-season="autumn"] .season-glow { background: radial-gradient(circle at 50% -10%, rgba(209,112,31,0.24), transparent 60%); }
+
+[data-season="winter"] {
+  --accent: #2e6fd6;
+  --accent-soft: #e2edff;
+  --accent-deep: #1d4d9c;
+  --gold: #9fc2f2;
+}
+[data-season="winter"] .season-glow { background: radial-gradient(circle at 50% -10%, rgba(46,111,214,0.22), transparent 60%); }
+
+/* Default rising-sun glow when no season class is present */
+.season-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(circle at 50% -10%, rgba(200,16,46,0.18), transparent 60%);
+}
+
+/* New Year / Hatsu Basho special accent (applied via [data-hatsu="true"]) */
+[data-hatsu="true"] {
+  --accent: #c8102e;
+  --gold: #d9b45c;
+}
+
+/* Sakura particle layer */
+.sakura-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  overflow: hidden;
+}
+/* .petal base rules now live in main.css (pixel sprite backgrounds) */
+
+/* Salt easter-egg particles (subtle, before live tournaments) */
+.salt-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  overflow: hidden;
+}
+.salt-grain {
+  position: absolute;
+  top: -5%;
+  width: 3px; height: 3px;
+  background: #ffffff;
+  border-radius: 50%;
+  opacity: 0.7;
+}
