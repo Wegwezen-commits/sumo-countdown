@@ -125,7 +125,7 @@ button, select, input { font-family: inherit; }
 .brand { display: flex; align-items: center; gap: 10px; }
 .brand-mark {
   width: 34px; height: 34px;
-  background-image: url('assets/icons/icon-192.png');
+  background-image: url('../assets/icons/icon-192.png');
   background-size: cover;
   image-rendering: pixelated;
   box-shadow: var(--shadow-sm);
@@ -198,7 +198,7 @@ button, select, input { font-family: inherit; }
 
 .hero-sprite {
   position: absolute; inset: 0;
-  background-image: url('assets/pixel/hero-idle-sheet.png');
+  background-image: url('../assets/pixel/hero-idle-sheet.png');
   background-repeat: no-repeat;
   background-position: 0% 0%;
   background-size: 800% 100%;
@@ -209,7 +209,7 @@ button, select, input { font-family: inherit; }
   filter: drop-shadow(0 10px 14px rgba(0,0,0,0.35));
 }
 .hero-sprite.celebrate {
-  background-image: url('assets/pixel/hero-celebrate.png');
+  background-image: url('../assets/pixel/hero-celebrate.png');
   background-size: 100% 100%;
   animation: heroCelebrate 900ms ease-in-out infinite alternate;
 }
@@ -332,6 +332,27 @@ button, select, input { font-family: inherit; }
   border-radius: 0;
 }
 
+.volume-control { display: flex; align-items: center; gap: 8px; }
+.volume-value {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+  min-width: 2.6em;
+  text-align: right;
+}
+
+.setting-row.tz-preview-row { justify-content: flex-start; padding-top: 0; }
+.tz-preview {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-soft);
+  background: var(--line);
+  border-radius: 6px;
+  padding: 6px 10px;
+  width: 100%;
+}
+.tz-preview strong { color: var(--ink); font-weight: 700; }
+
 .flip-card {
   position: relative;
   background: #0c0e14;
@@ -444,6 +465,7 @@ button, select, input { font-family: inherit; }
 .row:last-child { border-bottom: none; }
 .row .k { color: var(--ink-soft); }
 .row .v { font-weight: 600; text-align: right; }
+.row-yours .k, .row-yours .v { color: var(--accent); font-weight: 700; }
 
 .venue-card { display: flex; gap: 12px; align-items: center; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 10px; }
 .venue-card img { width: 96px; height: 54px; object-fit: cover; flex-shrink: 0; border: 1px solid var(--line); }
@@ -517,7 +539,7 @@ select.mini { border: 1px solid var(--line); border-radius: 8px; background: var
 .loading-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 .loading-sprite {
   width: 48px; height: 48px;
-  background-image: url('assets/pixel/loading-sheet.png');
+  background-image: url('../assets/pixel/loading-sheet.png');
   background-size: 400% 100%;
   background-repeat: no-repeat;
   animation: loadingSpin 900ms steps(4) infinite;
@@ -537,11 +559,11 @@ select.mini { border: 1px solid var(--line); border-radius: 8px; background: var
   width: 14px; height: 14px;
   background-repeat: no-repeat;
   background-size: contain;
-  background-image: url('assets/pixel/particle-sakura.png');
+  background-image: url('../assets/pixel/particle-sakura.png');
 }
-[data-season="summer"] .petal { background-image: url('assets/pixel/particle-leaf-summer.png'); }
-[data-season="autumn"] .petal { background-image: url('assets/pixel/particle-leaf.png'); }
-[data-season="winter"] .petal { background-image: url('assets/pixel/particle-snow.png'); }
+[data-season="summer"] .petal { background-image: url('../assets/pixel/particle-leaf-summer.png'); }
+[data-season="autumn"] .petal { background-image: url('../assets/pixel/particle-leaf.png'); }
+[data-season="winter"] .petal { background-image: url('../assets/pixel/particle-snow.png'); }
 
 /* ---------- high contrast helper ---------- */
 [data-contrast="high"] {
