@@ -5,7 +5,9 @@
 [data-tv="true"] .info-grid,
 [data-tv="true"] footer.site-footer,
 [data-tv="true"] .hero-image,
-[data-tv="true"] .hero-sprite {
+[data-tv="true"] .hero-sprite,
+[data-tv="true"] .venue-crowd,
+[data-tv="true"] .hero-hint {
   display: none !important;
 }
 
@@ -31,9 +33,18 @@
 [data-tv="true"] .hero-figure { aspect-ratio: auto; max-height: none; height: 100vh; width: 100%; }
 [data-tv="true"] .venue-scene { filter: brightness(0.55) saturate(1.1); }
 
-[data-tv="true"] .hero-overlay {
+/* The rikishi is hidden in TV mode (hero-image/hero-sprite above), so the
+   rig just becomes a plain full-stage positioning box for the overlay. */
+[data-tv="true"] .hero-rig {
   position: static;
   width: min(96vw, 1400px);
+  aspect-ratio: auto;
+  transform: none;
+  cursor: default;
+}
+[data-tv="true"] .hero-overlay {
+  position: static;
+  width: 100%;
   height: auto;
   gap: 18px;
 }

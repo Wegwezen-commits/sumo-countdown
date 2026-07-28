@@ -176,7 +176,10 @@ button, select, input { font-family: inherit; }
   background: var(--paper-raised);
 }
 
-.hero-figure { position: relative; width: 100%; aspect-ratio: 3 / 4; max-height: 74vh; overflow: hidden; background: #10131c; }
+/* Wider "stage" aspect than before on purpose: the rikishi no longer fills
+   the whole frame (see .hero-rig below), so there's a real venue scene
+   to see either side of and above him. */
+.hero-figure { position: relative; width: 100%; aspect-ratio: 16 / 10; max-height: 70vh; overflow: hidden; background: #10131c; }
 
 /* Animated pixel-art venue backdrop, swapped by JS (venue.js / countdown.js)
    to match the upcoming or live tournament's host arena, day/night aware. */
@@ -190,6 +193,72 @@ button, select, input { font-family: inherit; }
   content: "";
   position: absolute; inset: 0;
   background: linear-gradient(180deg, rgba(16,19,28,0) 40%, rgba(16,19,28,0.55) 100%);
+}
+
+/* Cheap CSS-only crowd band along the bottom of the venue — no extra image
+   assets, just two rows of "heads" (radial-gradient dots) with a slow
+   opacity flicker so the arena reads as occupied/alive behind the rikishi. */
+.venue-crowd {
+  position: absolute;
+  left: 0; right: 0; bottom: 14%;
+  height: 6%;
+  min-height: 10px;
+  background-image:
+    radial-gradient(circle at 6px 60%, rgba(20,16,14,0.55) 0 3px, transparent 4px),
+    radial-gradient(circle at 22px 40%, rgba(20,16,14,0.45) 0 3px, transparent 4px);
+  background-size: 28px 100%;
+  background-repeat: repeat-x;
+  opacity: 0.7;
+  animation: crowdFlicker 3.6s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes crowdFlicker {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.8; }
+}
+@media (prefers-reduced-motion: reduce) { .venue-crowd { animation: none; opacity: 0.65; } }
+
+/* ---------- Hero rig: the rikishi + his sign, as one movable unit ---------- */
+/* Anchored to the bottom of the stage and deliberately sized well under
+   100% of the frame, so venue is visible above and to both sides.
+   Hovering / focusing / tapping it (see js/hero.js) adds .approach, which
+   scales it up and lifts it toward the viewer — "he steps forward to
+   show you the sign". */
+.hero-rig {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: clamp(210px, 40%, 420px);
+  aspect-ratio: 3 / 4;
+  transform: translate(-50%, 15%) scale(0.8);
+  transform-origin: 50% 100%;
+  transition: transform 700ms cubic-bezier(.2,.8,.2,1);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  z-index: 2;
+  /* Countdown text inside (see .hero-overlay) is sized in cqw, relative to
+     THIS box, not the viewport — so it always fits the sign regardless of
+     how big the rig itself is at a given breakpoint or approach-scale. */
+  container-type: inline-size;
+  container-name: hero-rig;
+}
+/* Older browsers without container-query support (no meaningful market
+   share by 2026, but this keeps the clock legible rather than tiny/blank
+   if it ever gets embedded somewhere odd): fall back to the previous
+   viewport-relative sizing. */
+@supports not (container-type: inline-size) {
+  .flip-card { font-size: clamp(16px, 3.2vw, 40px) !important; }
+  .clock-sep { font-size: clamp(12px, 2.2vw, 26px) !important; }
+  .eyebrow { font-size: clamp(8px, 0.9vw, 12px) !important; }
+  .live-badge { font-size: clamp(8px, 1vw, 12px) !important; }
+}
+.hero-rig:focus-visible { outline: 2px solid var(--gold); outline-offset: 6px; }
+.hero-rig.approach {
+  transform: translate(-50%, -1%) scale(1.06);
+}
+.hero-rig.walking .hero-sprite { animation-duration: 1.6s; }
+@media (prefers-reduced-motion: reduce) {
+  .hero-rig, .hero-rig.approach { transition: none; }
 }
 
 /* The base <img> is kept for SEO/alt-text/no-JS/print; visually replaced by
@@ -208,6 +277,7 @@ button, select, input { font-family: inherit; }
   animation: heroIdle 4.8s steps(1) infinite;
   filter: drop-shadow(0 10px 14px rgba(0,0,0,0.35));
 }
+.hero-rig.approach .hero-sprite { filter: drop-shadow(0 16px 20px rgba(0,0,0,0.45)); }
 .hero-sprite.celebrate {
   background-image: url('../assets/pixel/hero-celebrate.png');
   background-size: 100% 100%;
@@ -238,10 +308,9 @@ button, select, input { font-family: inherit; }
 /* The overlay is positioned to match the blank sign panel baked into the
    hero sprite sheet (see assets/pixel/hero-meta.json — sign box in the
    192x256 pixel-art canvas: x 12-180, y 68-192 of 256, i.e. left 6.25%,
-   right 93.75%, top 26.56%, bottom 75%). Percentages, so it never
-   overflows the sign at any breakpoint. (This session's bigger 192x256
-   canvas is an exact 2x of the previous 96x128 one, so these percentages
-   are unchanged from before.) */
+   right 93.75%, top 26.56%, bottom 75%). Percentages of the .hero-rig
+   (not the whole stage), so it never overflows the sign at any breakpoint
+   or rig scale. */
 .hero-overlay {
   position: absolute;
   left: 6.25%;
@@ -260,6 +329,33 @@ button, select, input { font-family: inherit; }
 .hero-overlay .basho-meta { color: #cdbfae; }
 .hero-overlay .eyebrow { color: #ffb37a; }
 
+.hero-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 4%;
+  transform: translateX(-50%);
+  z-index: 3;
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  color: #f6ead8;
+  background: rgba(16,19,28,0.55);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 999px;
+  padding: 5px 12px;
+  pointer-events: none;
+  opacity: 0.85;
+  animation: hintPulse 2.4s ease-in-out infinite;
+  transition: opacity 400ms ease;
+}
+.hero-hint.hidden { opacity: 0; }
+@keyframes hintPulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.9; }
+}
+@media (hover: hover) and (pointer: fine) { .hero-hint { display: none; } }
+@media (prefers-reduced-motion: reduce) { .hero-hint { animation: none; } }
+
 .live-badge {
   position: absolute;
   top: -10px;
@@ -268,7 +364,7 @@ button, select, input { font-family: inherit; }
   background: var(--accent);
   color: #fff;
   font-weight: 700;
-  font-size: clamp(9px, 1.4vw, 13px);
+  font-size: clamp(8px, 4.5cqw, 13px);
   padding: 3px 10px;
   border-radius: 999px;
   display: flex;
@@ -284,29 +380,34 @@ button, select, input { font-family: inherit; }
 }
 
 .eyebrow {
-  font-size: clamp(9px, 1.3vw, 13px);
+  font-size: clamp(8px, 4cqw, 13px);
   text-transform: uppercase;
   letter-spacing: 0.14em;
   color: var(--accent-deep);
   font-weight: 700;
 }
 
-.countdown-shell { display: flex; flex-direction: column; align-items: center; gap: clamp(2px,0.6vw,6px); width: 100%; }
+.countdown-shell { display: flex; flex-direction: column; align-items: center; gap: clamp(2px, 1.5cqw, 6px); width: 100%; }
 
+/* flex-wrap is a deliberate safety net: even if the cqw sizing below is
+   ever slightly too generous for some odd viewport/zoom combination, the
+   clock wraps onto a second line instead of ever clipping or overflowing
+   the sign — it must never overflow, per the brief. */
 .digital-clock {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-end;
   justify-content: center;
-  gap: clamp(2px, 1vw, 10px);
+  gap: clamp(2px, 2.5cqw, 10px);
   width: 100%;
 }
 .clock-part { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
 .clock-sep {
   font-family: var(--font-led);
   font-weight: 400;
-  font-size: clamp(18px, 4vw, 38px);
+  font-size: clamp(14px, 10cqw, 34px);
   color: var(--led-glow);
-  padding-bottom: clamp(8px, 1.6vw, 14px);
+  padding-bottom: clamp(6px, 4cqw, 12px);
   opacity: 0.75;
 }
 
@@ -357,13 +458,13 @@ button, select, input { font-family: inherit; }
   position: relative;
   background: #0c0e14;
   color: var(--led-glow);
-  padding: clamp(2px, 0.8vw, 6px) clamp(4px, 1.1vw, 10px);
+  padding: clamp(2px, 1.5cqw, 6px) clamp(3px, 2cqw, 9px);
   font-family: var(--font-led);
   font-weight: 400;
-  font-size: clamp(22px, 6vw, 52px);
+  font-size: clamp(15px, 12cqw, 40px);
   line-height: 1;
   box-shadow: inset 0 0 0 2px #000, inset 0 0 0 4px rgba(255,95,128,0.25), 0 0 12px rgba(255,95,128,0.35);
-  min-width: 1.6em;
+  min-width: 1.35em;
   text-align: center;
   overflow: hidden;
   text-shadow: 0 0 6px var(--led-glow), 0 0 14px rgba(255,95,128,0.6);
@@ -387,15 +488,15 @@ button, select, input { font-family: inherit; }
 .digit.flip { animation: digitFlip 420ms steps(4); }
 
 .clock-label {
-  font-size: clamp(7px, 1vw, 11px);
+  font-size: clamp(6px, 3cqw, 11px);
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--ink-soft);
   font-weight: 600;
 }
 
-.basho-name { font-weight: 700; font-size: clamp(11px, 1.8vw, 16px); margin-top: 2px; }
-.basho-meta { font-size: clamp(8px, 1.2vw, 12px); color: var(--ink-soft); }
+.basho-name { font-weight: 700; font-size: clamp(10px, 5cqw, 16px); margin-top: 2px; }
+.basho-meta { font-size: clamp(7px, 3.5cqw, 12px); color: var(--ink-soft); }
 
 .progress-wrap { width: 92%; display: flex; align-items: center; gap: 8px; margin-top: 2px; }
 .progress-line {
@@ -411,7 +512,7 @@ button, select, input { font-family: inherit; }
   border-radius: 999px;
   transition: width 600ms ease;
 }
-.progress-text { font-size: clamp(7px, 1vw, 11px); color: var(--ink-soft); white-space: nowrap; }
+.progress-text { font-size: clamp(6px, 3cqw, 11px); color: var(--ink-soft); white-space: nowrap; }
 
 /* ---------- Panels ---------- */
 .info-grid {
@@ -477,6 +578,52 @@ button, select, input { font-family: inherit; }
 .champion-strip { display: flex; gap: 12px; align-items: center; }
 .champion-strip img { width: 56px; height: 56px; object-fit: contain; background: var(--paper); border: 1px solid var(--line); }
 
+/* ---------- News panel ---------- */
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  min-height: 24px;
+}
+.news-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  background: var(--paper);
+  text-decoration: none;
+  color: inherit;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+.news-item:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+.news-source {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-deep);
+}
+.news-title { font-size: 13px; font-weight: 600; line-height: 1.4; }
+.news-time { font-size: 11px; color: var(--ink-soft); margin-top: auto; }
+
+.news-sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line);
+}
+.news-sources a {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent-deep);
+  text-decoration: none;
+}
+.news-sources a:hover { text-decoration: underline; }
+
 footer.site-footer {
   max-width: 1200px; margin: 0 auto; padding: 20px; text-align: center;
   color: var(--ink-soft); font-size: 12px;
@@ -509,15 +656,20 @@ footer.site-footer {
 .setting-row label:first-child { font-size: 13px; font-weight: 600; }
 
 .switch { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
-.switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.switch input {
+  position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer;
+  z-index: 1; /* sits above .track/.thumb so clicks always reach the real checkbox */
+}
 .switch .track {
   position: absolute; inset: 0; background: var(--line); border-radius: 999px;
   transition: background var(--transition-fast);
+  pointer-events: none; /* decorative — was silently swallowing clicks meant for input */
 }
 .switch .thumb {
   position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%;
   background: #fff; box-shadow: var(--shadow-sm);
   transition: transform var(--transition-fast);
+  pointer-events: none; /* decorative — see .track above */
 }
 .switch input:checked + .track { background: var(--accent); }
 .switch input:checked + .track + .thumb { transform: translateX(18px); }

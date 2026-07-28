@@ -8,6 +8,14 @@
   .info-grid { grid-template-columns: 1fr; }
   .panel { grid-column: span 1; }
   .tournament-grid { grid-template-columns: repeat(2, 1fr); }
+  .news-grid { grid-template-columns: 1fr; }
+
+  /* Less horizontal room on phones, so the stage goes taller/narrower and
+     the rig starts a bit bigger — still smaller than the old edge-to-edge
+     hero, but the sign stays comfortably readable without a tap. */
+  .hero-figure { aspect-ratio: 4 / 5; max-height: 78vh; }
+  .hero-rig { width: clamp(190px, 58%, 320px); transform: translate(-50%, 10%) scale(0.92); }
+  .hero-rig.approach { transform: translate(-50%, -1%) scale(1.04); }
 }
 
 @media (max-width: 480px) {
