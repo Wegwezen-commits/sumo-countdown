@@ -1,0 +1,54 @@
+{
+  "ryogoku": {
+    "name": "Ryogoku Kokugikan",
+    "nameJa": "両国国技館",
+    "city": "Tokyo",
+    "cityJa": "東京",
+    "capacity": 11098,
+    "opened": 1985,
+    "map": "https://maps.google.com/?q=Ryogoku+Kokugikan+Tokyo",
+    "info": "https://sumo.or.jp/EnHonbashoInfo/venue",
+    "image": "assets/pixel/venue-ryogoku.png",
+    "description": "Sumo's spiritual home, in the Ryogoku district of Tokyo. Hosts three of the six annual honbasho: January, May and September.",
+    "imageNight": "assets/pixel/venue-ryogoku-night.png"
+  },
+  "edion-osaka": {
+    "name": "EDION Arena Osaka",
+    "nameJa": "エディオンアリーナ大阪",
+    "city": "Osaka",
+    "cityJa": "大阪",
+    "capacity": 8700,
+    "opened": 1983,
+    "map": "https://maps.google.com/?q=EDION+Arena+Osaka",
+    "info": "https://sumo.or.jp/EnHonbashoInfo/venue",
+    "image": "assets/pixel/venue-osaka.png",
+    "description": "Host of the March Haru Basho, in the heart of Namba, Osaka.",
+    "imageNight": "assets/pixel/venue-osaka-night.png"
+  },
+  "ig-arena": {
+    "name": "IG Arena",
+    "nameJa": "IGアリーナ",
+    "city": "Nagoya",
+    "cityJa": "名古屋",
+    "capacity": 17000,
+    "opened": 2025,
+    "map": "https://maps.google.com/?q=IG+Arena+Nagoya",
+    "info": "https://sumo.or.jp/EnHonbashoInfo/venue",
+    "image": "assets/pixel/venue-nagoya.png",
+    "description": "The brand-new Aichi International Arena, designed by Kengo Kuma, hosting the July Nagoya Basho with full climate control.",
+    "imageNight": "assets/pixel/venue-nagoya-night.png"
+  },
+  "fukuoka": {
+    "name": "Fukuoka Kokusai Center",
+    "nameJa": "福岡国際センター",
+    "city": "Fukuoka",
+    "cityJa": "福岡",
+    "capacity": 7300,
+    "opened": 1994,
+    "map": "https://maps.google.com/?q=Fukuoka+Kokusai+Center",
+    "info": "https://sumo.or.jp/EnHonbashoInfo/venue",
+    "image": "assets/pixel/venue-fukuoka.png",
+    "description": "Host of the November Kyushu Basho, the final tournament of the sumo year.",
+    "imageNight": "assets/pixel/venue-fukuoka-night.png"
+  }
+}
