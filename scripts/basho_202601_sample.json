@@ -1,0 +1,22 @@
+{
+  "date": "20260111",
+  "bashoId": "202601",
+  "location": "Tokyo",
+  "startDate": "2026-01-11",
+  "endDate": "2026-01-25",
+  "yusho": [
+    {
+      "type": "Makuuchi",
+      "shikonaEn": "Aonishiki",
+      "shikonaJp": "安青錦",
+      "record": "12-3 (playoff)"
+    },
+    {
+      "type": "Juryo",
+      "shikonaEn": "Someexample",
+      "shikonaJp": "例",
+      "record": "11-4"
+    }
+  ],
+  "specialPrizes": []
+}
