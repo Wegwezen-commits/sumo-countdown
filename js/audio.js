@@ -155,6 +155,19 @@
     tone(c, sfxGain, c.currentTime, 0.06, 700, 0.12, "square");
   }
 
+  // Soft double-footstep + a light wood creak, used when the rikishi steps
+  // forward toward the viewer (see js/hero.js). Deliberately understated —
+  // this fires often (hover/tap), so it shouldn't compete with the music.
+  function playApproach() {
+    if (!Settings.prefs.audio || !unlocked) return;
+    const c = ensureContext();
+    if (!c) return;
+    const t0 = c.currentTime;
+    noiseBurst(c, sfxGain, t0, 0.05, 0.22, "lowpass", 400);
+    noiseBurst(c, sfxGain, t0 + 0.13, 0.05, 0.18, "lowpass", 380);
+    tone(c, sfxGain, t0 + 0.02, 0.18, 180, 0.08, "triangle", 140);
+  }
+
   function onZero(bashoId) {
     if (playedForId === bashoId) return;
     playedForId = bashoId;
@@ -271,5 +284,5 @@
     if (e.detail.key === "music") setMusicEnabled(e.detail.value);
   });
 
-  global.SumoAudio = { onZero, unlock, playClick, startMusic, stopMusic, setMusicEnabled };
+  global.SumoAudio = { onZero, unlock, playClick, playApproach, startMusic, stopMusic, setMusicEnabled };
 })(window);

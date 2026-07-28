@@ -231,6 +231,11 @@
     Countdown.start();
     PWA.init();
 
+    if (window.News) {
+      News.init();
+      setInterval(() => News.init(), 20 * 60 * 1000);
+    }
+
     document.querySelectorAll(".ghost-button, .icon-button").forEach((btn) => {
       btn.addEventListener("click", () => SumoAudio.playClick());
     });
