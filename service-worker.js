@@ -1,6 +1,10 @@
-// service-worker.js — app-shell cache-first strategy with background
-// revalidation, so the site works offline and updates itself quietly.
-const CACHE_VERSION = "sumo-countdown-v3-music";
+// service-worker.js — app-shell caching so the site works offline.
+// HTML/CSS/JS/JSON go network-first (fall back to cache offline) so a
+// fixed deploy is never masked by a stale cached copy of the code
+// itself; images/audio (which rarely change) stay cache-first for
+// speed and offline reliability.
+const CACHE_VERSION = "sumo-countdown-v4-fixes";
+const NETWORK_FIRST_EXT = [".html", ".js", ".css", ".json"];
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -65,8 +69,34 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+function isNetworkFirst(url) {
+  if (url.pathname === "/" || url.pathname.endsWith("/")) return true;
+  return NETWORK_FIRST_EXT.some((ext) => url.pathname.endsWith(ext));
+}
+
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+  const url = new URL(event.request.url);
+
+  if (isNetworkFirst(url)) {
+    // Network-first: always try to get the latest code/data; only fall
+    // back to whatever's cached if the network is unavailable (offline).
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_VERSION).then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Cache-first for media (images/audio/fonts): instant + offline-safe,
+  // with a background revalidation so next load picks up any change.
   event.respondWith(
     caches.match(event.request).then((cached) => {
       const network = fetch(event.request)
