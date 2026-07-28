@@ -54,7 +54,15 @@
     "volume": "Master volume",
     "ultraWide": "Ultra-wide layout",
     "currentlyIn": "Currently in",
-    "autoDetected": "auto-detected"
+    "autoDetected": "auto-detected",
+    "news": "Sumo News",
+    "newsLoading": "Fetching the latest headlines…",
+    "newsLive": "Live headlines",
+    "newsUpdated": "Updated {time}",
+    "newsOffline": "Showing saved headlines — couldn't refresh just now",
+    "newsUnavailable": "Couldn't load live headlines right now — try these sources directly:",
+    "heroHint": "Tap the rikishi",
+    "heroApproachHint": "Rikishi — bring the tournament sign closer"
   },
   "ja": {
     "title": "大相撲場所カウントダウン",
@@ -111,7 +119,15 @@
     "volume": "音量",
     "ultraWide": "ワイドレイアウト",
     "currentlyIn": "現在の時刻",
-    "autoDetected": "自動検出"
+    "autoDetected": "自動検出",
+    "news": "相撲ニュース",
+    "newsLoading": "最新ニュースを取得中…",
+    "newsLive": "最新ニュース",
+    "newsUpdated": "{time}に更新",
+    "newsOffline": "保存済みのニュースを表示中 — 更新できませんでした",
+    "newsUnavailable": "現在ニュースを取得できません。こちらのサイトをご覧ください：",
+    "heroHint": "力士をタップ",
+    "heroApproachHint": "力士 — 番付を近くで見る"
   },
   "nl": {
     "title": "Sumo Basho Aftelklok",
@@ -168,6 +184,14 @@
     "volume": "Volume",
     "ultraWide": "Ultrabreed layout",
     "currentlyIn": "Nu in",
-    "autoDetected": "automatisch gedetecteerd"
+    "autoDetected": "automatisch gedetecteerd",
+    "news": "Sumonieuws",
+    "newsLoading": "Laatste koppen ophalen…",
+    "newsLive": "Actuele koppen",
+    "newsUpdated": "Bijgewerkt {time}",
+    "newsOffline": "Bewaarde koppen worden getoond — bijwerken lukte nu niet",
+    "newsUnavailable": "Kan nu geen actueel nieuws laden — probeer deze bronnen direct:",
+    "heroHint": "Tik op de rikishi",
+    "heroApproachHint": "Rikishi — haal het bord dichterbij"
   }
 }
