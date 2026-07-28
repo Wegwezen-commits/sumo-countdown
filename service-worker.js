@@ -3,7 +3,7 @@
 // fixed deploy is never masked by a stale cached copy of the code
 // itself; images/audio (which rarely change) stay cache-first for
 // speed and offline reliability.
-const CACHE_VERSION = "sumo-countdown-v4-fixes";
+const CACHE_VERSION = "sumo-countdown-v5-hero-news";
 const NETWORK_FIRST_EXT = [".html", ".js", ".css", ".json"];
 const APP_SHELL = [
   "./",
@@ -23,12 +23,15 @@ const APP_SHELL = [
   "./js/animations.js",
   "./js/audio.js",
   "./js/countdown.js",
+  "./js/hero.js",
+  "./js/news.js",
   "./js/pwa.js",
   "./js/app.js",
   "./data/schedule.json",
   "./data/venues.json",
   "./data/champions.json",
   "./data/translations.json",
+  "./data/news-sources.json",
   "./assets/icons/icon-192.png",
   "./assets/icons/icon-512.png",
   "./assets/pixel/hero-static.png",
@@ -77,6 +80,13 @@ function isNetworkFirst(url) {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   const url = new URL(event.request.url);
+
+  // Only manage same-origin requests here. Cross-origin calls (Google
+  // Fonts, the news-aggregator's CORS proxies) should just hit the
+  // network normally — the news panel already has its own localStorage
+  // cache with a real TTL; caching opaque cross-origin responses here
+  // would make headlines look permanently stuck instead.
+  if (url.origin !== self.location.origin) return;
 
   if (isNetworkFirst(url)) {
     // Network-first: always try to get the latest code/data; only fall

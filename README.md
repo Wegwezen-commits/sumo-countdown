@@ -81,9 +81,9 @@ Google Sites via an `<iframe>`.
 sumo-countdown/
 ├── index.html
 ├── css/           main.css, themes.css, animations.css, responsive.css, tvmode.css
-├── js/            util, language, settings, schedule, venue, live, animations, audio, countdown, pwa, app
+├── js/            util, language, settings, schedule, venue, live, animations, audio, countdown, hero, news, pwa, app
 ├── assets/        pixel/ (generated pixel-art PNGs), audio/ (composed OGG tracks), icons/ (PWA icons)
-├── data/          schedule.json, venues.json, champions.json, translations.json
+├── data/          schedule.json, venues.json, champions.json, translations.json, news-sources.json
 ├── scripts/       check_schedule.py (real sumo-api.com sync), test_check_schedule.py,
 │                  fixtures/ (saved sample API response for offline tests)
 ├── manifest.json, service-worker.js, robots.txt, sitemap.xml
@@ -146,7 +146,83 @@ A round of real bugs was reported after the previous delivery. Root causes and f
   `CACHE_VERSION` so existing installs pick up all of the above
   immediately.
 
-## Known limitations / what to double-check before relying on this
+## Latest session — bug fixes + hero/venue redesign + news panel
+
+**Bug fix: settings toggles ("sliders") didn't respond to clicks.**
+Root cause: each on/off switch is a real `<input type="checkbox">` with two
+purely-decorative `<span>`s (`.track`, `.thumb`) drawn on top of it for the
+pill/thumb look. Neither span had a `z-index` or `pointer-events: none`, and
+since they come *after* the input in the DOM, the browser painted them above
+it in the same stacking context — so every click was actually landing on an
+inert decorative span, not the checkbox underneath. `sakura`, `music`,
+`audio`, `compact`, `ultra-wide`, and `TV mode` were all affected. Fixed in
+`css/main.css` (`.switch input` now gets `z-index: 1`; `.track`/`.thumb` get
+`pointer-events: none`). The volume range slider was unaffected — it has no
+overlay — but got swept into the same testing pass.
+
+**Hero vs. venue visibility.**
+The rikishi previously filled the entire hero card edge-to-edge (his sprite
+sheet is ~62% opaque pixels across the full frame), so almost none of the
+venue backdrop behind him was ever visible. Reworked into a `.hero-rig`
+wrapper (rikishi + sign as one movable unit) that's bottom-anchored at well
+under full size by default, on a wider stage (`aspect-ratio: 16/10` instead
+of `3/4`), so the venue is visible above and to both sides of him — see
+`.hero-rig` / `.hero-figure` in `css/main.css`.
+
+**"Walk toward the viewer" interaction (`js/hero.js`, new file).**
+- Desktop: hovering or keyboard-focusing the rig scales/lifts it forward
+  (with a soft footstep SFX via `SumoAudio.playApproach`, a new small synth
+  cue in `js/audio.js`) and it steps back on mouse-leave/blur.
+- Touch: no `:hover` to discover the interaction with, so a tap toggles the
+  same "approach" state for ~3.2s, and a small pulsing "Tap the rikishi"
+  badge (`.hero-hint`) shows until the first tap (then remembers, via
+  `localStorage`, not to show it again).
+- Touch devices also get an unprompted, sporadic approach every ~22–48s
+  (paused when the tab isn't visible, and skipped entirely under
+  `prefers-reduced-motion`) so mobile visitors see the interaction happen at
+  least once without being told about it, per the original ask.
+- The countdown/sign overlay is positioned as percentages *of the rig*, not
+  the whole stage, so it scales and stays perfectly aligned through the
+  whole hover/approach/TV-mode range without any extra JS math.
+
+**New: aggregated Sumo News panel (`js/news.js`, `data/news-sources.json`).**
+Full-width panel pulling recent headlines from Tachiai, The Japan Times'
+sumo tag, and r/Sumo — title, source, relative time, and an outbound link
+only (deliberately no article text, to stay clearly on the right side of
+fair use for an aggregator). Read the caveat below before relying on it.
+
+- **This is a static site with no backend**, and none of those three
+  sources send CORS headers on their feeds, so a direct browser `fetch()`
+  of their RSS from a GitHub Pages origin will normally be blocked. The
+  only way to do this without a server is through a public, read-only CORS
+  proxy — `js/news.js` tries a direct fetch first, then falls through
+  `api.allorigins.win` and `corsproxy.io` in order, each with its own
+  timeout.
+- **I could not verify any of this end-to-end** — this build environment's
+  network egress is disabled, so none of the feed URLs, proxy endpoints, or
+  parsing logic were tested against a live response. The feed URLs
+  (`https://www.tachiai.org/feed/`, the Japan Times sumo-tag feed, and
+  Reddit's `.rss` endpoint) are standard-shape URLs for those platforms as
+  of this writing, not confirmed live. **Please load the deployed site and
+  check the News panel actually populates** — if a feed URL has moved or a
+  proxy is down/rate-limited, that source silently drops out (this degrades
+  gracefully, it won't break the page) rather than failing loudly.
+- Third-party CORS proxies are convenience infrastructure outside your
+  control — they can rate-limit, go down, or shut down entirely. If you
+  want this reliable long-term, the real fix is a tiny server-side proxy
+  you control (a Cloudflare Worker or GitHub Action that fetches the feeds
+  on a schedule and commits a small JSON file, the same pattern already
+  used for `data/schedule.json`) rather than depending on public proxies
+  from the client.
+- Results are cached in `localStorage` for 20 minutes so a source blip
+  doesn't blank the panel on every reload; if every source fails and there's
+  no cache, it falls back to a curated list of direct links
+  (`data/news-sources.json`'s `curatedLinks`) so the section never just
+  breaks.
+- To add/remove/re-point a source, edit `data/news-sources.json` — no code
+  changes needed for a same-shape (RSS or Atom) feed.
+
+
 
 **Art (Workstream A)**
 - **No image-generation tool was available in this build environment**,
