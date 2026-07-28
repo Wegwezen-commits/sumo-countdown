@@ -306,22 +306,33 @@ button, select, input { font-family: inherit; }
 }
 
 /* The overlay is positioned to match the blank sign panel baked into the
-   hero sprite sheet (see assets/pixel/hero-meta.json — sign box in the
-   192x256 pixel-art canvas: x 12-180, y 68-192 of 256, i.e. left 6.25%,
-   right 93.75%, top 26.56%, bottom 75%). Percentages of the .hero-rig
-   (not the whole stage), so it never overflows the sign at any breakpoint
-   or rig scale. */
+   hero sprite sheet (see assets/pixel/hero-meta.json — sign box measured
+   in the idle-sheet artwork: left 38.70%, right 61.95%, top 45.43%,
+   bottom 58.62%). Percentages of the .hero-rig (not the whole stage), so
+   it never overflows the sign at any breakpoint or rig scale.
+   Calibrated to the idle sprite sheet specifically (the state visible
+   almost all the time) since the celebrate artwork's sign sits at a
+   very slightly different spot — close enough during the few seconds
+   of the celebrate animation not to be worth a second overlay position.
+   The sign in this artwork is noticeably smaller than in the previous
+   one, so the text below is also scaled down (see the cqw values on
+   .live-badge/.eyebrow/.countdown-shell/.digital-clock/.clock-sep/
+   .flip-card/.clock-label/.basho-name/.basho-meta/.progress-text,
+   all reduced by the same ~0.27 ratio) — the px floors are left
+   unchanged so nothing becomes unreadably small; on the rare
+   viewport/zoom combination where that floor is wider than the sign,
+   the existing flex-wrap safety net kicks in rather than clipping. */
 .hero-overlay {
   position: absolute;
-  left: 6.25%;
-  top: 26.56%;
-  width: 87.5%;
-  height: 48.44%;
+  left: 38.7%;
+  top: 45.43%;
+  width: 23.25%;
+  height: 13.19%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(2px, 0.8vw, 8px);
+  gap: clamp(2px, 0.2vw, 8px);
   padding: 2%;
   text-align: center;
   color: #f6ead8;
@@ -364,7 +375,7 @@ button, select, input { font-family: inherit; }
   background: var(--accent);
   color: #fff;
   font-weight: 700;
-  font-size: clamp(8px, 4.5cqw, 13px);
+  font-size: clamp(8px, 1.2cqw, 13px);
   padding: 3px 10px;
   border-radius: 999px;
   display: flex;
@@ -380,14 +391,14 @@ button, select, input { font-family: inherit; }
 }
 
 .eyebrow {
-  font-size: clamp(8px, 4cqw, 13px);
+  font-size: clamp(8px, 1.1cqw, 13px);
   text-transform: uppercase;
   letter-spacing: 0.14em;
   color: var(--accent-deep);
   font-weight: 700;
 }
 
-.countdown-shell { display: flex; flex-direction: column; align-items: center; gap: clamp(2px, 1.5cqw, 6px); width: 100%; }
+.countdown-shell { display: flex; flex-direction: column; align-items: center; gap: clamp(2px, 0.4cqw, 6px); width: 100%; }
 
 /* flex-wrap is a deliberate safety net: even if the cqw sizing below is
    ever slightly too generous for some odd viewport/zoom combination, the
@@ -398,16 +409,16 @@ button, select, input { font-family: inherit; }
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: center;
-  gap: clamp(2px, 2.5cqw, 10px);
+  gap: clamp(2px, 0.7cqw, 10px);
   width: 100%;
 }
 .clock-part { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
 .clock-sep {
   font-family: var(--font-led);
   font-weight: 400;
-  font-size: clamp(14px, 10cqw, 34px);
+  font-size: clamp(14px, 2.7cqw, 34px);
   color: var(--led-glow);
-  padding-bottom: clamp(6px, 4cqw, 12px);
+  padding-bottom: clamp(6px, 1.1cqw, 12px);
   opacity: 0.75;
 }
 
@@ -458,10 +469,10 @@ button, select, input { font-family: inherit; }
   position: relative;
   background: #0c0e14;
   color: var(--led-glow);
-  padding: clamp(2px, 1.5cqw, 6px) clamp(3px, 2cqw, 9px);
+  padding: clamp(2px, 0.4cqw, 6px) clamp(3px, 0.5cqw, 9px);
   font-family: var(--font-led);
   font-weight: 400;
-  font-size: clamp(15px, 12cqw, 40px);
+  font-size: clamp(15px, 3.2cqw, 40px);
   line-height: 1;
   box-shadow: inset 0 0 0 2px #000, inset 0 0 0 4px rgba(255,95,128,0.25), 0 0 12px rgba(255,95,128,0.35);
   min-width: 1.35em;
@@ -488,15 +499,15 @@ button, select, input { font-family: inherit; }
 .digit.flip { animation: digitFlip 420ms steps(4); }
 
 .clock-label {
-  font-size: clamp(6px, 3cqw, 11px);
+  font-size: clamp(6px, 0.8cqw, 11px);
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--ink-soft);
   font-weight: 600;
 }
 
-.basho-name { font-weight: 700; font-size: clamp(10px, 5cqw, 16px); margin-top: 2px; }
-.basho-meta { font-size: clamp(7px, 3.5cqw, 12px); color: var(--ink-soft); }
+.basho-name { font-weight: 700; font-size: clamp(10px, 1.4cqw, 16px); margin-top: 2px; }
+.basho-meta { font-size: clamp(7px, 0.9cqw, 12px); color: var(--ink-soft); }
 
 .progress-wrap { width: 92%; display: flex; align-items: center; gap: 8px; margin-top: 2px; }
 .progress-line {
@@ -512,7 +523,7 @@ button, select, input { font-family: inherit; }
   border-radius: 999px;
   transition: width 600ms ease;
 }
-.progress-text { font-size: clamp(6px, 3cqw, 11px); color: var(--ink-soft); white-space: nowrap; }
+.progress-text { font-size: clamp(6px, 0.8cqw, 11px); color: var(--ink-soft); white-space: nowrap; }
 
 /* ---------- Panels ---------- */
 .info-grid {
@@ -567,6 +578,7 @@ button, select, input { font-family: inherit; }
 .row .k { color: var(--ink-soft); }
 .row .v { font-weight: 600; text-align: right; }
 .row-yours .k, .row-yours .v { color: var(--accent); font-weight: 700; }
+.tz-note { font-size: 11px; color: var(--ink-soft); padding-top: 6px; }
 
 .venue-card { display: flex; gap: 12px; align-items: center; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 10px; }
 .venue-card img { width: 96px; height: 54px; object-fit: cover; flex-shrink: 0; border: 1px solid var(--line); }
