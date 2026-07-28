@@ -168,6 +168,19 @@
     tone(c, sfxGain, t0 + 0.02, 0.18, 180, 0.08, "triangle", 140);
   }
 
+  // Low, gruff "humpf" — a wrestler catching his breath after a bout.
+  // A short chesty grunt: a quick downward-glided low tone (the "voice"
+  // of the grunt) layered with a soft low-passed noise puff (the exhale),
+  // deliberately coarse/short so it reads as effort, not a musical note.
+  function playGrunt() {
+    if (!Settings.prefs.audio || !unlocked) return;
+    const c = ensureContext();
+    if (!c) return;
+    const t0 = c.currentTime;
+    tone(c, sfxGain, t0, 0.22, 145, 0.22, "sawtooth", 95);
+    noiseBurst(c, sfxGain, t0 + 0.02, 0.16, 0.16, "lowpass", 320);
+  }
+
   function onZero(bashoId) {
     if (playedForId === bashoId) return;
     playedForId = bashoId;
@@ -284,5 +297,5 @@
     if (e.detail.key === "music") setMusicEnabled(e.detail.value);
   });
 
-  global.SumoAudio = { onZero, unlock, playClick, playApproach, startMusic, stopMusic, setMusicEnabled };
+  global.SumoAudio = { onZero, unlock, playClick, playApproach, playGrunt, startMusic, stopMusic, setMusicEnabled };
 })(window);

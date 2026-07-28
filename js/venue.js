@@ -51,13 +51,17 @@
         const label = effectiveTz.includes("/") ? effectiveTz.split("/").pop().replace(/_/g, " ") : effectiveTz;
         zones.push({ label, tz: effectiveTz });
       }
-      container.innerHTML = zones.map((z) => {
+      const rows = zones.map((z) => {
         const fmt = new Intl.DateTimeFormat(I18n.locale(), {
           weekday: "short", hour: "2-digit", minute: "2-digit", timeZone: z.tz
         });
         const isYours = z.tz === effectiveTz;
         return `<div class="row${isYours ? " row-yours" : ""}"><span class="k">${z.label}${isYours ? " ★" : ""}</span><span class="v">${fmt.format(base)}</span></div>`;
       }).join("");
+      // Without this, the times above read as ambiguous (start of what?
+      // doors, first bout, end of day?) — spell out what they represent.
+      const note = `<div class="tz-note">${I18n.t("tzNote")}</div>`;
+      container.innerHTML = rows + note;
     }
   };
 

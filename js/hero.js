@@ -10,6 +10,8 @@
   const WALK_CLASS_MS = 720;       // matches the CSS transition length (footstep bob)
   const SPORADIC_MIN_MS = 22000;
   const SPORADIC_MAX_MS = 48000;
+  const GRUNT_MIN_MS = 25000;   // "just fought a match" — an occasional
+  const GRUNT_MAX_MS = 55000;   // low humpf, independent of hover/tap
 
   function reduceMotion() {
     return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -27,6 +29,7 @@
     let holdTimer = null;
     let walkTimer = null;
     let sporadicTimer = null;
+    let gruntTimer = null;
     let dismissedHint = SumoUtil.storage.get("heroHintSeen", false);
     if (dismissedHint && hint) hint.classList.add("hidden");
 
@@ -99,9 +102,27 @@
     }
     scheduleSporadic();
 
+    // ---------- Periodic grunt: a low "humpf", like a wrestler still
+    // catching his breath after a bout. Independent of hover/tap/sway —
+    // fires on desktop and touch alike, just an ambient flavor sound
+    // that repeats every so often while the tab is visible. ----------
+    function scheduleGrunt() {
+      const delay = GRUNT_MIN_MS + Math.random() * (GRUNT_MAX_MS - GRUNT_MIN_MS);
+      gruntTimer = setTimeout(() => {
+        if (document.visibilityState === "visible" && global.SumoAudio && typeof SumoAudio.playGrunt === "function") {
+          SumoAudio.playGrunt();
+        }
+        scheduleGrunt();
+      }, delay);
+    }
+    scheduleGrunt();
+
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "hidden") {
         clearTimeout(sporadicTimer);
+        clearTimeout(gruntTimer);
+      } else if (document.visibilityState === "visible") {
+        scheduleGrunt();
       }
     });
   }
