@@ -1,0 +1,88 @@
+// service-worker.js — app-shell cache-first strategy with background
+// revalidation, so the site works offline and updates itself quietly.
+const CACHE_VERSION = "sumo-countdown-v3-music";
+const APP_SHELL = [
+  "./",
+  "./index.html",
+  "./manifest.json",
+  "./css/main.css",
+  "./css/themes.css",
+  "./css/animations.css",
+  "./css/responsive.css",
+  "./css/tvmode.css",
+  "./js/util.js",
+  "./js/language.js",
+  "./js/settings.js",
+  "./js/schedule.js",
+  "./js/venue.js",
+  "./js/live.js",
+  "./js/animations.js",
+  "./js/audio.js",
+  "./js/countdown.js",
+  "./js/pwa.js",
+  "./js/app.js",
+  "./data/schedule.json",
+  "./data/venues.json",
+  "./data/champions.json",
+  "./data/translations.json",
+  "./assets/icons/icon-192.png",
+  "./assets/icons/icon-512.png",
+  "./assets/pixel/hero-static.png",
+  "./assets/pixel/hero-idle-sheet.png",
+  "./assets/pixel/hero-celebrate.png",
+  "./assets/pixel/loading-sheet.png",
+  "./assets/pixel/champion-medallion.png",
+  "./assets/pixel/particle-sakura.png",
+  "./assets/pixel/particle-leaf.png",
+  "./assets/pixel/particle-leaf-summer.png",
+  "./assets/pixel/particle-snow.png",
+  "./assets/pixel/venue-ryogoku.png",
+  "./assets/pixel/venue-ryogoku-night.png",
+  "./assets/pixel/venue-osaka.png",
+  "./assets/pixel/venue-osaka-night.png",
+  "./assets/pixel/venue-nagoya.png",
+  "./assets/pixel/venue-nagoya-night.png",
+  "./assets/pixel/venue-fukuoka.png",
+  "./assets/pixel/venue-fukuoka-night.png",
+  "./assets/audio/idle.ogg",
+  "./assets/audio/countdown.ogg",
+  "./assets/audio/live.ogg",
+  "./assets/audio/finalDay.ogg",
+  "./assets/audio/victory.ogg"
+];
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE_VERSION).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((k) => k !== CACHE_VERSION).map((k) => caches.delete(k)))
+    ).then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener("fetch", (event) => {
+  if (event.request.method !== "GET") return;
+  event.respondWith(
+    caches.match(event.request).then((cached) => {
+      const network = fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_VERSION).then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => cached);
+      return cached || network;
+    })
+  );
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
+});

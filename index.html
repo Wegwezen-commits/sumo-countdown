@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sumo Basho Countdown</title>
+<meta name="description" content="A premium, live countdown to the next Grand Sumo Tournament (Honbasho) — schedule, venues, and results, styled like a broadcast timing screen." />
+<meta name="theme-color" content="#c8102e" />
+<link rel="canonical" href="https://wegwezen-commits.github.io/sumo-countdown/" />
+
+<!-- Open Graph -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Sumo Basho Countdown" />
+<meta property="og:description" content="A premium, live countdown to the next Grand Sumo Tournament (Honbasho)." />
+<meta property="og:image" content="assets/pixel/hero-static.png" />
+<meta property="og:url" content="https://wegwezen-commits.github.io/sumo-countdown/" />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Sumo Basho Countdown" />
+<meta name="twitter:description" content="A premium, live countdown to the next Grand Sumo Tournament (Honbasho)." />
+<meta name="twitter:image" content="assets/pixel/hero-static.png" />
+
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="assets/icons/icon-192.png" type="image/png" />
+<link rel="apple-touch-icon" href="assets/icons/icon-192.png" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap" />
+
+<link rel="stylesheet" href="css/main.css" />
+<link rel="stylesheet" href="css/themes.css" />
+<link rel="stylesheet" href="css/animations.css" />
+<link rel="stylesheet" href="css/responsive.css" />
+<link rel="stylesheet" href="css/tvmode.css" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Sumo Basho Countdown",
+  "url": "https://wegwezen-commits.github.io/sumo-countdown/",
+  "description": "A live countdown to the next Grand Sumo Tournament (Honbasho), with schedule, venues and results."
+}
+</script>
+</head>
+<body>
+<a class="visually-hidden" href="#main">Skip to content</a>
+<div id="app" class="app-shell">
+  <div id="seasonGlow" class="season-glow" aria-hidden="true"></div>
+  <div id="sakuraLayer" class="sakura-layer" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"></div>
+      <div>
+        <div id="appTitle" class="brand-title" data-i18n="title">Sumo Basho Countdown</div>
+        <div id="appSubtitle" class="brand-subtitle" data-i18n="subtitle">The countdown to the next Grand Sumo Tournament</div>
+      </div>
+    </div>
+    <div class="controls">
+      <button id="installButton" class="ghost-button hidden" type="button" data-i18n="install">Install app</button>
+      <button id="settingsButton" class="icon-button" type="button" aria-haspopup="dialog" aria-controls="settingsDialog" data-i18n-aria="settings" aria-label="Settings">⚙️</button>
+    </div>
+  </header>
+
+  <div id="loadingScreen" class="loading-screen" aria-hidden="true">
+    <div class="loading-sprite"></div>
+    <div class="loading-label" data-i18n="loading">Loading the dohyō…</div>
+  </div>
+
+  <main class="content" id="main">
+    <section class="hero-card">
+      <div class="hero-figure">
+        <div id="venueScene" class="venue-scene" aria-hidden="true"></div>
+        <img class="hero-image" src="assets/pixel/hero-static.png" alt="A pixel-art sumo wrestler holding up a blank wooden tournament sign" />
+        <div id="heroSprite" class="hero-sprite" aria-hidden="true"></div>
+        <div class="hero-overlay">
+          <div id="liveBadge" class="live-badge hidden"><span class="dot" aria-hidden="true"></span> LIVE</div>
+          <div id="eyebrow" class="eyebrow" data-i18n="daysUntil">Days until</div>
+          <div class="countdown-shell">
+            <div id="clock" class="digital-clock" role="timer" aria-live="polite" aria-atomic="true">
+              <div class="clock-part">
+                <div class="flip-card"><span id="days" class="digit">00</span></div>
+                <div class="clock-label" data-clock-label="days" data-i18n="days">Days</div>
+              </div>
+              <div class="clock-sep" aria-hidden="true">:</div>
+              <div class="clock-part">
+                <div class="flip-card"><span id="hours" class="digit">00</span></div>
+                <div class="clock-label" data-i18n="hours">Hours</div>
+              </div>
+              <div class="clock-sep" aria-hidden="true">:</div>
+              <div class="clock-part">
+                <div class="flip-card"><span id="minutes" class="digit">00</span></div>
+                <div class="clock-label" data-i18n="minutes">Minutes</div>
+              </div>
+              <div class="clock-sep" aria-hidden="true">:</div>
+              <div class="clock-part">
+                <div class="flip-card"><span id="seconds" class="digit">00</span></div>
+                <div class="clock-label" data-i18n="seconds">Seconds</div>
+              </div>
+            </div>
+            <div id="bashoName" class="basho-name">—</div>
+            <div id="bashoMeta" class="basho-meta">Loading schedule…</div>
+            <div class="progress-wrap">
+              <div class="progress-line"><span id="progressBar" style="width:0%"></span></div>
+              <div id="progressText" class="progress-text">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="info-grid">
+      <article class="panel panel-wide">
+        <div class="panel-head">
+          <h2 data-i18n="upcoming">Upcoming Tournaments</h2>
+          <div class="panel-note">JSA official dates where published, generated estimates beyond that.</div>
+        </div>
+        <div id="nextSix" class="tournament-grid"></div>
+      </article>
+
+      <article class="panel">
+        <h2 data-i18n="basholive">Basho Live</h2>
+        <div id="liveCard" class="stack"></div>
+      </article>
+
+      <article class="panel">
+        <h2 data-i18n="stats">Statistics</h2>
+        <div id="statsCard" class="stack"></div>
+      </article>
+
+      <article class="panel">
+        <h2 data-i18n="previous">Previous Basho</h2>
+        <div id="previousCard" class="stack"></div>
+      </article>
+
+      <article class="panel">
+        <h2 data-i18n="venues">Venues & Time Zones</h2>
+        <div id="venueCard" class="stack"></div>
+      </article>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span>Sumo Basho Countdown · unofficial fan project · schedule sourced from the Japan Sumo Association where available</span>
+  </footer>
+
+  <button id="tvExitButton" class="tv-exit-button ghost-button" type="button" data-i18n="tvModeExit">Exit TV mode</button>
+
+  <div id="settingsDialog" class="settings-dialog" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" aria-hidden="true">
+    <div class="settings-backdrop"></div>
+    <div class="settings-panel">
+      <h2 id="settingsTitle" data-i18n="settings">Settings</h2>
+
+      <div class="setting-row">
+        <label for="langSelect" data-i18n="language">Language</label>
+        <select id="langSelect" class="mini">
+          <option value="en">English</option>
+          <option value="ja">日本語</option>
+          <option value="nl">Nederlands</option>
+        </select>
+      </div>
+
+      <div class="setting-row">
+        <label for="tzSelect" data-i18n="timezone">Time zone</label>
+        <select id="tzSelect" class="mini">
+          <option value="auto">Auto</option>
+          <option value="Asia/Tokyo">JST</option>
+          <option value="Europe/Amsterdam">CET</option>
+          <option value="America/New_York">EDT</option>
+          <option value="UTC">UTC</option>
+        </select>
+      </div>
+
+      <div class="setting-row">
+        <label for="prefTheme" data-i18n="darkMode">Dark mode</label>
+        <select id="prefTheme" class="mini">
+          <option value="auto">Auto (JST)</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </div>
+
+      <div class="setting-row">
+        <label for="prefSakura" data-i18n="sakura">Sakura petals</label>
+        <span class="switch"><input id="prefSakura" type="checkbox" /><span class="track"></span><span class="thumb"></span></span>
+      </div>
+
+      <div class="setting-row">
+        <label for="prefMusic" data-i18n="music">Ambient music</label>
+        <span class="switch"><input id="prefMusic" type="checkbox" /><span class="track"></span><span class="thumb"></span></span>
+      </div>
+
+      <div class="setting-row">
+        <label for="prefAudio" data-i18n="audio">Sound effects</label>
+        <span class="switch"><input id="prefAudio" type="checkbox" /><span class="track"></span><span class="thumb"></span></span>
+      </div>
+
+      <div class="setting-row">
+        <label for="prefVolume" data-i18n="volume">Master volume</label>
+        <input id="prefVolume" class="pixel-range" type="range" min="0" max="100" value="60" />
+      </div>
+
+      <div class="setting-row">
+        <label for="prefCompact" data-i18n="compactMode">Compact mode</label>
+        <span class="switch"><input id="prefCompact" type="checkbox" /><span class="track"></span><span class="thumb"></span></span>
+      </div>
+
+      <div class="setting-row">
+        <label for="prefUltra" data-i18n="largeDisplay">Ultra-wide layout</label>
+        <span class="switch"><input id="prefUltra" type="checkbox" /><span class="track"></span><span class="thumb"></span></span>
+      </div>
+
+      <div class="setting-row">
+        <label for="prefTv" data-i18n="largeDisplay">Large display (TV mode)</label>
+        <span class="switch"><input id="prefTv" type="checkbox" /><span class="track"></span><span class="thumb"></span></span>
+      </div>
+
+      <button id="settingsClose" class="ghost-button" type="button" style="margin-top:14px;width:100%;">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/util.js"></script>
+<script src="js/language.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/schedule.js"></script>
+<script src="js/venue.js"></script>
+<script src="js/live.js"></script>
+<script src="js/animations.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/countdown.js"></script>
+<script src="js/pwa.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

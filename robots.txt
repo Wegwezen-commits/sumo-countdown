@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://wegwezen-commits.github.io/sumo-countdown/sitemap.xml
