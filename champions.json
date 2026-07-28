@@ -1,0 +1,17 @@
+{
+  "_comment": "Fallback champion records, keyed by basho id. The app prefers whatever champion/record fields are present directly on the schedule entry; this file fills in extra detail (photo placeholder, notes) when available.",
+  "records": {
+    "2026-01": {
+      "champion": "Aonishiki",
+      "record": "12-3",
+      "note": "First Ukrainian-born wrestler to win a top-division championship; won in a playoff over Atamifuji.",
+      "photo": "assets/pixel/champion-medallion.png"
+    },
+    "2026-03": {
+      "champion": "Kirishima",
+      "record": "12-3",
+      "note": "Third career top-division title; earned re-promotion to Ozeki.",
+      "photo": "assets/pixel/champion-medallion.png"
+    }
+  }
+}
