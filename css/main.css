@@ -257,6 +257,21 @@ button, select, input { font-family: inherit; }
   transform: translate(-50%, -1%) scale(1.06);
 }
 .hero-rig.walking .hero-sprite { animation-duration: 1.6s; }
+/* "Walk near the venue": since there's no dedicated walk-cycle artwork,
+   this is the whole rig (wrestler + sign) sliding sideways along the
+   bottom of the stage on a slow transition, using the same still art —
+   a stroll rather than a walk cycle. See js/hero.js "wander" behaviour.
+   The sprite/image layers (not .hero-overlay, so the countdown text
+   stays legible and unmirrored) are flipped horizontally to face the
+   direction of travel. */
+.hero-rig.wandering { transition-duration: 1600ms; }
+.hero-rig.wander-left { transform: translate(-88%, 15%) scale(0.8); }
+.hero-rig.wander-right { transform: translate(-12%, 15%) scale(0.8); }
+.hero-rig.wander-left .hero-image,
+.hero-rig.wander-left .hero-sprite { transform: scaleX(-1); }
+@media (prefers-reduced-motion: reduce) {
+  .hero-rig.wandering { transition: none; }
+}
 @media (prefers-reduced-motion: reduce) {
   .hero-rig, .hero-rig.approach { transition: none; }
 }
@@ -278,14 +293,22 @@ button, select, input { font-family: inherit; }
   filter: drop-shadow(0 10px 14px rgba(0,0,0,0.35));
 }
 .hero-rig.approach .hero-sprite { filter: drop-shadow(0 16px 20px rgba(0,0,0,0.45)); }
+/* Worn for the entire live-basho window now (see js/countdown.js), not a
+   brief flash, so this is a static pose swap rather than a bouncing
+   animation — a multi-day-long bounce would be exhausting to look at
+   and wastes battery on a page that may be left open as a tab/TV mode. */
 .hero-sprite.celebrate {
   background-image: url('../assets/pixel/hero-celebrate.png');
   background-size: 100% 100%;
-  animation: heroCelebrate 900ms ease-in-out infinite alternate;
 }
-/* 8-frame cycle: rest -> breathe up -> breathe hold -> blink -> rest ->
-   weight shift -> weight shift settle -> return, each frame an equal
-   1/8 slice of the sheet (100/7% steps between frame positions). */
+/* All 8 slices of hero-idle-sheet.png are currently identical copies of
+   hero-static.png (no distinct idle-animation frames available this
+   round — see the note in hero-meta.json), so this stepped animation is
+   presently a harmless no-op. Left in place, unchanged, so a future
+   sheet with real per-frame differences drops straight in without a
+   second code change. Idle movement instead comes from the "wander"
+   behaviour in js/hero.js (an occasional walk toward the venue and
+   back), not from per-frame artwork. */
 @keyframes heroIdle {
   0%     { background-position-x: 0%; }
   12.5%  { background-position-x: 14.2857%; }
@@ -297,42 +320,40 @@ button, select, input { font-family: inherit; }
   87.5%  { background-position-x: 100%; }
   100%   { background-position-x: 0%; }
 }
-@keyframes heroCelebrate {
-  from { transform: translateY(0); }
-  to   { transform: translateY(-6px); }
-}
 @media (prefers-reduced-motion: reduce) {
   .hero-sprite { animation: none; background-position-x: 0%; }
 }
 
 /* The overlay is positioned to match the blank sign panel baked into the
-   hero sprite sheet (see assets/pixel/hero-meta.json — sign box measured
-   in the idle-sheet artwork: left 38.70%, right 61.95%, top 45.43%,
-   bottom 58.62%). Percentages of the .hero-rig (not the whole stage), so
-   it never overflows the sign at any breakpoint or rig scale.
-   Calibrated to the idle sprite sheet specifically (the state visible
-   almost all the time) since the celebrate artwork's sign sits at a
-   very slightly different spot — close enough during the few seconds
-   of the celebrate animation not to be worth a second overlay position.
-   The sign in this artwork is noticeably smaller than in the previous
-   one, so the text below is also scaled down (see the cqw values on
-   .live-badge/.eyebrow/.countdown-shell/.digital-clock/.clock-sep/
-   .flip-card/.clock-label/.basho-name/.basho-meta/.progress-text,
-   all reduced by the same ~0.27 ratio) — the px floors are left
-   unchanged so nothing becomes unreadably small; on the rare
-   viewport/zoom combination where that floor is wider than the sign,
-   the existing flex-wrap safety net kicks in rather than clipping. */
+   hero art (see assets/pixel/hero-meta.json — sign box measured in the
+   latest hero-static/hero-celebrate artwork, which agree closely: left
+   25.92%, right 73.25%, top 53.2%, bottom 77.45%). Percentages of the
+   .hero-rig (not the whole stage), so it never overflows the sign at any
+   breakpoint or rig scale.
+   There's no separate idle-sheet artwork this round (see hero-sprite
+   below) — hero-static now doubles as every idle frame, and
+   hero-celebrate is worn for an entire live tournament rather than a
+   quick flash, so it matters more than before that both agree on where
+   the sign sits, and they do.
+   The sign in this artwork is smaller than the original design's, so the
+   text below is also scaled down (see the cqw values on .live-badge/
+   .eyebrow/.countdown-shell/.digital-clock/.clock-sep/.flip-card/
+   .clock-label/.basho-name/.basho-meta/.progress-text, all reduced by
+   the same ~0.52 ratio) — the px floors are left unchanged so nothing
+   becomes unreadably small; on the rare viewport/zoom combination where
+   that floor is wider than the sign, the existing flex-wrap safety net
+   kicks in rather than clipping. */
 .hero-overlay {
   position: absolute;
-  left: 38.7%;
-  top: 45.43%;
-  width: 23.25%;
-  height: 13.19%;
+  left: 25.92%;
+  top: 53.2%;
+  width: 47.33%;
+  height: 24.25%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(2px, 0.2vw, 8px);
+  gap: clamp(2px, 0.4vw, 8px);
   padding: 2%;
   text-align: center;
   color: #f6ead8;
@@ -375,7 +396,7 @@ button, select, input { font-family: inherit; }
   background: var(--accent);
   color: #fff;
   font-weight: 700;
-  font-size: clamp(8px, 1.2cqw, 13px);
+  font-size: clamp(8px, 2.3cqw, 13px);
   padding: 3px 10px;
   border-radius: 999px;
   display: flex;
@@ -391,14 +412,14 @@ button, select, input { font-family: inherit; }
 }
 
 .eyebrow {
-  font-size: clamp(8px, 1.1cqw, 13px);
+  font-size: clamp(8px, 2.1cqw, 13px);
   text-transform: uppercase;
   letter-spacing: 0.14em;
   color: var(--accent-deep);
   font-weight: 700;
 }
 
-.countdown-shell { display: flex; flex-direction: column; align-items: center; gap: clamp(2px, 0.4cqw, 6px); width: 100%; }
+.countdown-shell { display: flex; flex-direction: column; align-items: center; gap: clamp(2px, 0.8cqw, 6px); width: 100%; }
 
 /* flex-wrap is a deliberate safety net: even if the cqw sizing below is
    ever slightly too generous for some odd viewport/zoom combination, the
@@ -409,16 +430,16 @@ button, select, input { font-family: inherit; }
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: center;
-  gap: clamp(2px, 0.7cqw, 10px);
+  gap: clamp(2px, 1.3cqw, 10px);
   width: 100%;
 }
 .clock-part { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
 .clock-sep {
   font-family: var(--font-led);
   font-weight: 400;
-  font-size: clamp(14px, 2.7cqw, 34px);
+  font-size: clamp(14px, 5.2cqw, 34px);
   color: var(--led-glow);
-  padding-bottom: clamp(6px, 1.1cqw, 12px);
+  padding-bottom: clamp(6px, 2.1cqw, 12px);
   opacity: 0.75;
 }
 
@@ -469,10 +490,10 @@ button, select, input { font-family: inherit; }
   position: relative;
   background: #0c0e14;
   color: var(--led-glow);
-  padding: clamp(2px, 0.4cqw, 6px) clamp(3px, 0.5cqw, 9px);
+  padding: clamp(2px, 0.8cqw, 6px) clamp(3px, 1cqw, 9px);
   font-family: var(--font-led);
   font-weight: 400;
-  font-size: clamp(15px, 3.2cqw, 40px);
+  font-size: clamp(15px, 6.2cqw, 40px);
   line-height: 1;
   box-shadow: inset 0 0 0 2px #000, inset 0 0 0 4px rgba(255,95,128,0.25), 0 0 12px rgba(255,95,128,0.35);
   min-width: 1.35em;
@@ -499,15 +520,15 @@ button, select, input { font-family: inherit; }
 .digit.flip { animation: digitFlip 420ms steps(4); }
 
 .clock-label {
-  font-size: clamp(6px, 0.8cqw, 11px);
+  font-size: clamp(6px, 1.6cqw, 11px);
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--ink-soft);
   font-weight: 600;
 }
 
-.basho-name { font-weight: 700; font-size: clamp(10px, 1.4cqw, 16px); margin-top: 2px; }
-.basho-meta { font-size: clamp(7px, 0.9cqw, 12px); color: var(--ink-soft); }
+.basho-name { font-weight: 700; font-size: clamp(10px, 2.6cqw, 16px); margin-top: 2px; }
+.basho-meta { font-size: clamp(7px, 1.8cqw, 12px); color: var(--ink-soft); }
 
 .progress-wrap { width: 92%; display: flex; align-items: center; gap: 8px; margin-top: 2px; }
 .progress-line {
@@ -523,7 +544,7 @@ button, select, input { font-family: inherit; }
   border-radius: 999px;
   transition: width 600ms ease;
 }
-.progress-text { font-size: clamp(6px, 0.8cqw, 11px); color: var(--ink-soft); white-space: nowrap; }
+.progress-text { font-size: clamp(6px, 1.6cqw, 11px); color: var(--ink-soft); white-space: nowrap; }
 
 /* ---------- Panels ---------- */
 .info-grid {
