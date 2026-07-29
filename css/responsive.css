@@ -14,8 +14,8 @@
      the rig starts a bit bigger — still smaller than the old edge-to-edge
      hero, but the sign stays comfortably readable without a tap. */
   .hero-figure { aspect-ratio: 4 / 5; max-height: 78vh; }
-  .hero-rig { width: clamp(190px, 58%, 320px); transform: translate(-50%, 10%) scale(0.92); }
-  .hero-rig.approach { transform: translate(-50%, -1%) scale(1.04); }
+  .hero-rig { width: clamp(190px, 58%, 320px); transform: translate(-50%, 2%) scale(0.92); }
+  .hero-rig.approach { transform: translate(-50%, -8%) scale(1.04); }
 }
 
 @media (max-width: 480px) {

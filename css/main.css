@@ -230,7 +230,7 @@ button, select, input { font-family: inherit; }
   bottom: 0;
   width: clamp(210px, 40%, 420px);
   aspect-ratio: 3 / 4;
-  transform: translate(-50%, 15%) scale(0.8);
+  transform: translate(-50%, 7%) scale(0.8);
   transform-origin: 50% 100%;
   transition: transform 700ms cubic-bezier(.2,.8,.2,1);
   cursor: pointer;
@@ -254,23 +254,7 @@ button, select, input { font-family: inherit; }
 }
 .hero-rig:focus-visible { outline: 2px solid var(--gold); outline-offset: 6px; }
 .hero-rig.approach {
-  transform: translate(-50%, -1%) scale(1.06);
-}
-.hero-rig.walking .hero-sprite { animation-duration: 1.6s; }
-/* "Walk near the venue": since there's no dedicated walk-cycle artwork,
-   this is the whole rig (wrestler + sign) sliding sideways along the
-   bottom of the stage on a slow transition, using the same still art —
-   a stroll rather than a walk cycle. See js/hero.js "wander" behaviour.
-   The sprite/image layers (not .hero-overlay, so the countdown text
-   stays legible and unmirrored) are flipped horizontally to face the
-   direction of travel. */
-.hero-rig.wandering { transition-duration: 1600ms; }
-.hero-rig.wander-left { transform: translate(-88%, 15%) scale(0.8); }
-.hero-rig.wander-right { transform: translate(-12%, 15%) scale(0.8); }
-.hero-rig.wander-left .hero-image,
-.hero-rig.wander-left .hero-sprite { transform: scaleX(-1); }
-@media (prefers-reduced-motion: reduce) {
-  .hero-rig.wandering { transition: none; }
+  transform: translate(-50%, -8%) scale(1.06);
 }
 @media (prefers-reduced-motion: reduce) {
   .hero-rig, .hero-rig.approach { transition: none; }
@@ -301,14 +285,8 @@ button, select, input { font-family: inherit; }
   background-image: url('../assets/pixel/hero-celebrate.png');
   background-size: 100% 100%;
 }
-/* All 8 slices of hero-idle-sheet.png are currently identical copies of
-   hero-static.png (no distinct idle-animation frames available this
-   round — see the note in hero-meta.json), so this stepped animation is
-   presently a harmless no-op. Left in place, unchanged, so a future
-   sheet with real per-frame differences drops straight in without a
-   second code change. Idle movement instead comes from the "wander"
-   behaviour in js/hero.js (an occasional walk toward the venue and
-   back), not from per-frame artwork. */
+/* The idle sheet contains 8 distinct hero frames. The stepped animation
+   advances one full frame at a time so the pixel art stays crisp. */
 @keyframes heroIdle {
   0%     { background-position-x: 0%; }
   12.5%  { background-position-x: 14.2857%; }
@@ -353,8 +331,10 @@ button, select, input { font-family: inherit; }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(2px, 0.4vw, 8px);
-  padding: 2%;
+  gap: clamp(1px, 0.35cqw, 5px);
+  padding: 1.5%;
+  box-sizing: border-box;
+  overflow: hidden;
   text-align: center;
   color: #f6ead8;
 }
@@ -419,7 +399,7 @@ button, select, input { font-family: inherit; }
   font-weight: 700;
 }
 
-.countdown-shell { display: flex; flex-direction: column; align-items: center; gap: clamp(2px, 0.8cqw, 6px); width: 100%; }
+.countdown-shell { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(1px, 0.55cqw, 5px); width: 100%; min-width: 0; min-height: 0; overflow: hidden; }
 
 /* flex-wrap is a deliberate safety net: even if the cqw sizing below is
    ever slightly too generous for some odd viewport/zoom combination, the
@@ -432,8 +412,11 @@ button, select, input { font-family: inherit; }
   justify-content: center;
   gap: clamp(2px, 1.3cqw, 10px);
   width: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
-.clock-part { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
+.clock-part { display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 0; flex: 0 1 auto; }
 .clock-sep {
   font-family: var(--font-led);
   font-weight: 400;
@@ -527,10 +510,10 @@ button, select, input { font-family: inherit; }
   font-weight: 600;
 }
 
-.basho-name { font-weight: 700; font-size: clamp(10px, 2.6cqw, 16px); margin-top: 2px; }
-.basho-meta { font-size: clamp(7px, 1.8cqw, 12px); color: var(--ink-soft); }
+.basho-name { font-weight: 700; font-size: clamp(8px, 2.25cqw, 15px); margin-top: 1px; max-width: 100%; overflow-wrap: anywhere; line-height: 1.05; }
+.basho-meta { font-size: clamp(6px, 1.55cqw, 11px); color: var(--ink-soft); max-width: 100%; overflow-wrap: anywhere; line-height: 1.05; }
 
-.progress-wrap { width: 92%; display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+.progress-wrap { width: 92%; max-width: 100%; display: flex; align-items: center; gap: clamp(2px, 0.8cqw, 8px); margin-top: 1px; min-width: 0; }
 .progress-line {
   flex: 1;
   height: 6px;
@@ -544,7 +527,7 @@ button, select, input { font-family: inherit; }
   border-radius: 999px;
   transition: width 600ms ease;
 }
-.progress-text { font-size: clamp(6px, 1.6cqw, 11px); color: var(--ink-soft); white-space: nowrap; }
+.progress-text { font-size: clamp(5px, 1.4cqw, 10px); color: var(--ink-soft); white-space: normal; overflow-wrap: anywhere; min-width: 0; }
 
 /* ---------- Panels ---------- */
 .info-grid {
