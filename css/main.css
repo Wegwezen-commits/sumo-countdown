@@ -275,16 +275,24 @@ button, select, input { font-family: inherit; }
    offsets — that's what produced the smooth "scrolling sheet" look instead
    of a clean frame-swap). hero-meta.json's frameCount is 8, so this is
    steps(7, end). If frameCount ever changes, update both this and the
-   -87.5% end value below (both derive from frameCount). */
+   -87.5% end value below (both derive from frameCount).
+   Resting state: the sprite's own background is hero-static.png, so
+   whenever the idle-sheet layer (::before) isn't actively playing, the
+   hero simply stands still holding the sign. js/hero.js adds/removes
+   '.playing-idle' on #heroSprite at random intervals (see IDLE_TRIGGER_*
+   in hero.js) to run the idle-sheet animation for a few cycles, then lets
+   it fall back to the static pose — rather than looping forever. */
 .hero-sprite {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   overflow: hidden;
+  background-image: url('../assets/pixel/hero-static.png');
   background-repeat: no-repeat;
   background-position: center bottom;
   background-size: 100% 100%;
   background-color: transparent;
   filter: drop-shadow(0 10px 14px rgba(0,0,0,0.35));
+  image-rendering: pixelated;
 }
 .hero-sprite::before {
   content: "";
@@ -297,8 +305,28 @@ button, select, input { font-family: inherit; }
   background-size: 100% 100%;
   background-position: left bottom;
   image-rendering: pixelated;
-  animation: heroIdle 1.2s steps(7, end) infinite;
+  opacity: 0;
+  animation: none;
+  transition: opacity 180ms ease;
   will-change: transform;
+}
+/* Only run (and only show) the idle-sheet strip while hero.js has flagged
+   it as playing; otherwise the plain hero-static.png underneath shows. */
+.hero-sprite.playing-idle::before {
+  opacity: 1;
+  animation: heroIdle 1.2s steps(7, end) 3;
+}
+/* Blink: a quick flash of frame 2 (index 1) of the idle sheet — one frame
+   width in, i.e. -12.5% of the pseudo-element's own 800%-wide box (same
+   math as the steps() animation above: 1/8 of the strip). No animation,
+   just a snap to that frame and back, held only briefly by hero.js
+   (BLINK_HOLD_MS) so it reads as a blink rather than a held expression.
+   A tighter transition than the idle crossfade above so it stays snappy. */
+.hero-sprite.blinking::before {
+  opacity: 1;
+  animation: none;
+  transform: translateX(-12.5%);
+  transition: opacity 60ms ease;
 }
 .hero-rig.approach .hero-sprite { filter: drop-shadow(0 16px 20px rgba(0,0,0,0.45)); }
 /* Live basho: replace the idle strip with the dedicated celebration art. */
@@ -313,7 +341,12 @@ button, select, input { font-family: inherit; }
   to   { transform: translateX(-87.5%); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .hero-sprite::before { animation: none; transform: translateX(0); }
+  /* Belt-and-braces: hero.js already refuses to schedule/trigger the idle
+     animation and blink under reduced motion, but this guarantees no
+     motion even if those classes somehow end up on the element. */
+  .hero-sprite::before,
+  .hero-sprite.playing-idle::before,
+  .hero-sprite.blinking::before { animation: none; opacity: 0; transform: translateX(0); }
 }
 
 /* The overlay is positioned to match the blank sign panel baked into the
