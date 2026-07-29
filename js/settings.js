@@ -44,10 +44,16 @@
       } catch (e) { return false; }
     },
 
+    prefersDarkDevice() {
+      try { return window.matchMedia("(prefers-color-scheme: dark)").matches; }
+      catch (e) { return false; }
+    },
+
     resolvedTheme() {
       if (this.prefs.theme === "light") return "light";
       if (this.prefs.theme === "dark") return "dark";
-      return this.isJapanNight() ? "dark" : "light";
+      if (this.prefs.theme === "auto-device") return this.prefersDarkDevice() ? "dark" : "light";
+      return this.isJapanNight() ? "dark" : "light"; // "auto" — JST-based
     },
 
     apply() {
@@ -72,4 +78,12 @@
 
   // Re-apply dark-mode-by-JST every 10 minutes in case "auto" crosses the boundary
   setInterval(() => { if (Settings.prefs.theme === "auto") Settings.apply(); }, 10 * 60 * 1000);
+
+  // "auto-device" should react immediately when the OS/browser theme flips,
+  // rather than waiting on the JST poll above (which only matters for "auto").
+  try {
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+      if (Settings.prefs.theme === "auto-device") Settings.apply();
+    });
+  } catch (e) { /* matchMedia change listener unsupported — auto-device just won't live-update */ }
 })(window);
