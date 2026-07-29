@@ -268,12 +268,17 @@ button, select, input { font-family: inherit; }
   position: absolute; inset: 0;
   background-image: url('../assets/pixel/hero-idle-sheet.png');
   background-repeat: no-repeat;
-  background-position: 0% 0%;
+  /* Keep the sprite on whole-frame boundaries and use nearest-neighbour
+     sampling so pixel art is not softened by browser interpolation. */
+  background-position: 0% 100%;
   background-size: 800% 100%;
   background-position-x: 0%;
   width: 100%; height: 100%;
-  background-position-y: bottom;
-  animation: heroIdle 4.8s steps(1) infinite;
+  background-position-y: 100%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  -ms-interpolation-mode: nearest-neighbor;
+  animation: heroIdle 4.8s steps(8, end) infinite;
   filter: drop-shadow(0 10px 14px rgba(0,0,0,0.35));
 }
 .hero-rig.approach .hero-sprite { filter: drop-shadow(0 16px 20px rgba(0,0,0,0.45)); }
@@ -299,7 +304,7 @@ button, select, input { font-family: inherit; }
   100%   { background-position-x: 0%; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .hero-sprite { animation: none; background-position-x: 0%; }
+  .hero-sprite { animation: none; background-position: 0% 100%; }
 }
 
 /* The overlay is positioned to match the blank sign panel baked into the
