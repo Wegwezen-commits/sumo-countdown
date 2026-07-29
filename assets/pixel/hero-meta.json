@@ -14,5 +14,5 @@
     "bottom": 77.45
   },
   "frameCount": 8,
-  "note": "hero-idle-sheet.png is 8 identical copies of hero-static.png (no distinct idle animation frames were available this round); frameCount is kept at 8 so the existing CSS sprite-stepping math in main.css still applies unchanged. Movement during idle now comes from the 'wander' behaviour in hero.js (walking toward/away from the venue) rather than per-frame drawing changes."
+  "note": "hero-idle-sheet.png contains 8 distinct idle-animation frames (a subtle breathing/shifting loop), stepped through by the CSS sprite animation in main.css. The sheet is 800% the width of a single frame; the animation uses steps(frameCount - 1, end) — not steps(frameCount, end) — so each step lands exactly on a frame boundary instead of a fractional offset. The 'wander' behaviour in hero.js (walking toward/away from the venue) is a separate, additional idle behaviour layered on top of this frame animation."
 }
