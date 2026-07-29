@@ -1,17 +1,18 @@
 {
-  "canvasW": 665,
-  "canvasH": 887,
+  "canvasW": 1254,
+  "canvasH": 1672,
   "signBox": {
-    "x": 257,
-    "y": 403,
-    "w": 155,
-    "h": 117
+    "x": 325,
+    "y": 890,
+    "w": 593,
+    "h": 406
   },
   "signPct": {
-    "left": 38.70,
-    "top": 45.43,
-    "right": 61.95,
-    "bottom": 58.62
+    "left": 25.92,
+    "top": 53.2,
+    "right": 73.25,
+    "bottom": 77.45
   },
-  "frameCount": 8
+  "frameCount": 8,
+  "note": "hero-idle-sheet.png is 8 identical copies of hero-static.png (no distinct idle animation frames were available this round); frameCount is kept at 8 so the existing CSS sprite-stepping math in main.css still applies unchanged. Movement during idle now comes from the 'wander' behaviour in hero.js (walking toward/away from the venue) rather than per-frame drawing changes."
 }
