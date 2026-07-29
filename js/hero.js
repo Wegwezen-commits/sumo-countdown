@@ -12,6 +12,14 @@
   const SPORADIC_MAX_MS = 48000;
   const GRUNT_MIN_MS = 25000;   // "just fought a match" — an occasional
   const GRUNT_MAX_MS = 55000;   // low humpf, independent of hover/tap
+  // "Walk near the venue": with no dedicated walk-cycle artwork this
+  // round, movement (rather than a breathing/frowning idle loop) is
+  // what stands in for idle personality — an occasional stroll toward
+  // one side of the stage and back, using the same still art.
+  const WANDER_MIN_MS = 20000;
+  const WANDER_MAX_MS = 45000;
+  const WANDER_HOLD_MS = 2200;   // how long he lingers at the far side
+  const WANDER_TRANSIT_MS = 1700; // matches .hero-rig.wandering's transition
 
   function reduceMotion() {
     return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -30,6 +38,8 @@
     let walkTimer = null;
     let sporadicTimer = null;
     let gruntTimer = null;
+    let wanderTimer = null;
+    let wanderStateTimer = null;
     let dismissedHint = SumoUtil.storage.get("heroHintSeen", false);
     if (dismissedHint && hint) hint.classList.add("hidden");
 
@@ -41,6 +51,8 @@
     }
 
     function stepForward({ sound = true, autoRetract = false } = {}) {
+      clearTimeout(wanderStateTimer);
+      rig.classList.remove("wandering", "wander-left", "wander-right");
       rig.classList.add("approach", "walking");
       if (sound && global.SumoAudio && typeof SumoAudio.playApproach === "function") {
         SumoAudio.playApproach();
@@ -117,12 +129,43 @@
     }
     scheduleGrunt();
 
+    // ---------- Periodic wander: an occasional stroll toward one side of
+    // the venue and back. Runs on desktop and touch alike (it's now the
+    // primary idle "personality" motion, not a hover-discoverable extra),
+    // but skips a cycle if the rig is already mid-approach/mid-wander so
+    // it never fights the hover/tap transform. ----------
+    function scheduleWander() {
+      if (reduceMotion()) return;
+      const delay = WANDER_MIN_MS + Math.random() * (WANDER_MAX_MS - WANDER_MIN_MS);
+      wanderTimer = setTimeout(() => {
+        const canWander = document.visibilityState === "visible" &&
+          !rig.classList.contains("approach") &&
+          !rig.classList.contains("wandering");
+        if (canWander) {
+          const dir = Math.random() < 0.5 ? "wander-left" : "wander-right";
+          rig.classList.add("wandering", dir);
+          wanderStateTimer = setTimeout(() => {
+            rig.classList.remove(dir); // stroll back to center
+            wanderStateTimer = setTimeout(() => {
+              rig.classList.remove("wandering");
+            }, WANDER_TRANSIT_MS + 100);
+          }, WANDER_HOLD_MS);
+        }
+        scheduleWander();
+      }, delay);
+    }
+    scheduleWander();
+
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "hidden") {
         clearTimeout(sporadicTimer);
         clearTimeout(gruntTimer);
+        clearTimeout(wanderTimer);
+        clearTimeout(wanderStateTimer);
+        rig.classList.remove("wandering", "wander-left", "wander-right");
       } else if (document.visibilityState === "visible") {
         scheduleGrunt();
+        scheduleWander();
       }
     });
   }

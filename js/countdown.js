@@ -53,13 +53,15 @@
   }
 
   let celebrating = false;
-  function triggerCelebration() {
+  // The heroSprite's "celebrate" pose is now worn for the whole live
+  // window (see render() below), not just flashed at a zero-crossing —
+  // this helper is only left responsible for the victory sound/music
+  // pulse that plays at the moment a countdown actually hits zero.
+  function pulseVictory() {
     if (celebrating) return;
     celebrating = true;
     setMusicState("victory");
-    if (els.heroSprite) els.heroSprite.classList.add("celebrate");
     setTimeout(() => {
-      if (els.heroSprite) els.heroSprite.classList.remove("celebrate");
       celebrating = false;
       lastMusicState = null; // let the next tick pick idle/countdown/live again
     }, 6000);
@@ -71,6 +73,7 @@
     const liveInfo = live ? Live.status(live, now) : null;
 
     if (liveInfo) {
+      if (els.heroSprite) els.heroSprite.classList.add("celebrate");
       els.liveBadge.classList.remove("hidden");
       els.liveBadge.innerHTML = `<span class="dot" aria-hidden="true"></span> ${I18n.t("liveBadge")}`;
       els.eyebrow.textContent = I18n.t("basholive");
@@ -86,7 +89,7 @@
 
       if (parts.d === 0 && parts.h === 0 && parts.m === 0 && parts.s === 0) {
         SumoAudio.onZero(live.id + "-senshuraku");
-        triggerCelebration();
+        pulseVictory();
       } else {
         setMusicState(liveInfo.dayIndex >= liveInfo.totalDays ? "finalDay" : "live");
       }
@@ -95,6 +98,7 @@
     }
 
     els.liveBadge.classList.add("hidden");
+    if (els.heroSprite) els.heroSprite.classList.remove("celebrate");
     const next = Schedule.getNextUpcoming(now);
     if (!next) {
       els.bashoMeta.textContent = "—";
@@ -127,7 +131,7 @@
 
     if (parts.d === 0 && parts.h === 0 && parts.m === 0 && parts.s === 0) {
       SumoAudio.onZero(next.id + "-start");
-      triggerCelebration();
+      pulseVictory();
     } else {
       setMusicState(hoursUntil <= 48 ? "countdown" : "idle");
     }
