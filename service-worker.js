@@ -3,7 +3,7 @@
 // fixed deploy is never masked by a stale cached copy of the code
 // itself; images/audio (which rarely change) stay cache-first for
 // speed and offline reliability.
-const CACHE_VERSION = "sumo-countdown-v6-hero-grunt-tz";
+const CACHE_VERSION = "sumo-countdown-v7-hero-wander-live-celebrate";
 const NETWORK_FIRST_EXT = [".html", ".js", ".css", ".json"];
 const APP_SHELL = [
   "./",
