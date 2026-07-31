@@ -5,17 +5,23 @@
   "use strict";
 
   const DEFAULTS = {
-    theme: "auto",       // "auto" | "light" | "dark"
+    theme: "auto-device",       // "auto" | "auto-device" | "light" | "dark"
     sakura: true,
     audio: false,
     music: false,
     volume: 60,
     compact: false,
+    compactAuto: true,
     ultra: false,
     tv: false,
     timezone: "auto",
     contrast: "normal"
   };
+
+  function isMobileViewport() {
+    try { return window.matchMedia("(max-width: 767px)").matches; }
+    catch (e) { return false; }
+  }
 
   const Settings = {
     prefs: { ...DEFAULTS },
@@ -56,10 +62,21 @@
       return this.isJapanNight() ? "dark" : "light"; // "auto" — JST-based
     },
 
+    // compactAuto (default true) means "follow the device": compact mode
+    // tracks the same <=767px breakpoint responsive.css already uses for
+    // phone layout, re-evaluated on every load/resize. The moment the
+    // visitor explicitly flips the "Compact mode" checkbox in settings,
+    // compactAuto is set to false and their explicit choice (prefs.compact)
+    // takes over permanently — "auto on mobile unless they switch it off".
+    resolvedCompact() {
+      if (!this.prefs.compactAuto) return !!this.prefs.compact;
+      return isMobileViewport();
+    },
+
     apply() {
       const root = document.documentElement;
       root.setAttribute("data-theme", this.resolvedTheme());
-      document.body.setAttribute("data-compact", String(!!this.prefs.compact));
+      document.body.setAttribute("data-compact", String(this.resolvedCompact()));
       document.body.setAttribute("data-ultra", String(!!this.prefs.ultra));
       root.setAttribute("data-tv", String(!!this.prefs.tv));
       root.setAttribute("data-contrast", this.prefs.contrast);
@@ -86,4 +103,12 @@
       if (Settings.prefs.theme === "auto-device") Settings.apply();
     });
   } catch (e) { /* matchMedia change listener unsupported — auto-device just won't live-update */ }
+  try {
+    let resizeTimer = null;
+    window.addEventListener("resize", () => {
+      if (!Settings.prefs.compactAuto) return; // user has an explicit choice — don't override it
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => Settings.apply(), 150);
+    });
+  } catch (e) { /* no-op */ }
 })(window);

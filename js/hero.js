@@ -9,6 +9,9 @@
 // shifts/breathes rather than looping the animation forever. Separately,
 // schedules a much more frequent, much shorter blink (frame 2 of the idle
 // sheet, held briefly) so the hero doesn't look frozen between those.
+// All of the "unprompted" behaviour (sporadic approach, grunt, idle-sheet,
+// blink) pauses when the tab is hidden OR the hero is scrolled out of
+// view, and resumes when either comes back — see pauseAmbient/resumeAmbient.
 (function (global) {
   "use strict";
 
@@ -29,6 +32,15 @@
   // widen/narrow this range to make it fire more or less often.
   const IDLE_TRIGGER_MIN_MS = 45000;
   const IDLE_TRIGGER_MAX_MS = 85000;
+  // Weighting around real interaction (hover/tap/focus — see markInteraction):
+  // right after one, wait at least this long before the idle-sheet can play,
+  // so it doesn't compete with something the visitor just did on purpose;
+  // after a long stretch of nobody touching the hero, shrink the random
+  // window instead of widening it, so it fires a bit more often — a little
+  // more personality during long stretches of nobody paying attention.
+  const IDLE_COOLDOWN_AFTER_INTERACTION_MS = 20000;
+  const IDLE_STILLNESS_BONUS_AFTER_MS = 150000;
+  const IDLE_STILLNESS_RANGE_FACTOR = 0.6;
 
   // Blink: a quick flash of frame 2 of the idle sheet (see .hero-sprite.blinking
   // in main.css), independent of and much more frequent than the full idle-sheet
@@ -61,8 +73,22 @@
     let gruntTimer = null;
     let idleAnimTimer = null;
     let blinkTimer = null;
+    let lastInteractionAt = Date.now();
+    let tabVisible = document.visibilityState === "visible";
+    let inViewport = true; // updated by IntersectionObserver below, if supported
+    let ambientStarted = false;
     let dismissedHint = SumoUtil.storage.get("heroHintSeen", false);
     if (dismissedHint && hint) hint.classList.add("hidden");
+
+    function ambientActive() { return tabVisible && inViewport; }
+
+    function markInteraction() {
+      lastInteractionAt = Date.now();
+      // A real interaction just happened — push the next idle-sheet play
+      // out past the cooldown rather than letting an already-pending timer
+      // fire right on top of it.
+      if (idleAnimTimer) { clearTimeout(idleAnimTimer); scheduleIdleAnim(); }
+    }
 
     function dismissHint() {
       if (dismissedHint || !hint) return;
@@ -91,13 +117,14 @@
     rig.addEventListener("pointerenter", (e) => {
       if (e.pointerType !== "mouse") return; // touch/pen handled via tap below
       dismissHint();
+      markInteraction();
       stepForward({ autoRetract: false });
     });
     rig.addEventListener("pointerleave", (e) => {
       if (e.pointerType !== "mouse") return;
       stepBack();
     });
-    rig.addEventListener("focus", () => { dismissHint(); stepForward({ autoRetract: false }); });
+    rig.addEventListener("focus", () => { dismissHint(); markInteraction(); stepForward({ autoRetract: false }); });
     rig.addEventListener("blur", stepBack);
 
     // ---------- Touch: tap toggles a timed approach ----------
@@ -106,6 +133,7 @@
       // a discrete tap trigger on devices that can't hover.
       if (canHover()) return;
       dismissHint();
+      markInteraction();
       if (rig.classList.contains("approach")) stepBack();
       else stepForward({ autoRetract: true });
     });
@@ -115,6 +143,7 @@
       if (e.key !== "Enter" && e.key !== " ") return;
       e.preventDefault();
       dismissHint();
+      markInteraction();
       stepForward({ autoRetract: true });
     });
 
@@ -129,7 +158,6 @@
         scheduleSporadic();
       }, delay);
     }
-    scheduleSporadic();
 
     // ---------- Periodic grunt: a low "humpf", like a wrestler still
     // catching his breath after a bout. Independent of hover/tap/sway —
@@ -144,10 +172,9 @@
         scheduleGrunt();
       }, delay);
     }
-    scheduleGrunt();
 
-    // ---------- Idle-sheet playback: play the 8-frame animation for a
-    // few cycles at random intervals, otherwise stay on hero-static.png
+    // ---------- Idle-sheet playback: play the 8-frame animation once
+    // through at random intervals, otherwise stay on hero-static.png
     // (see .hero-sprite / .hero-sprite.playing-idle in main.css). ----------
     function idleAnimAllowed() {
       return sprite && !reduceMotion() && !sprite.classList.contains("celebrate")
@@ -157,6 +184,9 @@
     function playIdleAnim() {
       if (!idleAnimAllowed() || sprite.classList.contains("playing-idle")) return;
       sprite.classList.add("playing-idle");
+      if (global.SumoAudio && typeof SumoAudio.playIdleShift === "function") {
+        SumoAudio.playIdleShift();
+      }
     }
 
     if (sprite) {
@@ -170,13 +200,24 @@
 
     function scheduleIdleAnim() {
       if (!sprite) return;
-      const delay = IDLE_TRIGGER_MIN_MS + Math.random() * (IDLE_TRIGGER_MAX_MS - IDLE_TRIGGER_MIN_MS);
+      const stillFor = Date.now() - lastInteractionAt;
+      let min = IDLE_TRIGGER_MIN_MS;
+      let max = IDLE_TRIGGER_MAX_MS;
+      if (stillFor < IDLE_COOLDOWN_AFTER_INTERACTION_MS) {
+        // Just interacted with directly — give it room before the ambient
+        // animation competes with whatever the visitor just did on purpose.
+        min = IDLE_TRIGGER_MIN_MS + (IDLE_TRIGGER_MAX_MS - IDLE_TRIGGER_MIN_MS) * 0.5;
+      } else if (stillFor > IDLE_STILLNESS_BONUS_AFTER_MS) {
+        // Nobody's touched it in a while — let a bit more personality show
+        // by shrinking the window instead of widening it.
+        max = IDLE_TRIGGER_MIN_MS + (IDLE_TRIGGER_MAX_MS - IDLE_TRIGGER_MIN_MS) * IDLE_STILLNESS_RANGE_FACTOR;
+      }
+      const delay = min + Math.random() * (max - min);
       idleAnimTimer = setTimeout(() => {
-        if (document.visibilityState === "visible") playIdleAnim();
+        if (ambientActive()) playIdleAnim();
         scheduleIdleAnim();
       }, delay);
     }
-    scheduleIdleAnim();
 
     // ---------- Blink: much more frequent, much shorter than the idle-sheet
     // playback above — see BLINK_* constants and .hero-sprite.blinking in
@@ -212,20 +253,44 @@
         scheduleBlink();
       }, delay);
     }
-    scheduleBlink();
+
+    // ---------- Ambient lifecycle: all four "unprompted" behaviours above
+    // (sporadic approach, grunt, idle-sheet, blink) start/stop together via
+    // ambientActive() = tab visible AND hero scrolled into view. started
+    // guards against double-scheduling if both the IntersectionObserver's
+    // initial callback and the unconditional call at the bottom both land
+    // while already active. ----------
+    function pauseAmbient() {
+      ambientStarted = false;
+      clearTimeout(sporadicTimer);
+      clearTimeout(gruntTimer);
+      clearTimeout(idleAnimTimer);
+      clearTimeout(blinkTimer);
+    }
+
+    function resumeAmbient() {
+      if (!ambientActive() || ambientStarted) return;
+      ambientStarted = true;
+      scheduleSporadic();
+      scheduleGrunt();
+      scheduleIdleAnim();
+      scheduleBlink();
+    }
 
     document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "hidden") {
-        clearTimeout(sporadicTimer);
-        clearTimeout(gruntTimer);
-        clearTimeout(idleAnimTimer);
-        clearTimeout(blinkTimer);
-      } else if (document.visibilityState === "visible") {
-        scheduleGrunt();
-        scheduleIdleAnim();
-        scheduleBlink();
-      }
+      tabVisible = document.visibilityState === "visible";
+      if (!tabVisible) pauseAmbient(); else resumeAmbient();
     });
+
+    if ("IntersectionObserver" in window) {
+      const io = new IntersectionObserver((entries) => {
+        inViewport = entries[entries.length - 1].isIntersecting;
+        if (!inViewport) pauseAmbient(); else resumeAmbient();
+      }, { threshold: 0.15 });
+      io.observe(rig);
+    } else {
+      resumeAmbient(); // no IntersectionObserver support — just start on load
+    }
   }
 
   document.addEventListener("DOMContentLoaded", init);

@@ -181,6 +181,20 @@
     noiseBurst(c, sfxGain, t0 + 0.02, 0.16, 0.16, "lowpass", 320);
   }
 
+  // A very soft breath/shift sound, paired with the idle-sheet animation
+  // (see js/hero.js) — deliberately much quieter and gentler than
+  // playGrunt/playApproach above, since this fires roughly once a minute
+  // and shouldn't draw attention the way an intentional interaction does.
+  // Reuses the same breathTone helper as the composed music's shakuhachi
+  // voice, just a single very quiet, very short puff.
+  function playIdleShift() {
+    if (!Settings.prefs.audio || !unlocked) return;
+    const c = ensureContext();
+    if (!c) return;
+    const t0 = c.currentTime;
+    breathTone(c, sfxGain, t0, 0.5, 210, 0.05);
+  }
+
   function onZero(bashoId) {
     if (playedForId === bashoId) return;
     playedForId = bashoId;
@@ -297,5 +311,5 @@
     if (e.detail.key === "music") setMusicEnabled(e.detail.value);
   });
 
-  global.SumoAudio = { onZero, unlock, playClick, playApproach, playGrunt, startMusic, stopMusic, setMusicEnabled };
+  global.SumoAudio = { onZero, unlock, playClick, playApproach, playGrunt, playIdleShift, startMusic, stopMusic, setMusicEnabled };
 })(window);

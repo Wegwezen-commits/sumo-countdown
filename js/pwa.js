@@ -44,21 +44,37 @@
   }
 
   function wireInstallButton() {
-    const btn = document.getElementById("installButton");
-    if (!btn) return;
+    const topBtn = document.getElementById("installButton");
+    const settingsRow = document.getElementById("installRow");
+    const settingsBtn = document.getElementById("installButtonSettings");
+    if (!topBtn && !settingsBtn) return;
+
+    function show() {
+      if (topBtn) topBtn.classList.remove("hidden");
+      if (settingsRow) settingsRow.classList.remove("hidden");
+    }
+    function hide() {
+      if (topBtn) topBtn.classList.add("hidden");
+      if (settingsRow) settingsRow.classList.add("hidden");
+    }
+
     window.addEventListener("beforeinstallprompt", (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      btn.classList.remove("hidden");
+      show();
     });
-    btn.addEventListener("click", async () => {
+
+    async function doInstall() {
       if (!deferredPrompt) return;
       deferredPrompt.prompt();
       await deferredPrompt.userChoice;
       deferredPrompt = null;
-      btn.classList.add("hidden");
-    });
-    window.addEventListener("appinstalled", () => btn.classList.add("hidden"));
+      hide();
+    }
+    if (topBtn) topBtn.addEventListener("click", doInstall);
+    if (settingsBtn) settingsBtn.addEventListener("click", doInstall);
+
+    window.addEventListener("appinstalled", hide);
   }
 
   global.PWA = { init() { registerServiceWorker(); wireInstallButton(); } };

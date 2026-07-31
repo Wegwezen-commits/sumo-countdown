@@ -186,7 +186,7 @@
     sMusic.checked = p.music;
     sVolume.value = p.volume;
     sVolumeValue.textContent = `${p.volume}%`;
-    sCompact.checked = p.compact;
+    sCompact.checked = Settings.resolvedCompact();
     sUltra.checked = p.ultra;
     sTv.checked = p.tv;
     sTheme.value = p.theme;
@@ -200,7 +200,7 @@
       Settings.set("volume", Number(sVolume.value));
       sVolumeValue.textContent = `${sVolume.value}%`;
     });
-    sCompact.addEventListener("change", () => Settings.set("compact", sCompact.checked));
+    sCompact.addEventListener("change", () => { Settings.set("compactAuto", false); Settings.set("compact", sCompact.checked); });
     sUltra.addEventListener("change", () => Settings.set("ultra", sUltra.checked));
     sTv.addEventListener("change", () => Settings.set("tv", sTv.checked));
     sTheme.addEventListener("change", () => Settings.set("theme", sTheme.value));
