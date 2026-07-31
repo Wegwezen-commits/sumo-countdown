@@ -30,8 +30,8 @@
   // seconds every so often — "roughly once a minute", randomized so it
   // doesn't feel like a metronome. Average of MIN/MAX below is ~65s;
   // widen/narrow this range to make it fire more or less often.
-  const IDLE_TRIGGER_MIN_MS = 45000;
-  const IDLE_TRIGGER_MAX_MS = 85000;
+  const IDLE_TRIGGER_MIN_MS = 18000;
+  const IDLE_TRIGGER_MAX_MS = 35000;
   // Weighting around real interaction (hover/tap/focus — see markInteraction):
   // right after one, wait at least this long before the idle-sheet can play,
   // so it doesn't compete with something the visitor just did on purpose;
