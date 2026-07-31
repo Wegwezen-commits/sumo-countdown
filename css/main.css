@@ -687,6 +687,109 @@ button, select, input { font-family: inherit; }
 }
 .news-sources a:hover { text-decoration: underline; }
 
+/* Live Streams panel — only ever shows real content while a basho is
+   live (see js/streams.js render()); otherwise .streams-idle is set on
+   the panel and the grid is replaced with the "back for next basho"
+   message + a dim pixel-style OFFLINE sign, reusing the same visual
+   language as the individual offline stream cards below. */
+.streams-panel.streams-idle .stream-grid { display: none; }
+.streams-panel:not(.streams-idle) .streams-back-message { display: none; }
+.streams-back-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 12px 6px;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.stream-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+  min-height: 24px;
+}
+.stream-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  background: var(--paper);
+}
+.stream-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.stream-platform {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-deep);
+}
+.stream-live-dot {
+  /* .live-badge is normally absolutely centered over the hero sign — reset
+     that positioning to sit inline in the stream card header instead. */
+  position: static;
+  top: auto; left: auto; transform: none;
+  font-size: 10px;
+}
+.stream-card-foot { font-size: 12px; font-weight: 600; color: var(--ink); }
+
+.stream-embed-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: #0c0e14;
+}
+.stream-embed { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* The pixel-style "OFFLINE" sign — same LED font/board language as the
+   countdown digits, but dim/desaturated instead of the glowing pink, so
+   it visually reads as "powered down" rather than "actively counting". */
+.stream-offline-sign {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0c0e14;
+  border-radius: var(--radius-sm);
+  box-shadow: inset 0 0 0 2px #000, inset 0 0 0 4px rgba(150,155,165,0.18);
+}
+.stream-offline-sign::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(0deg, rgba(0,0,0,0.35) 0 1px, transparent 1px 3px);
+  pointer-events: none;
+  opacity: 0.5;
+  border-radius: inherit;
+}
+.stream-offline-text {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-led);
+  font-size: clamp(20px, 5cqw, 34px);
+  letter-spacing: 0.08em;
+  color: #6b7078;
+  text-shadow: 0 0 6px rgba(180,185,195,0.25);
+}
+.stream-offline-sign.small { aspect-ratio: auto; width: auto; padding: 10px 22px; }
+.stream-offline-sign.small .stream-offline-text { font-size: 16px; }
+
+@media (max-width: 640px) {
+  .stream-grid { grid-template-columns: 1fr; }
+}
+
 footer.site-footer {
   max-width: 1200px; margin: 0 auto; padding: 20px; text-align: center;
   color: var(--ink-soft); font-size: 12px;
