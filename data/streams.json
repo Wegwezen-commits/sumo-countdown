@@ -1,0 +1,32 @@
+{
+  "_readme": [
+    "Add livestream links here — this whole section only appears in the app while a basho is actually live (see Schedule.getLive in js/schedule.js), and shows a 'back for the next basho' message otherwise.",
+    "",
+    "Each entry: { \"id\", \"platform\", \"label\", plus platform-specific fields below }. 'id' just needs to be unique in this file.",
+    "",
+    "platform: \"youtube\" — set \"channelId\" to the channel's UC... ID (Channel URL -> right-click -> View Page Source -> search \"channelId\", or use a lookup tool like https://commentpicker.com/youtube-channel-id.php). Live status is checked automatically, no API key needed — the app asks YouTube's public oEmbed endpoint whether https://www.youtube.com/channel/<channelId>/live currently resolves to a live video. You do not need to flip anything manually for YouTube entries.",
+    "",
+    "platform: \"twitch\" — set \"channelName\" to the Twitch username (the part after twitch.tv/). Twitch doesn't offer a public, keyless way to check live status from a browser (their live API requires an app Client-ID + access token), so this app CANNOT auto-detect Twitch live status out of the box. Toggle \"assumeLive\": true while you know the stream is running, and back to false when it ends — the pixel 'OFFLINE' card shows automatically whenever assumeLive is false.",
+    "",
+    "platform: \"generic\" — for any other platform's embeddable player. Set \"embedUrl\" to the full iframe embed URL. Same limitation as Twitch: no auto-detection, so control it with \"assumeLive\".",
+    "",
+    "Delete this _readme block or leave it — it's ignored at runtime, only \"streams\" is read. The two example entries below are marked \"disabled\": true so they're skipped at runtime and don't try to embed a fake channel — copy one, fill in your own IDs, and delete (or flip) \"disabled\"."
+  ],
+  "streams": [
+    {
+      "id": "example-youtube",
+      "platform": "youtube",
+      "label": "Example channel (YouTube)",
+      "channelId": "UCxxxxxxxxxxxxxxxxxxxxxx",
+      "disabled": true
+    },
+    {
+      "id": "example-twitch",
+      "platform": "twitch",
+      "label": "Example channel (Twitch)",
+      "channelName": "example_channel",
+      "assumeLive": false,
+      "disabled": true
+    }
+  ]
+}

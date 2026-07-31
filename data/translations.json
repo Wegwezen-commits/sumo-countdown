@@ -63,7 +63,11 @@
     "newsOffline": "Showing saved headlines — couldn't refresh just now",
     "newsUnavailable": "Couldn't load live headlines right now — try these sources directly:",
     "heroHint": "Tap the rikishi",
-    "heroApproachHint": "Rikishi — bring the tournament sign closer"
+    "heroApproachHint": "Rikishi — bring the tournament sign closer",
+    "liveStreams": "Live Streams",
+    "liveStreamsNote": "Shown only while a basho is live.",
+    "streamOffline": "OFFLINE",
+    "streamsComingBack": "Live streams will be back for the next basho."
   },
   "ja": {
     "title": "大相撲場所カウントダウン",
@@ -129,7 +133,11 @@
     "newsOffline": "保存済みのニュースを表示中 — 更新できませんでした",
     "newsUnavailable": "現在ニュースを取得できません。こちらのサイトをご覧ください：",
     "heroHint": "力士をタップ",
-    "heroApproachHint": "力士 — 番付を近くで見る"
+    "heroApproachHint": "力士 — 番付を近くで見る",
+    "liveStreams": "ライブ配信",
+    "liveStreamsNote": "本場所開催中のみ表示されます。",
+    "streamOffline": "オフライン",
+    "streamsComingBack": "次の本場所でまたお会いしましょう。"
   },
   "nl": {
     "title": "Sumo Basho Aftelklok",
@@ -195,6 +203,10 @@
     "newsOffline": "Bewaarde koppen worden getoond — bijwerken lukte nu niet",
     "newsUnavailable": "Kan nu geen actueel nieuws laden — probeer deze bronnen direct:",
     "heroHint": "Tik op de rikishi",
-    "heroApproachHint": "Rikishi — haal het bord dichterbij"
+    "heroApproachHint": "Rikishi — haal het bord dichterbij",
+    "liveStreams": "Livestreams",
+    "liveStreamsNote": "Alleen zichtbaar tijdens een lopend basho.",
+    "streamOffline": "OFFLINE",
+    "streamsComingBack": "Livestreams zijn terug bij de volgende basho."
   }
 }
