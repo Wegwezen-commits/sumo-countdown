@@ -329,31 +329,27 @@ button, select, input { font-family: inherit; }
   opacity: 1;
   animation: heroIdle 1.2s steps(7, end) 1;
 }
-/* Blink: uses ONLY hero-blink-sheet.png (built directly from the
-   user-supplied Blinking-hero.png reference — see that file and
-   assets/pixel/hero-meta.json for exactly how) — a dedicated 2-frame
-   sheet on its own ::after layer, never mixed with the 8-frame idle
-   sheet above. hero.js runs a real open -> closed -> open sequence by
-   toggling .blinking (shows frame 1, "open") and .eyes-closed (shifts
-   to frame 2, "closed") independently, so the whole thing is a genuine
-   loop through both of that file's frames, not a snap to a single frame. */
-.hero-sprite::after {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 200%;
-  height: 100%;
-  background-image: url('../assets/pixel/hero-blink-sheet.png');
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  background-position: left bottom;
-  image-rendering: pixelated;
-  opacity: 0;
-  transform: translateX(0);
-  transition: opacity 70ms ease;
-}
-.hero-sprite.blinking::after { opacity: 1; }
-.hero-sprite.blinking.eyes-closed::after { transform: translateX(-100%); }
+/* Blink: reuses the SAME idle-sheet layer above rather than a separate
+   image/pseudo-element. hero-idle-sheet.png's frame 0 is the neutral/open
+   pose (matches hero-static.png) and frame 1 is the closed-eyes blink —
+   authored directly into the sheet, not composited. A quick blink just
+   jumps this one layer to frame 1 and back, using the same -1-frame math
+   as the full 8-frame walk below (-12.5% = one frame of the 800%-wide
+   strip), instead of animating through all 8. hero.js runs a real
+   open -> closed -> open sequence by toggling .blinking (fades this layer
+   in, showing frame 0) and .eyes-closed (shifts to frame 1) — see
+   blinkAllowed()/idleAnimAllowed() in hero.js for why this and the full
+   idle animation above are mutually exclusive: they're the same element,
+   so only one can be driving its transform at a time.
+   Previously this was a second, separate pseudo-element/image
+   (hero-blink-sheet.png on ::after) layered on top of the idle strip.
+   That's what produced the glitch: two independently-transitioning layers
+   over the same spot, each with their own opacity fade and (in an earlier
+   version) a differently-scaled source image, so a blink could visibly
+   flash/jump instead of reading as a clean frame swap. Folding it into
+   the single ::before layer removes that race entirely. */
+.hero-sprite.blinking::before { opacity: 1; transition: opacity 70ms ease; }
+.hero-sprite.blinking.eyes-closed::before { transform: translateX(-12.5%); }
 
 .hero-rig.approach .hero-sprite { filter: drop-shadow(0 16px 20px rgba(0,0,0,0.45)); }
 /* Live basho: replace the idle strip with the dedicated celebration art. */
@@ -361,7 +357,7 @@ button, select, input { font-family: inherit; }
   background-image: url('../assets/pixel/hero-celebrate.png');
   background-size: 100% 100%;
 }
-.hero-sprite.celebrate::before, .hero-sprite.celebrate::after { display: none; }
+.hero-sprite.celebrate::before { display: none; }
 
 @keyframes heroIdle {
   from { transform: translateX(0); }
@@ -372,10 +368,9 @@ button, select, input { font-family: inherit; }
      animation and blink under reduced motion, but this guarantees no
      motion even if those classes somehow end up on the element. */
   .hero-sprite::before,
-  .hero-sprite.playing-idle::before { animation: none; opacity: 0; transform: translateX(0); }
-  .hero-sprite::after,
-  .hero-sprite.blinking::after,
-  .hero-sprite.blinking.eyes-closed::after { opacity: 0; transform: translateX(0); transition: none; }
+  .hero-sprite.playing-idle::before,
+  .hero-sprite.blinking::before,
+  .hero-sprite.blinking.eyes-closed::before { animation: none; opacity: 0; transform: translateX(0); transition: none; }
 }
 
 /* The overlay is positioned to match the blank sign panel baked into the
