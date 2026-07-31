@@ -53,13 +53,17 @@
    Auto-enabled on phones by default (see Settings.resolvedCompact in
    settings.js) — the smaller floors below aren't just cosmetic padding
    trims, they're what guarantees the DD:HH:MM:SS row fits on one line
-   without wrapping at typical phone widths. At the smallest realistic
-   width (a ~190px-wide hero-rig, see the 767px breakpoint above), the
-   sign is only ~90px wide; the *non*-compact floors (15px digits) don't
-   fit four of them plus separators in that space, so the row's own
-   flex-wrap safety net pushes "seconds" onto a second line — which then
-   gets clipped by .hero-overlay's fixed height + overflow:hidden. These
-   smaller floors keep everything, including seconds, on one visible row. */
+   without wrapping at typical phone widths.
+   Two real-device-only gotchas made this fail even though it looked fine
+   in desktop/headless testing, both fixed alongside these floors:
+   1. .clock-part/.clock-sep used to allow flex-shrink, so instead of
+      wrapping when the row didn't fit, flexbox crushed the *last* item
+      (seconds) down toward zero width rather than moving it to a new
+      line — see flex: 0 0 auto on both in the rules above them.
+   2. Mobile browsers auto-boost small text for readability, silently
+      overriding these clamp() floors on a real phone in a way no
+      desktop/headless test will ever reproduce — see text-size-adjust
+      on the html rule near the top of this file. */
 [data-compact="true"] .panel { padding: 14px; }
 [data-compact="true"] .info-grid { gap: 10px; }
 [data-compact="true"] .content { padding-top: 14px; }
@@ -74,6 +78,12 @@
 }
 [data-compact="true"] .digital-clock { gap: clamp(1px, 1.3cqw, 10px); }
 [data-compact="true"] .countdown-shell { gap: clamp(1px, 0.4cqw, 4px); }
+/* Extra vertical breathing room, in case the clock row still ever wraps
+   to two lines on some real device — shrink the two least essential
+   overlay rows so a wrap doesn't get clipped by .hero-overlay's fixed
+   height + overflow:hidden (see that rule for why it can't just grow). */
+[data-compact="true"] .eyebrow { font-size: clamp(6px, 0.9vw, 9px) !important; }
+[data-compact="true"] .progress-text { font-size: clamp(4px, 1.1cqw, 8px); }
 
 /* Ultra-wide toggle (user preference — forces a wider max width) */
 [data-ultra="true"] .content { max-width: 1800px; }
