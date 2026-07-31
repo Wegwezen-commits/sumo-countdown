@@ -67,5 +67,10 @@
     };
   }
 
-  global.SumoUtil = { pad, clamp, storage, formatRange, daysBetween, fetchJSON, debounce };
+  const ESCAPE_MAP = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+  function escapeHTML(str) {
+    return String(str == null ? "" : str).replace(/[&<>"']/g, (ch) => ESCAPE_MAP[ch]);
+  }
+
+  global.SumoUtil = { pad, clamp, storage, formatRange, daysBetween, fetchJSON, debounce, escapeHTML };
 })(window);

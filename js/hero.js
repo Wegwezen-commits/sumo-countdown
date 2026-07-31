@@ -51,6 +51,8 @@
   const BLINK_MIN_MS = 2500;
   const BLINK_MAX_MS = 6000;
   const BLINK_HOLD_MS = 130;          // how long the eyes stay "closed"
+  const BLINK_OPEN_LEAD_MS = 40;      // brief "open" (blink-sheet frame 1) before closing
+  const BLINK_OPEN_TAIL_MS = 40;      // brief "open" again before reverting to hero-static.png
   const BLINK_DOUBLE_CHANCE = 0.12;   // occasional natural double-blink
   const BLINK_DOUBLE_GAP_MS = 120;
 
@@ -230,19 +232,33 @@
         && !sprite.classList.contains("playing-idle");
     }
 
-    function playBlink() {
-      if (!blinkAllowed() || sprite.classList.contains("blinking")) return;
+    // Runs one full open -> closed -> open pass through hero-blink-sheet.png
+    // (see that file / .hero-sprite::after in main.css), then reverts to
+    // hero-static.png. ".blinking" swaps the display over to the blink
+    // sheet's own "open" frame (frame 1); ".eyes-closed" shifts it to
+    // frame 2. Both classes always toggle together in this order, so the
+    // blink sheet is never shown holding on some other, unrelated frame.
+    function oneBlinkPass(onDone) {
       sprite.classList.add("blinking");
       setTimeout(() => {
-        sprite.classList.remove("blinking");
-        if (Math.random() < BLINK_DOUBLE_CHANCE) {
+        sprite.classList.add("eyes-closed");
+        setTimeout(() => {
+          sprite.classList.remove("eyes-closed");
           setTimeout(() => {
-            if (!blinkAllowed() || sprite.classList.contains("blinking")) return;
-            sprite.classList.add("blinking");
-            setTimeout(() => sprite.classList.remove("blinking"), BLINK_HOLD_MS);
-          }, BLINK_DOUBLE_GAP_MS);
+            sprite.classList.remove("blinking");
+            if (onDone) onDone();
+          }, BLINK_OPEN_TAIL_MS);
+        }, BLINK_HOLD_MS);
+      }, BLINK_OPEN_LEAD_MS);
+    }
+
+    function playBlink() {
+      if (!blinkAllowed() || sprite.classList.contains("blinking")) return;
+      oneBlinkPass(() => {
+        if (Math.random() < BLINK_DOUBLE_CHANCE && blinkAllowed()) {
+          setTimeout(() => { if (blinkAllowed()) oneBlinkPass(); }, BLINK_DOUBLE_GAP_MS);
         }
-      }, BLINK_HOLD_MS);
+      });
     }
 
     function scheduleBlink() {

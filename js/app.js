@@ -236,6 +236,8 @@
       setInterval(() => News.init(), 20 * 60 * 1000);
     }
 
+    if (window.Streams) Streams.init();
+
     document.querySelectorAll(".ghost-button, .icon-button").forEach((btn) => {
       btn.addEventListener("click", () => SumoAudio.playClick());
     });
