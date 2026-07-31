@@ -42,12 +42,14 @@
   const IDLE_STILLNESS_BONUS_AFTER_MS = 150000;
   const IDLE_STILLNESS_RANGE_FACTOR = 0.6;
 
-  // Blink: a quick flash of frame 2 of the idle sheet (see .hero-sprite.blinking
-  // in main.css), independent of and much more frequent than the full idle-sheet
-  // playback above. Kept short enough to read as a blink rather than a held
-  // expression, and guarded (see idleAnimAllowed/blinkAllowed below) so it never
-  // fires at the same time as the full idle-sheet animation — both animate the
-  // same sprite sheet layer, so they'd visually clash if they overlapped.
+  // Blink: a quick flash of frame 1 of hero-idle-sheet.png (the closed-eyes
+  // frame, authored directly into the sheet — see .hero-sprite.blinking in
+  // main.css), independent of and much more frequent than the full 8-frame
+  // idle-sheet playback above. Both now live on the SAME sprite-sheet layer
+  // (there is no separate blink sheet/image anymore), so they're guarded
+  // (see idleAnimAllowed/blinkAllowed below) to be strictly mutually
+  // exclusive — only one of them may be driving that layer's transform at
+  // a time, or they'd fight over the same element.
   const BLINK_MIN_MS = 2500;
   const BLINK_MAX_MS = 6000;
   const BLINK_HOLD_MS = 130;          // how long the eyes stay "closed"
@@ -232,12 +234,12 @@
         && !sprite.classList.contains("playing-idle");
     }
 
-    // Runs one full open -> closed -> open pass through hero-blink-sheet.png
-    // (see that file / .hero-sprite::after in main.css), then reverts to
-    // hero-static.png. ".blinking" swaps the display over to the blink
-    // sheet's own "open" frame (frame 1); ".eyes-closed" shifts it to
-    // frame 2. Both classes always toggle together in this order, so the
-    // blink sheet is never shown holding on some other, unrelated frame.
+    // Runs one full open -> closed -> open pass through hero-idle-sheet.png's
+    // frames 0/1 (see that file / .hero-sprite::before in main.css), then
+    // reverts to hero-static.png. ".blinking" fades this layer in on frame 0
+    // ("open", identical to hero-static); ".eyes-closed" shifts it to frame 1
+    // ("closed"). Both classes always toggle together in this order, so the
+    // idle sheet is never shown holding on some other, unrelated frame.
     function oneBlinkPass(onDone) {
       sprite.classList.add("blinking");
       setTimeout(() => {
