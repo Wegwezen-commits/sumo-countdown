@@ -67,7 +67,8 @@
     "liveStreams": "Live Streams",
     "liveStreamsNote": "Shown only while a basho is live.",
     "streamOffline": "OFFLINE",
-    "streamsComingBack": "Live streams will be back for the next basho."
+    "streamsComingBack": "Live streams will be back for the next basho.",
+    "installed": "Installed ✓"
   },
   "ja": {
     "title": "大相撲場所カウントダウン",
@@ -137,7 +138,8 @@
     "liveStreams": "ライブ配信",
     "liveStreamsNote": "本場所開催中のみ表示されます。",
     "streamOffline": "オフライン",
-    "streamsComingBack": "次の本場所でまたお会いしましょう。"
+    "streamsComingBack": "次の本場所でまたお会いしましょう。",
+    "installed": "インストール済み ✓"
   },
   "nl": {
     "title": "Sumo Basho Aftelklok",
@@ -207,6 +209,7 @@
     "liveStreams": "Livestreams",
     "liveStreamsNote": "Alleen zichtbaar tijdens een lopend basho.",
     "streamOffline": "OFFLINE",
-    "streamsComingBack": "Livestreams zijn terug bij de volgende basho."
+    "streamsComingBack": "Livestreams zijn terug bij de volgende basho.",
+    "installed": "Geïnstalleerd ✓"
   }
 }
