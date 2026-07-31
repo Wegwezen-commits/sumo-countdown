@@ -49,11 +49,31 @@
   body { font-size: 18px; }
 }
 
-/* Compact mode toggle (user preference, applied via body attribute) */
+/* Compact mode toggle (user preference, applied via body attribute).
+   Auto-enabled on phones by default (see Settings.resolvedCompact in
+   settings.js) — the smaller floors below aren't just cosmetic padding
+   trims, they're what guarantees the DD:HH:MM:SS row fits on one line
+   without wrapping at typical phone widths. At the smallest realistic
+   width (a ~190px-wide hero-rig, see the 767px breakpoint above), the
+   sign is only ~90px wide; the *non*-compact floors (15px digits) don't
+   fit four of them plus separators in that space, so the row's own
+   flex-wrap safety net pushes "seconds" onto a second line — which then
+   gets clipped by .hero-overlay's fixed height + overflow:hidden. These
+   smaller floors keep everything, including seconds, on one visible row. */
 [data-compact="true"] .panel { padding: 14px; }
 [data-compact="true"] .info-grid { gap: 10px; }
 [data-compact="true"] .content { padding-top: 14px; }
 [data-compact="true"] .clock-label { display: none; }
+[data-compact="true"] .flip-card {
+  font-size: clamp(10px, 6.2cqw, 40px);
+  padding: clamp(1px, 0.8cqw, 6px) clamp(1px, 1cqw, 9px);
+}
+[data-compact="true"] .clock-sep {
+  font-size: clamp(9px, 5.2cqw, 34px);
+  padding-bottom: clamp(2px, 2.1cqw, 12px);
+}
+[data-compact="true"] .digital-clock { gap: clamp(1px, 1.3cqw, 10px); }
+[data-compact="true"] .countdown-shell { gap: clamp(1px, 0.4cqw, 4px); }
 
 /* Ultra-wide toggle (user preference — forces a wider max width) */
 [data-ultra="true"] .content { max-width: 1800px; }

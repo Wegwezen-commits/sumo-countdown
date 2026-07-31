@@ -5,7 +5,6 @@
 [data-tv="true"] .info-grid,
 [data-tv="true"] footer.site-footer,
 [data-tv="true"] .hero-image,
-[data-tv="true"] .hero-sprite,
 [data-tv="true"] .venue-crowd,
 [data-tv="true"] .hero-hint {
   display: none !important;
@@ -33,8 +32,10 @@
 [data-tv="true"] .hero-figure { aspect-ratio: auto; max-height: none; height: 100vh; width: 100%; }
 [data-tv="true"] .venue-scene { filter: brightness(0.55) saturate(1.1); }
 
-/* The rikishi is hidden in TV mode (hero-image/hero-sprite above), so the
-   rig just becomes a plain full-stage positioning box for the overlay. */
+/* hero-image (the hidden SEO/no-js fallback img) stays hidden in TV mode,
+   but hero-sprite itself is repositioned into a small corner badge further
+   below rather than hidden — see that rule for why. The rig here just
+   becomes a plain full-stage positioning box for the countdown overlay. */
 [data-tv="true"] .hero-rig {
   position: static;
   width: min(96vw, 1400px);
@@ -47,6 +48,22 @@
   width: 100%;
   height: auto;
   gap: 18px;
+}
+
+/* The rikishi still stands somewhere on a TV — just small, out of the way
+   of the giant countdown, rather than hidden entirely. #heroSprite is
+   pulled out of the (now full-screen, static) hero-rig's flow with
+   position:fixed so it doesn't affect that layout; the idle-sheet/blink
+   behaviour from hero.js keeps working unchanged since the same element
+   and classes are still in play, just repositioned/resized here. */
+[data-tv="true"] .hero-sprite {
+  position: fixed;
+  inset: auto auto 24px 24px;
+  width: min(11vw, 150px);
+  height: auto;
+  aspect-ratio: 3 / 4;
+  z-index: 60;
+  opacity: 0.92;
 }
 
 [data-tv="true"] .flip-card { font-size: clamp(48px, 12vw, 180px); padding: 12px 20px; border-radius: 16px; }

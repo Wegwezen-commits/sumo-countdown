@@ -280,7 +280,7 @@ button, select, input { font-family: inherit; }
    whenever the idle-sheet layer (::before) isn't actively playing, the
    hero simply stands still holding the sign. js/hero.js adds/removes
    '.playing-idle' on #heroSprite at random intervals (see IDLE_TRIGGER_*
-   in hero.js) to run the idle-sheet animation for a few cycles, then lets
+   in hero.js) to play the idle-sheet animation once through, then lets
    it fall back to the static pose — rather than looping forever. */
 .hero-sprite {
   position: absolute; inset: 0;
@@ -314,7 +314,7 @@ button, select, input { font-family: inherit; }
    it as playing; otherwise the plain hero-static.png underneath shows. */
 .hero-sprite.playing-idle::before {
   opacity: 1;
-  animation: heroIdle 1.2s steps(7, end) 3;
+  animation: heroIdle 1.2s steps(7, end) 1;
 }
 /* Blink: a quick flash of frame 2 (index 1) of the idle sheet — one frame
    width in, i.e. -12.5% of the pseudo-element's own 800%-wide box (same
