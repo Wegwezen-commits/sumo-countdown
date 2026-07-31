@@ -3,7 +3,7 @@
 // fixed deploy is never masked by a stale cached copy of the code
 // itself; images/audio (which rarely change) stay cache-first for
 // speed and offline reliability.
-const CACHE_VERSION = "sumo-countdown-v10-crisp-idle-fixed";
+const CACHE_VERSION = "sumo-countdown-v11-live-streams";
 const NETWORK_FIRST_EXT = [".html", ".js", ".css", ".json"];
 const APP_SHELL = [
   "./",
@@ -25,6 +25,7 @@ const APP_SHELL = [
   "./js/countdown.js",
   "./js/hero.js",
   "./js/news.js",
+  "./js/streams.js",
   "./js/pwa.js",
   "./js/app.js",
   "./data/schedule.json",
@@ -32,6 +33,7 @@ const APP_SHELL = [
   "./data/champions.json",
   "./data/translations.json",
   "./data/news-sources.json",
+  "./data/streams.json",
   "./assets/icons/icon-192.png",
   "./assets/icons/icon-512.png",
   "./assets/pixel/hero-static.png",

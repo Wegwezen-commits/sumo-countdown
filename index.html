@@ -147,6 +147,20 @@
         <div id="venueCard" class="stack"></div>
       </article>
 
+      <article class="panel panel-wide streams-panel streams-idle" id="streamsPanel">
+        <div class="panel-head">
+          <h2 data-i18n="liveStreams">Live Streams</h2>
+          <div class="panel-note" data-i18n="liveStreamsNote">Shown only while a basho is live.</div>
+        </div>
+        <div id="streamsGrid" class="stream-grid" aria-live="polite"></div>
+        <div id="streamsBackMessage" class="streams-back-message">
+          <span class="stream-offline-sign small">
+            <span class="stream-offline-text" data-i18n="streamOffline">OFFLINE</span>
+          </span>
+          <p data-i18n="streamsComingBack">Live streams will be back for the next basho.</p>
+        </div>
+      </article>
+
       <article class="panel panel-wide" id="newsPanel">
         <div class="panel-head">
           <h2 data-i18n="news">Sumo News</h2>
@@ -261,6 +275,7 @@
 <script src="js/countdown.js"></script>
 <script src="js/hero.js"></script>
 <script src="js/news.js"></script>
+<script src="js/streams.js"></script>
 <script src="js/pwa.js"></script>
 <script src="js/app.js"></script>
 </body>
