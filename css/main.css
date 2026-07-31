@@ -413,6 +413,17 @@ button, select, input { font-family: inherit; }
   overflow: hidden;
   text-align: center;
   color: #f6ead8;
+  /* BUGFIX: every cqw value inside here (flip-card, clock-sep, eyebrow,
+     etc.) was resolving against .hero-rig's inline size, not this box's —
+     the only other container in the tree is .hero-rig, which is over 2x
+     wider than the sign area (this box is 47.33% of it). That made the
+     clock size itself as if it had ~2x the room it actually has, so on
+     phones the 4th (seconds) column reliably didn't fit, wrapped, and got
+     clipped by this element's fixed height + overflow:hidden. Establishing
+     the query container here instead makes every descendant cqw actually
+     relative to the space they need to fit in. */
+  container-type: inline-size;
+  container-name: hero-overlay;
 }
 .hero-overlay .basho-meta { color: #cdbfae; }
 .hero-overlay .eyebrow { color: #ffb37a; }
