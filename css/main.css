@@ -770,7 +770,81 @@ button, select, input { font-family: inherit; }
   top: auto; left: auto; transform: none;
   font-size: 10px;
 }
-.stream-card-foot { font-size: 12px; font-weight: 600; color: var(--ink); }
+.stream-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.stream-card-foot a { font-size: 11px; font-weight: 600; color: var(--accent-deep); text-decoration: none; flex: 0 0 auto; }
+.stream-card-foot a:hover { text-decoration: underline; }
+.stream-card-badges, .video-card-badges { display: flex; flex-wrap: wrap; gap: 4px; }
+.video-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--paper-alt, rgba(0,0,0,0.06));
+  color: var(--ink-soft);
+}
+.video-badge-official { background: rgba(255,95,128,0.16); color: var(--accent-deep); }
+.video-card-subtitle { font-weight: 400; color: var(--ink-soft); }
+
+/* Filter bars: shared between the Streams and Videos tabs. Category
+   options are populated at render time from whatever's actually in the
+   loaded JSON (see js/videos.js/js/streams.js renderFilterBar), so
+   "Highlights only"/"Livestreams only"/"Analysis"/"Stable channels"/
+   "Amateur sumo" from the original brief are all just category filter
+   values — no separate boolean filter needed per category. "Divisions
+   covered" from that same brief isn't implemented: none of the source
+   data (CSV or otherwise) has real per-channel division data, and
+   fabricating it would be worse than leaving it out. */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed var(--line);
+}
+.filter-select { min-width: 130px; }
+.filter-checkbox { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-soft); cursor: pointer; }
+.filter-checkbox input { accent-color: var(--accent-deep); }
+.filter-empty { grid-column: 1 / -1; font-size: 13px; color: var(--ink-soft); text-align: center; padding: 18px 0; }
+
+/* Live stream cards: click-to-embed instead of auto-loading an iframe per
+   card (lighter on load, and avoids the Twitch parent-domain embed being
+   the very first thing that runs). The poster shows viewer count when
+   VIEWER_STATS_ENDPOINT is configured (see streams.js) — otherwise that
+   line is simply absent, not a placeholder/zero. */
+.stream-embed-poster {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px;
+  background: #0c0e14;
+}
+.stream-viewers { font-size: 12px; font-weight: 600; color: var(--led-glow); }
+.stream-watch-btn { font-size: 11px; padding: 8px 16px; }
+
+.news-source-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  padding: 2px 0 10px;
+}
+.news-source-toggle { font-size: 12px; }
+
+@media (max-width: 640px) {
+  .stream-grid { grid-template-columns: 1fr; }
+  .filter-bar { gap: 8px; }
+  .filter-select { min-width: 0; flex: 1 1 auto; }
+}
 
 .stream-embed-wrap {
   position: relative;
