@@ -237,6 +237,8 @@
     }
 
     if (window.Streams) Streams.init();
+    if (window.Videos) Videos.init();
+    if (window.WatchTabs) WatchTabs.init();
 
     document.querySelectorAll(".ghost-button, .icon-button").forEach((btn) => {
       btn.addEventListener("click", () => SumoAudio.playClick());
