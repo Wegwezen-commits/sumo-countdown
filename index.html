@@ -119,6 +119,28 @@
     </section>
 
     <section class="info-grid">
+      <article class="panel panel-wide watch-panel" id="watchPanel">
+        <div class="panel-head">
+          <h2 data-i18n="watchSumo">Watch Sumo</h2>
+        </div>
+        <div class="watch-tabs" role="tablist" aria-label="Watch sumo">
+          <button type="button" class="watch-tab is-active" id="watchTabStreams" role="tab"
+            aria-selected="true" aria-controls="streamsPanel" data-i18n="liveStreams">Live Streams</button>
+          <button type="button" class="watch-tab" id="watchTabVideos" role="tab"
+            aria-selected="false" tabindex="-1" aria-controls="videosTabPanel" data-i18n="videoChannels">Video Channels</button>
+        </div>
+
+        <div id="streamsPanel" class="watch-tabpanel streams-panel" role="tabpanel" aria-labelledby="watchTabStreams">
+          <div class="panel-note" data-i18n="liveStreamsNote">Live during honbasho — some channels also rerun matches between tournaments.</div>
+          <div id="streamsGrid" class="stream-grid" aria-live="polite"></div>
+        </div>
+
+        <div id="videosTabPanel" class="watch-tabpanel hidden" role="tabpanel" aria-labelledby="watchTabVideos">
+          <div class="panel-note" data-i18n="videosPanelNote">Recent uploads from community-recommended highlight channels.</div>
+          <div id="videosGrid" class="video-grid" aria-live="polite"></div>
+        </div>
+      </article>
+
       <article class="panel panel-wide">
         <div class="panel-head">
           <h2 data-i18n="upcoming">Upcoming Tournaments</h2>
@@ -145,34 +167,6 @@
       <article class="panel">
         <h2 data-i18n="venues">Venues & Time Zones</h2>
         <div id="venueCard" class="stack"></div>
-      </article>
-
-      <article class="panel panel-wide watch-panel" id="watchPanel">
-        <div class="panel-head">
-          <h2 data-i18n="watchSumo">Watch Sumo</h2>
-        </div>
-        <div class="watch-tabs" role="tablist" aria-label="Watch sumo">
-          <button type="button" class="watch-tab is-active" id="watchTabStreams" role="tab"
-            aria-selected="true" aria-controls="streamsPanel" data-i18n="liveStreams">Live Streams</button>
-          <button type="button" class="watch-tab" id="watchTabVideos" role="tab"
-            aria-selected="false" tabindex="-1" aria-controls="videosTabPanel" data-i18n="videoChannels">Video Channels</button>
-        </div>
-
-        <div id="streamsPanel" class="watch-tabpanel streams-panel streams-idle" role="tabpanel" aria-labelledby="watchTabStreams">
-          <div class="panel-note" data-i18n="liveStreamsNote">Shown only while a basho is live.</div>
-          <div id="streamsGrid" class="stream-grid" aria-live="polite"></div>
-          <div id="streamsBackMessage" class="streams-back-message">
-            <span class="stream-offline-sign small">
-              <span class="stream-offline-text" data-i18n="streamOffline">OFFLINE</span>
-            </span>
-            <p data-i18n="streamsComingBack">Live streams will be back for the next basho.</p>
-          </div>
-        </div>
-
-        <div id="videosTabPanel" class="watch-tabpanel hidden" role="tabpanel" aria-labelledby="watchTabVideos">
-          <div class="panel-note" data-i18n="videosPanelNote">Recent uploads from community-recommended highlight channels.</div>
-          <div id="videosGrid" class="video-grid" aria-live="polite"></div>
-        </div>
       </article>
 
       <article class="panel panel-wide" id="newsPanel">
