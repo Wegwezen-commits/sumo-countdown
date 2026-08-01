@@ -1,7 +1,17 @@
-// streams.js — renders the "Live Streams" panel from data/streams.json.
-// The panel only shows real content while a basho is live (Schedule.getLive);
-// otherwise it collapses to a "back for the next basho" message — see
-// render() below.
+// streams.js — renders the "Live Streams" tab from data/streams.json.
+// Every entry is rendered all the time (like videos.js) — this used to be
+// gated behind Schedule.getLive() (basho in progress), on the assumption
+// that these channels only have anything worth showing during a live
+// tournament. That assumption doesn't hold: some of these channels (e.g.
+// Twitch streamers running reruns/replays between tournaments) are
+// genuinely online outside honbasho, and — more importantly — the
+// basho-gate was suppressing the *entire* panel including YouTube entries'
+// real, automatic live-detection below, so an actual live stream (say, an
+// amateur tournament or exhibition match outside the regular calendar)
+// would never show just because our own schedule didn't know about it.
+// Per-card live/offline status already handles "nothing's on right now"
+// correctly (see cardHTML's is-offline branch) — no need for a second,
+// coarser gate on top of it.
 //
 // Live-status detection is genuinely different per platform:
 //  - YouTube: checked automatically, no API key. YouTube's public oEmbed
@@ -17,7 +27,10 @@
 //    status from a browser (Twitch's real status API needs an app
 //    Client-ID + access token, which can't be safely held client-side on
 //    a static site). These platforms are controlled by the "assumeLive"
-//    flag in data/streams.json instead — see that file's _readme.
+//    flag in data/streams.json instead — see that file's _readme. Since
+//    this tab is no longer basho-gated, it's fine (and expected) to flip
+//    assumeLive:true for a channel that's running reruns between
+//    tournaments too, not just for actual live bouts.
 (function (global) {
   "use strict";
 
@@ -32,9 +45,7 @@
   function cacheEls() {
     if (els) return els;
     els = {
-      panel: document.getElementById("streamsPanel"),
-      grid: document.getElementById("streamsGrid"),
-      offlineMsg: document.getElementById("streamsBackMessage")
+      grid: document.getElementById("streamsGrid")
     };
     return els;
   }
@@ -136,34 +147,11 @@
     list.grid.innerHTML = statuses.map(cardHTML).join("");
   }
 
-  function showBackMessage() {
-    const list = cacheEls();
-    if (!list.panel) return;
-    list.panel.classList.add("streams-idle");
-    if (list.grid) list.grid.innerHTML = "";
-    if (list.offlineMsg) list.offlineMsg.classList.remove("hidden");
-  }
-
-  function showLive() {
-    const list = cacheEls();
-    if (!list.panel) return;
-    list.panel.classList.remove("streams-idle");
-    if (list.offlineMsg) list.offlineMsg.classList.add("hidden");
-    renderGrid();
-  }
-
-  async function render(now) {
-    const list = cacheEls();
-    if (!list.panel) return;
-    const liveBasho = Schedule && typeof Schedule.getLive === "function" ? Schedule.getLive(now || new Date()) : null;
-    if (liveBasho) showLive(); else showBackMessage();
-  }
-
   function init() {
-    render(new Date());
+    renderGrid();
     clearInterval(refreshTimer);
-    refreshTimer = setInterval(() => render(new Date()), REFRESH_MS);
+    refreshTimer = setInterval(renderGrid, REFRESH_MS);
   }
 
-  global.Streams = { init, render };
+  global.Streams = { init, render: renderGrid };
 })(window);
