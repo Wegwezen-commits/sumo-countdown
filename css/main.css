@@ -30,8 +30,16 @@
 }
 
 /* Pixel-cut corners, used on cards, buttons, badges for a game-UI feel.
-   Cheaper and more robust across breakpoints than image-based 9-slices. */
-.pixel-corners, .hero-card, .panel, .t-card, .venue-card, .ghost-button, .flip-card,
+   Cheaper and more robust across breakpoints than image-based 9-slices.
+   NOTE: deliberately does NOT include .flip-card. --pixel is a fixed 4px
+   notch on every corner — fine on a panel/button that's 100+ px across,
+   but a mobile digit box can render as small as ~16-20px, where that same
+   4px notch eats a large fraction of each corner. clip-path clips
+   everything in the box, not just the background, so it was cutting into
+   the digit glyphs themselves — small enough boxes read as a cross/plus
+   rather than a rectangle with clipped corners. .flip-card gets plain
+   square corners instead (see below) so nothing ever eats into a digit. */
+.pixel-corners, .hero-card, .panel, .t-card, .venue-card, .ghost-button,
 .settings-panel, .icon-button, .t-status, .live-badge {
   clip-path: polygon(
     0 var(--pixel), var(--pixel) var(--pixel), var(--pixel) 0,
@@ -550,10 +558,10 @@ button, select, input { font-family: inherit; }
   position: relative;
   background: #0c0e14;
   color: var(--led-glow);
-  padding: clamp(2px, 0.8cqw, 6px) clamp(3px, 1cqw, 9px);
+  padding: clamp(2px, 0.7cqw, 6px) clamp(3px, 0.9cqw, 9px);
   font-family: var(--font-led);
   font-weight: 400;
-  font-size: clamp(15px, 6.2cqw, 40px);
+  font-size: clamp(16px, 6.8cqw, 42px);
   line-height: 1;
   box-shadow: inset 0 0 0 2px #000, inset 0 0 0 4px rgba(255,95,128,0.25), 0 0 12px rgba(255,95,128,0.35);
   min-width: 1.35em;

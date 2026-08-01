@@ -69,8 +69,8 @@
 [data-compact="true"] .content { padding-top: 14px; }
 [data-compact="true"] .clock-label { display: none; }
 [data-compact="true"] .flip-card {
-  font-size: clamp(9px, 6.2cqw, 40px);
-  padding: clamp(1px, 0.8cqw, 5px) clamp(1px, 1cqw, 7px);
+  font-size: clamp(10px, 6.8cqw, 42px);
+  padding: clamp(1px, 0.6cqw, 5px) clamp(1px, 0.8cqw, 7px);
 }
 [data-compact="true"] .clock-sep {
   font-size: clamp(7px, 5.2cqw, 34px);
