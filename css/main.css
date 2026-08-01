@@ -731,24 +731,10 @@ button, select, input { font-family: inherit; }
 }
 .news-sources a:hover { text-decoration: underline; }
 
-/* Live Streams panel — only ever shows real content while a basho is
-   live (see js/streams.js render()); otherwise .streams-idle is set on
-   the panel and the grid is replaced with the "back for next basho"
-   message + a dim pixel-style OFFLINE sign, reusing the same visual
-   language as the individual offline stream cards below. */
-.streams-panel.streams-idle .stream-grid { display: none; }
-.streams-panel:not(.streams-idle) .streams-back-message { display: none; }
-.streams-back-message {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 18px 12px 6px;
-  text-align: center;
-  color: var(--ink-soft);
-  font-size: 13px;
-}
-
+/* Live Streams tab: no longer basho-gated (see js/streams.js header
+   comment for why) — every entry always renders, and each card's own
+   live/offline state (is-live vs is-offline below) does the "nothing's on
+   right now" messaging per-channel instead of one big panel-level gate. */
 .stream-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -827,8 +813,6 @@ button, select, input { font-family: inherit; }
   color: #6b7078;
   text-shadow: 0 0 6px rgba(180,185,195,0.25);
 }
-.stream-offline-sign.small { aspect-ratio: auto; width: auto; padding: 10px 22px; }
-.stream-offline-sign.small .stream-offline-text { font-size: 16px; }
 
 @media (max-width: 640px) {
   .stream-grid { grid-template-columns: 1fr; }
