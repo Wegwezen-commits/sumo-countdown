@@ -60,7 +60,7 @@
     return el ? el.textContent.trim() : "";
   }
 
-  function parseEntries(doc, sourceName) {
+  function parseEntries(doc, sourceName, sourceId) {
     const items = [];
     // RSS 2.0
     doc.querySelectorAll("item").forEach((item) => {
@@ -68,7 +68,7 @@
       const link = textOf(item, "link");
       const pub = textOf(item, "pubDate");
       const date = pub ? new Date(pub) : null;
-      if (title && link) items.push({ title, link, date, source: sourceName });
+      if (title && link) items.push({ title, link, date, source: sourceName, sourceId });
     });
     // Atom (e.g. Reddit)
     if (!items.length) {
@@ -78,7 +78,7 @@
         const link = linkEl ? linkEl.getAttribute("href") : "";
         const updated = textOf(entry, "updated") || textOf(entry, "published");
         const date = updated ? new Date(updated) : null;
-        if (title && link) items.push({ title, link, date, source: sourceName });
+        if (title && link) items.push({ title, link, date, source: sourceName, sourceId });
       });
     }
     return items;
@@ -136,7 +136,7 @@
 
   async function fetchAll(sources) {
     const results = await Promise.allSettled(
-      sources.map((s) => fetchFeedXML(s.feedUrl).then((doc) => parseEntries(doc, s.name)))
+      sources.map((s) => fetchFeedXML(s.feedUrl).then((doc) => parseEntries(doc, s.name, s.id)))
     );
     let items = [];
     let anyOk = false;
@@ -145,7 +145,39 @@
     });
     if (!anyOk) throw new Error("all feeds failed");
     items.sort((a, b) => (b.date ? b.date.getTime() : 0) - (a.date ? a.date.getTime() : 0));
-    return items.slice(0, MAX_ITEMS);
+    return items; // NOT sliced here — exclusion filtering happens after this, at render time
+  }
+
+  let rawItems = []; // everything fetched/cached, before source-exclusion filtering
+  let sourceList = []; // config.feeds, for building the toggle checkboxes
+
+  function excludedSources() {
+    return (global.Settings && Settings.prefs.excludedNewsSources) || [];
+  }
+
+  function filteredItems() {
+    const excluded = excludedSources();
+    return rawItems.filter((it) => !it.sourceId || !excluded.includes(it.sourceId)).slice(0, MAX_ITEMS);
+  }
+
+  function renderSourceToggles() {
+    const container = document.getElementById("newsSourceToggles");
+    if (!container || !sourceList.length) return;
+    const excluded = excludedSources();
+    container.innerHTML = sourceList.map((s) => `
+      <label class="filter-checkbox news-source-toggle">
+        <input type="checkbox" data-source-id="${SumoUtil.escapeHTML(s.id)}" ${excluded.includes(s.id) ? "" : "checked"} />
+        <span>${SumoUtil.escapeHTML(s.name)}</span>
+      </label>`).join("");
+    container.querySelectorAll("input[data-source-id]").forEach((input) => {
+      input.addEventListener("change", () => {
+        const id = input.getAttribute("data-source-id");
+        const current = excludedSources();
+        const next = input.checked ? current.filter((x) => x !== id) : [...current, id];
+        Settings.set("excludedNewsSources", next);
+        renderItems(document.getElementById("newsList"), filteredItems());
+      });
+    });
   }
 
   const News = {
@@ -159,11 +191,14 @@
       try { config = await SumoUtil.fetchJSON("data/news-sources.json"); }
       catch (e) { config = { feeds: [], curatedLinks: [] }; }
 
+      sourceList = config.feeds || [];
+      renderSourceToggles();
       renderCuratedLinks(sourcesEl, config.curatedLinks || []);
 
       const cached = await loadFromCache();
       if (cached && cached.length) {
-        renderItems(list, cached);
+        rawItems = cached;
+        renderItems(list, filteredItems());
         if (status) status.textContent = I18n.t("newsUpdated", { time: timeAgo(new Date(SumoUtil.storage.get(CACHE_KEY, { at: Date.now() }).at), I18n.locale()) });
       }
 
@@ -175,7 +210,8 @@
       try {
         const items = await fetchAll(config.feeds);
         if (items.length) {
-          renderItems(list, items);
+          rawItems = items;
+          renderItems(list, filteredItems());
           saveToCache(items.map((it) => ({ ...it, date: it.date ? it.date.toISOString() : null })));
           if (status) status.textContent = I18n.t("newsLive");
         } else if (!cached) {
@@ -185,6 +221,10 @@
         if (!cached) this.showUnavailable();
         else if (status) status.textContent = I18n.t("newsOffline");
       }
+
+      document.addEventListener("prefschange", (e) => {
+        if (e.detail && e.detail.key === "excludedNewsSources") renderItems(list, filteredItems());
+      });
     },
 
     showUnavailable() {

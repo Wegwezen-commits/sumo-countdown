@@ -34,6 +34,13 @@
     const info = MONTH_INFO[month];
     const start = secondSunday(year, month);
     const end = new Date(start.getTime() + 14 * 86400000); // 15-day tournament
+    // Every officially confirmed banzuke release (see data/schedule.json's
+    // banzukeDate entries / _comment) lands 13 days before the tournament
+    // starts, except January (~20 days, due to the New Year break) — good
+    // enough for a placeholder on tournaments this far out; treat it the
+    // same as the rest of a generated entry: an estimate, not a fact.
+    const banzukeOffsetDays = month === 1 ? 20 : 13;
+    const banzuke = new Date(start.getTime() - banzukeOffsetDays * 86400000);
     return {
       id: `${year}-${String(month).padStart(2, "0")}`,
       name: info.name,
@@ -42,6 +49,7 @@
       venueId: info.venueId,
       startDate: toISO(start),
       endDate: toISO(end),
+      banzukeDate: toISO(banzuke),
       official: false,
       status: "estimated"
     };
@@ -114,6 +122,21 @@
     },
 
     statusOf(entry, now) { return computeStatus(entry, now || new Date()); },
+
+    // Banzuke (ranking list) release status for the next tournament — the
+    // basho that's either live right now, or the soonest one still ahead.
+    // Only meaningful when nothing is live: once a basho starts, its own
+    // banzuke is old news (it came out ~13 days before), so callers should
+    // prefer showing day-of-basho info instead while live is truthy.
+    getBanzukeInfo(now) {
+      now = now || new Date();
+      const target = this.getNextUpcoming(now);
+      if (!target || !target.banzukeDate) return null;
+      const banzukeDate = new Date(target.banzukeDate + "T00:00:00Z");
+      const released = now >= banzukeDate;
+      const daysUntil = released ? 0 : SumoUtil.daysBetween(target.banzukeDate, now);
+      return { basho: target, banzukeDate: target.banzukeDate, released, daysUntil, live: this.getLive(now) };
+    },
 
     // Progress between the previous basho's end and the next basho's start, 0-100
     progressBetween(now) {

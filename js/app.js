@@ -44,7 +44,17 @@
     const now = new Date();
     const live = Schedule.getLive(now);
     if (!live) {
-      container.innerHTML = `<div class="row"><span class="k">${I18n.t("status")}</span><span class="v">—</span></div>`;
+      const banzuke = Schedule.getBanzukeInfo(now);
+      if (!banzuke) {
+        container.innerHTML = `<div class="row"><span class="k">${I18n.t("status")}</span><span class="v">—</span></div>`;
+        return;
+      }
+      const dateStr = SumoUtil.formatRange(banzuke.banzukeDate, banzuke.banzukeDate, I18n.locale()).split("–").pop().trim();
+      container.innerHTML = banzuke.released
+        ? `<div class="row"><span class="k">${I18n.t("banzukeStatus")}</span><span class="v">${I18n.t("banzukeReleased")}</span></div>
+           <div class="row"><span class="k">${I18n.t("nextBasho")}</span><span class="v">${banzuke.basho.name}</span></div>`
+        : `<div class="row"><span class="k">${I18n.t("banzukeStatus")}</span><span class="v">${I18n.t("banzukeIn", { n: banzuke.daysUntil })}</span></div>
+           <div class="row"><span class="k">${banzuke.basho.name}</span><span class="v">${dateStr}</span></div>`;
       return;
     }
     const info = Live.status(live, now);
@@ -144,6 +154,8 @@
     renderPreviousPanel();
     renderVenuesPanel();
     updateVenueScene();
+    if (window.Streams) Streams.render();
+    if (window.Videos) Videos.render();
   }
 
   // ---------- Settings dialog ----------
@@ -177,6 +189,7 @@
     const sCompact = document.getElementById("prefCompact");
     const sUltra = document.getElementById("prefUltra");
     const sTv = document.getElementById("prefTv");
+    const sShowInactive = document.getElementById("prefShowInactive");
     const sTheme = document.getElementById("prefTheme");
     const sTz = document.getElementById("tzSelect");
     const sLang = document.getElementById("langSelect");
@@ -189,6 +202,7 @@
     sCompact.checked = Settings.resolvedCompact();
     sUltra.checked = p.ultra;
     sTv.checked = p.tv;
+    sShowInactive.checked = p.showInactiveChannels;
     sTheme.value = p.theme;
     sTz.value = p.timezone;
     sLang.value = I18n.lang;
@@ -203,6 +217,7 @@
     sCompact.addEventListener("change", () => { Settings.set("compactAuto", false); Settings.set("compact", sCompact.checked); });
     sUltra.addEventListener("change", () => Settings.set("ultra", sUltra.checked));
     sTv.addEventListener("change", () => Settings.set("tv", sTv.checked));
+    sShowInactive.addEventListener("change", () => Settings.set("showInactiveChannels", sShowInactive.checked));
     sTheme.addEventListener("change", () => Settings.set("theme", sTheme.value));
     sTz.addEventListener("change", () => { Settings.set("timezone", sTz.value); renderVenuesPanel(); updateTzPreview(); });
     sLang.addEventListener("change", () => { I18n.set(sLang.value); renderAllPanels(); Countdown.render(); });
