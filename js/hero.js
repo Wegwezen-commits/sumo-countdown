@@ -5,10 +5,11 @@
 // see it happen at least once without needing to be told.
 // Also schedules the idle-sheet animation (see .hero-sprite in main.css)
 // to play for a few seconds at random intervals, roughly once a minute,
-// so the hero mostly stands still on hero-static.png and only occasionally
-// shifts/breathes rather than looping the animation forever. Separately,
-// schedules a much more frequent, much shorter blink (frame 2 of the idle
-// sheet, held briefly) so the hero doesn't look frozen between those.
+// so the hero mostly stands still on frame 0 of hero-idle-sheet.png and
+// only occasionally shifts/breathes rather than looping the animation
+// forever. Separately, schedules a much more frequent, much shorter blink
+// (frame 1 of the same sheet, held briefly) so the hero doesn't look
+// frozen between those.
 // All of the "unprompted" behaviour (sporadic approach, grunt, idle-sheet,
 // blink) pauses when the tab is hidden OR the hero is scrolled out of
 // view, and resumes when either comes back — see pauseAmbient/resumeAmbient.
@@ -25,11 +26,12 @@
   // what stands in for idle personality — an occasional stroll toward
   // one side of the stage and back, using the same still art.
 
-  // Idle-sheet playback: the hero stands still on hero-static.png (see
-  // main.css) and only plays the 8-frame idle-sheet animation for a few
-  // seconds every so often — "roughly once a minute", randomized so it
-  // doesn't feel like a metronome. Average of MIN/MAX below is ~65s;
-  // widen/narrow this range to make it fire more or less often.
+  // Idle-sheet playback: the hero stands still on frame 0 of
+  // hero-idle-sheet.png (see main.css) and only plays the full 8-frame
+  // animation for a few seconds every so often — "roughly once a
+  // minute", randomized so it doesn't feel like a metronome. Average of
+  // MIN/MAX below is ~26.5s; widen/narrow this range to make it fire more
+  // or less often.
   const IDLE_TRIGGER_MIN_MS = 18000;
   const IDLE_TRIGGER_MAX_MS = 35000;
   // Weighting around real interaction (hover/tap/focus — see markInteraction):
@@ -54,7 +56,7 @@
   const BLINK_MAX_MS = 6000;
   const BLINK_HOLD_MS = 130;          // how long the eyes stay "closed"
   const BLINK_OPEN_LEAD_MS = 40;      // brief "open" (blink-sheet frame 1) before closing
-  const BLINK_OPEN_TAIL_MS = 40;      // brief "open" again before reverting to hero-static.png
+  const BLINK_OPEN_TAIL_MS = 40;      // brief "open" again before settling back to frame 0
   const BLINK_DOUBLE_CHANCE = 0.12;   // occasional natural double-blink
   const BLINK_DOUBLE_GAP_MS = 120;
 
@@ -178,7 +180,7 @@
     }
 
     // ---------- Idle-sheet playback: play the 8-frame animation once
-    // through at random intervals, otherwise stay on hero-static.png
+    // through at random intervals, otherwise stay on frame 0
     // (see .hero-sprite / .hero-sprite.playing-idle in main.css). ----------
     function idleAnimAllowed() {
       return sprite && !reduceMotion() && !sprite.classList.contains("celebrate")
@@ -196,7 +198,7 @@
     if (sprite) {
       // The animation runs a fixed iteration-count (see main.css), so it
       // ends on its own; drop the class then so the element falls back to
-      // hero-static.png underneath rather than freezing on the last frame.
+      // frame 0 underneath rather than freezing on the last frame.
       sprite.addEventListener("animationend", (e) => {
         if (e.animationName === "heroIdle") sprite.classList.remove("playing-idle");
       });
@@ -236,10 +238,12 @@
 
     // Runs one full open -> closed -> open pass through hero-idle-sheet.png's
     // frames 0/1 (see that file / .hero-sprite::before in main.css), then
-    // reverts to hero-static.png. ".blinking" fades this layer in on frame 0
-    // ("open", identical to hero-static); ".eyes-closed" shifts it to frame 1
-    // ("closed"). Both classes always toggle together in this order, so the
-    // idle sheet is never shown holding on some other, unrelated frame.
+    // settles back on frame 0. ".blinking" no longer has any visual effect
+    // by itself now that the sheet is always visible — it's kept purely as
+    // a JS-state guard (see blinkAllowed/idleAnimAllowed) so nothing else
+    // touches this element's transform mid-blink. ".eyes-closed" is what
+    // actually shifts the layer to frame 1; both classes always toggle
+    // together in this order.
     function oneBlinkPass(onDone) {
       sprite.classList.add("blinking");
       setTimeout(() => {
