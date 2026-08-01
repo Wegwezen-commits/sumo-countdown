@@ -10,23 +10,71 @@
     "",
     "platform: \"generic\" — for any other platform's embeddable player. Set \"embedUrl\" to the full iframe embed URL. Same limitation as Twitch: no auto-detection, so control it with \"assumeLive\".",
     "",
-    "Delete this _readme block or leave it — it's ignored at runtime, only \"streams\" is read. The two example entries below are marked \"disabled\": true so they're skipped at runtime and don't try to embed a fake channel — copy one, fill in your own IDs, and delete (or flip) \"disabled\"."
+    "Twitch channel names for midnightsumo/karla_sumoist, and the YouTube channelIds for leodickinsonsumo/lionsumo, were confirmed directly (creator video descriptions / the channels' own About pages) while building this feature. Everything else in this file marked disabled/\"note\" is an unverified best guess or a platform this app genuinely can't embed (see individual notes) — confirm before enabling. Delete this _readme block or leave it, it's ignored at runtime."
   ],
   "streams": [
     {
-      "id": "example-youtube",
-      "platform": "youtube",
-      "label": "Example channel (YouTube)",
-      "channelId": "UCxxxxxxxxxxxxxxxxxxxxxx",
-      "disabled": true
+      "id": "midnightsumo",
+      "platform": "twitch",
+      "label": "MidnightSumo",
+      "channelName": "midnightsumo",
+      "assumeLive": false
     },
     {
-      "id": "example-twitch",
+      "id": "karla_sumoist",
       "platform": "twitch",
-      "label": "Example channel (Twitch)",
-      "channelName": "example_channel",
+      "label": "Karla_Sumoist",
+      "channelName": "karla_sumoist",
+      "assumeLive": false
+    },
+    {
+      "id": "queenbee",
+      "platform": "twitch",
+      "label": "QueenBee",
+      "channelName": "queenbeesumo",
       "assumeLive": false,
-      "disabled": true
+      "disabled": true,
+      "note": "channelName is an unverified guess — confirm the actual Twitch username before enabling."
+    },
+    {
+      "id": "leodickinsonsumo",
+      "platform": "youtube",
+      "label": "LeoDickinsonSumo",
+      "channelId": "UCzL-FjJrqBiqehOk-7iPbXw"
+    },
+    {
+      "id": "lionsumo",
+      "platform": "youtube",
+      "label": "LionSumo",
+      "channelId": "UCh1oJaoowVVxYW_aGcYbdGw",
+      "note": "Second channel from the same streamer as leodickinsonsumo above, per user."
+    },
+    {
+      "id": "saltcitysumo",
+      "platform": "twitch",
+      "label": "Salt City Sumo",
+      "channelName": "saltcitysumo",
+      "assumeLive": false,
+      "disabled": true,
+      "note": "channelName is an unverified guess — confirm before enabling."
+    },
+    {
+      "id": "nhkworld",
+      "platform": "generic",
+      "label": "NHK World (official)",
+      "embedUrl": "",
+      "assumeLive": false,
+      "disabled": true,
+      "note": "NHK World doesn't offer a public embeddable player for this. Point people to https://www3.nhk.or.jp/nhkworld/en/live/ directly instead of trying to embed it — set embedUrl only if NHK ever ships one."
+    },
+    {
+      "id": "abema",
+      "platform": "generic",
+      "label": "Abema (official)",
+      "embedUrl": "",
+      "assumeLive": false,
+      "disabled": true,
+      "note": "Japan-only, account-gated, no public embeddable/keyless player. Not realistically embeddable here — this entry exists mainly so it's not forgotten if that ever changes."
     }
   ]
 }

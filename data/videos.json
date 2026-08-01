@@ -1,0 +1,111 @@
+{
+  "_readme": [
+    "Recorded highlight/analysis channels for the 'Videos' tab (see js/videos.js). Unlike streams.json, this section is NOT gated behind a live basho — it shows all the time.",
+    "",
+    "Each entry: { \"id\", \"label\", \"channelUrl\", \"channelId\", \"disabled\", \"note\" }. 'id' just needs to be unique in this file.",
+    "",
+    "'channelUrl' is the plain https://www.youtube.com/@handle URL — always required, used both as the 'open channel' link and as the fallback card when there's no embed.",
+    "",
+    "'channelId' is YouTube's UC... internal channel ID — optional. When present, the card embeds that channel's uploads playlist (https://www.youtube.com/embed/videoseries?list=UU...), which auto-updates as the channel posts new videos, so there's nothing to maintain. Get it by opening the channel and viewing this app's own note in js/videos.js for the lookup method, or a lookup tool such as https://commentpicker.com/youtube-channel-id.php. It always starts with 'UC' — js/videos.js swaps that prefix for 'UU' itself to get the uploads playlist, don't do that substitution here.",
+    "",
+    "Set \"disabled\": true to keep an entry out of the rendered grid without deleting it — e.g. while you're still tracking down its channelId, or if a channel has gone quiet. 'note' is optional free text shown nowhere in the UI; it's just for your own records in this file (e.g. why something is disabled).",
+    "",
+    "The entries below were checked while building this feature (see the channel's own 'About' page / RSS feed for the channelId, e.g. view-source on https://www.youtube.com/@handle and search 'channelId', or https://www.youtube.com/feeds/videos.xml?channel_id=UC... once you have a guess). Channel URLs and IDs on YouTube do change hands/get deleted, so it's worth a periodic recheck — Kintamayama below is a concrete example: a former top-3 channel that no longer has a working YouTube presence at all.",
+    "",
+    "Ranking/description text in 'label' is loosely based on community round-ups (r/Sumo, watch guides) circa mid-2026 — treat it as a starting point, not gospel."
+  ],
+  "videos": [
+    {
+      "id": "dondonsumo",
+      "label": "DonDon Sumo",
+      "channelUrl": "https://www.youtube.com/@dondonsumo2",
+      "channelId": "UCAcD1QKUTHyTZX4RIdQw2Xw",
+      "disabled": false
+    },
+    {
+      "id": "sumojason",
+      "label": "Sumo Jason (Jason's All Sumo Channel)",
+      "channelUrl": "https://www.youtube.com/@sumojason",
+      "channelId": "UC6d4ZhHYVy3ANeBScnXML7A",
+      "disabled": false
+    },
+    {
+      "id": "sumo-video",
+      "label": "Sumo Video — JSA Official Channel",
+      "channelUrl": "https://www.youtube.com/@sumo-video",
+      "channelId": "UC6ZZhovRZpUA4VafgBdECZQ",
+      "disabled": false
+    },
+    {
+      "id": "sumoprimetime",
+      "label": "Sumo Prime Time (official JSA English-language show)",
+      "channelUrl": "https://www.youtube.com/channel/UCLtOECZPTHBnR6X6Vg06LDQ",
+      "channelId": "UCLtOECZPTHBnR6X6Vg06LDQ",
+      "disabled": false
+    },
+    {
+      "id": "kintamayama",
+      "label": "Kintamayama",
+      "channelUrl": "https://www.youtube.com/@knitamaya",
+      "channelId": "UC2lNcdut0BZyyzN6__aO1jg",
+      "disabled": false,
+      "note": "Kintamayama's original YouTube channel was taken down in the January 2023 mass takedown, and a follow-up channel was also deleted; he moved to Rumble for a while (https://rumble.com/user/Kintamayama). This channel now displays as 'Mordy Dunchy' with no sumo content in its About section, but the site owner confirmed directly that this is the same, rebranded channel/handle (@knitamaya) — worth bearing in mind if the channel's public branding changes again."
+    },
+    {
+      "id": "nattosumo",
+      "label": "NattoSumo",
+      "channelUrl": "https://www.youtube.com/@nattosumo3",
+      "channelId": null,
+      "disabled": true,
+      "note": "Repeatedly hit by copyright takedowns and has moved channels/platforms more than once (Telegram, Ugetube, at least two different YouTube channels). @nattosumo3 was the most recent YouTube handle found, but given the history it's worth confirming it's still live and correct before enabling, and I couldn't pin down its channelId with confidence — fill that in once confirmed."
+    },
+    {
+      "id": "chrissumo",
+      "label": "Chris Sumo",
+      "channelUrl": "https://www.youtube.com/@ChrisGouldSumo",
+      "channelId": null,
+      "disabled": true,
+      "note": "Handle is a best guess, not independently confirmed — verify before enabling."
+    },
+    {
+      "id": "sumostew",
+      "label": "Sumostew",
+      "channelUrl": "https://www.youtube.com/@Sumostew",
+      "channelId": null,
+      "disabled": true,
+      "note": "Handle is a best guess, not independently confirmed — verify before enabling."
+    },
+    {
+      "id": "dohyo-jwags",
+      "label": "The Dohyo (JWags)",
+      "channelUrl": "https://www.youtube.com/@TheDohyo",
+      "channelId": null,
+      "disabled": true,
+      "note": "Handle is a best guess, not independently confirmed — verify before enabling."
+    },
+    {
+      "id": "worldofsumo",
+      "label": "World of Sumo",
+      "channelUrl": "https://www.youtube.com/c/WorldOfSumo",
+      "channelId": null,
+      "disabled": true,
+      "note": "URL confirmed to exist; channelId not looked up yet."
+    },
+    {
+      "id": "hookedonsumo",
+      "label": "Hooked on Sumo",
+      "channelUrl": "https://www.youtube.com/@HookedOnSumo",
+      "channelId": null,
+      "disabled": true,
+      "note": "Handle is a best guess, not independently confirmed — verify before enabling."
+    },
+    {
+      "id": "42opinionssumo",
+      "label": "42 Opinions Sumo",
+      "channelUrl": "https://www.youtube.com/@42OpinionsSumo",
+      "channelId": null,
+      "disabled": true,
+      "note": "Handle is a best guess, not independently confirmed — verify before enabling."
+    }
+  ]
+}
