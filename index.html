@@ -132,11 +132,13 @@
 
         <div id="streamsPanel" class="watch-tabpanel streams-panel" role="tabpanel" aria-labelledby="watchTabStreams">
           <div class="panel-note" data-i18n="liveStreamsNote">Live during honbasho — some channels also rerun matches between tournaments.</div>
+          <div id="streamsFilterBar" class="filter-bar"></div>
           <div id="streamsGrid" class="stream-grid" aria-live="polite"></div>
         </div>
 
         <div id="videosTabPanel" class="watch-tabpanel hidden" role="tabpanel" aria-labelledby="watchTabVideos">
           <div class="panel-note" data-i18n="videosPanelNote">Recent uploads from community-recommended highlight channels.</div>
+          <div id="videosFilterBar" class="filter-bar"></div>
           <div id="videosGrid" class="video-grid" aria-live="polite"></div>
         </div>
       </article>
@@ -261,6 +263,16 @@
         <label for="prefTv" data-i18n="largeDisplay">Large display (TV mode)</label>
         <span class="switch"><input id="prefTv" type="checkbox" /><span class="track"></span><span class="thumb"></span></span>
       </div>
+
+      <div class="setting-row">
+        <label for="prefShowInactive" data-i18n="showInactiveChannels">Show inactive channels</label>
+        <span class="switch"><input id="prefShowInactive" type="checkbox" /><span class="track"></span><span class="thumb"></span></span>
+      </div>
+
+      <div class="setting-row settings-news-sources-row">
+        <label data-i18n="newsSourcesPref">News sources</label>
+      </div>
+      <div id="newsSourceToggles" class="news-source-toggles"></div>
 
       <div id="installRow" class="setting-row hidden">
         <label data-i18n="install">Install app</label>
