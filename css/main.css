@@ -289,17 +289,26 @@ button, select, input { font-family: inherit; }
    of a clean frame-swap). hero-meta.json's frameCount is 8, so this is
    steps(7, end). If frameCount ever changes, update both this and the
    -87.5% end value below (both derive from frameCount).
-   Resting state: the sprite's own background is hero-static.png, so
-   whenever the idle-sheet layer (::before) isn't actively playing, the
-   hero simply stands still holding the sign. js/hero.js adds/removes
-   '.playing-idle' on #heroSprite at random intervals (see IDLE_TRIGGER_*
-   in hero.js) to play the idle-sheet animation once through, then lets
-   it fall back to the static pose — rather than looping forever. */
+   Resting state is frame 0 of hero-idle-sheet.png itself (::before, below)
+   — there is no separate hero-static.png in this layer anymore. Previously
+   the resting pose was a distinct image, crossfaded in/out via opacity
+   whenever the idle-sheet layer turned on/off; even though the two images
+   were confirmed to align, that fade meant switching between two
+   separately-authored files, and briefly ran a transition on every blink
+   and every idle-sheet play. Now the strip is always visible and simply
+   sits at translateX(0) at rest, so starting/ending a blink or the full
+   idle loop is one instant frame-swap on a single image, not a fade
+   between two. js/hero.js still adds/removes '.playing-idle' on
+   #heroSprite at random intervals (see IDLE_TRIGGER_* in hero.js) to walk
+   through all 8 frames once, then lets it snap back to frame 0 — rather
+   than looping forever. hero-static.png itself still exists on disk and
+   is still used by the plain <img class="hero-image"> above (SEO/no-JS/
+   print fallback, see that rule) — it's just no longer part of this
+   animated layer. */
 .hero-sprite {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   overflow: hidden;
-  background-image: url('../assets/pixel/hero-static.png');
   background-repeat: no-repeat;
   background-position: center bottom;
   background-size: 100% 100%;
@@ -318,37 +327,23 @@ button, select, input { font-family: inherit; }
   background-size: 100% 100%;
   background-position: left bottom;
   image-rendering: pixelated;
-  opacity: 0;
+  transform: translateX(0);
   animation: none;
-  transition: opacity 180ms ease;
   will-change: transform;
 }
-/* Only run (and only show) the idle-sheet strip while hero.js has flagged
-   it as playing; otherwise the plain hero-static.png underneath shows. */
+/* Full 8-frame walk, played once through at random intervals — see
+   scheduleIdleAnim/playIdleAnim in hero.js. */
 .hero-sprite.playing-idle::before {
-  opacity: 1;
   animation: heroIdle 1.2s steps(7, end) 1;
 }
-/* Blink: reuses the SAME idle-sheet layer above rather than a separate
-   image/pseudo-element. hero-idle-sheet.png's frame 0 is the neutral/open
-   pose (matches hero-static.png) and frame 1 is the closed-eyes blink —
-   authored directly into the sheet, not composited. A quick blink just
-   jumps this one layer to frame 1 and back, using the same -1-frame math
-   as the full 8-frame walk below (-12.5% = one frame of the 800%-wide
-   strip), instead of animating through all 8. hero.js runs a real
-   open -> closed -> open sequence by toggling .blinking (fades this layer
-   in, showing frame 0) and .eyes-closed (shifts to frame 1) — see
-   blinkAllowed()/idleAnimAllowed() in hero.js for why this and the full
-   idle animation above are mutually exclusive: they're the same element,
-   so only one can be driving its transform at a time.
-   Previously this was a second, separate pseudo-element/image
-   (hero-blink-sheet.png on ::after) layered on top of the idle strip.
-   That's what produced the glitch: two independently-transitioning layers
-   over the same spot, each with their own opacity fade and (in an earlier
-   version) a differently-scaled source image, so a blink could visibly
-   flash/jump instead of reading as a clean frame swap. Folding it into
-   the single ::before layer removes that race entirely. */
-.hero-sprite.blinking::before { opacity: 1; transition: opacity 70ms ease; }
+/* Blink: jumps the same layer straight to frame 1 (closed eyes, authored
+   directly into hero-idle-sheet.png) and back — one frame of travel
+   (-12.5% of the 800%-wide strip), instead of animating through all 8.
+   hero.js runs a real open -> closed -> open sequence by toggling
+   '.eyes-closed' on/off — see blinkAllowed()/idleAnimAllowed() in hero.js
+   for why this and the full idle animation above are strictly mutually
+   exclusive: they're the same element, so only one may drive its
+   transform at a time. */
 .hero-sprite.blinking.eyes-closed::before { transform: translateX(-12.5%); }
 
 .hero-rig.approach .hero-sprite { filter: drop-shadow(0 16px 20px rgba(0,0,0,0.45)); }
@@ -369,8 +364,7 @@ button, select, input { font-family: inherit; }
      motion even if those classes somehow end up on the element. */
   .hero-sprite::before,
   .hero-sprite.playing-idle::before,
-  .hero-sprite.blinking::before,
-  .hero-sprite.blinking.eyes-closed::before { animation: none; opacity: 0; transform: translateX(0); transition: none; }
+  .hero-sprite.blinking.eyes-closed::before { animation: none; transform: translateX(0); }
 }
 
 /* The overlay is positioned to match the blank sign panel baked into the
@@ -379,11 +373,11 @@ button, select, input { font-family: inherit; }
    25.92%, right 73.25%, top 53.2%, bottom 77.45%). Percentages of the
    .hero-rig (not the whole stage), so it never overflows the sign at any
    breakpoint or rig scale.
-   There's no separate idle-sheet artwork this round (see hero-sprite
-   below) — hero-static now doubles as every idle frame, and
-   hero-celebrate is worn for an entire live tournament rather than a
-   quick flash, so it matters more than before that both agree on where
-   the sign sits, and they do.
+   There's now a single idle-sheet image behind every pose (see hero-sprite
+   above) — frame 0 doubles as the resting pose, hero-idle-sheet.png's
+   other 7 frames are the idle walk/blink, and hero-celebrate.png is worn
+   for an entire live tournament rather than a quick flash — so it matters
+   that all of these agree on where the sign sits, and they do.
    The sign in this artwork is smaller than the original design's, so the
    text below is also scaled down (see the cqw values on .live-badge/
    .eyebrow/.countdown-shell/.digital-clock/.clock-sep/.flip-card/
@@ -567,20 +561,26 @@ button, select, input { font-family: inherit; }
   overflow: hidden;
   text-shadow: 0 0 6px var(--led-glow), 0 0 14px rgba(255,95,128,0.6);
 }
-/* faint LED scanline grid, purely decorative */
+/* faint LED scanline grid, purely decorative — kept subtle deliberately:
+   at 0.5 opacity / rgba(0,0,0,0.35) lines this reads fine at normal zoom,
+   but the flat 1px lines don't shrink with pinch-zoom, so on a zoomed-in
+   phone screenshot they turn into visibly thick stripes sitting right on
+   top of the digits (worst case: exactly over an LED-font digit's
+   mid-height stroke, making e.g. "4" misread as "2"). Lowered well below
+   the level where that happens. */
 .flip-card::before {
   content: "";
   position: absolute; inset: 0;
-  background: repeating-linear-gradient(0deg, rgba(0,0,0,0.35) 0 1px, transparent 1px 3px);
+  background: repeating-linear-gradient(0deg, rgba(0,0,0,0.18) 0 1px, transparent 1px 3px);
   pointer-events: none;
-  opacity: 0.5;
+  opacity: 0.22;
 }
 .flip-card::after {
   content: "";
   position: absolute;
   left: 0; right: 0; top: 50%;
   height: 1px;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.22);
 }
 .digit { display: inline-block; position: relative; z-index: 1; }
 .digit.flip { animation: digitFlip 420ms steps(4); }
