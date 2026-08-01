@@ -1,80 +1,148 @@
 {
   "_readme": [
-    "Add livestream links here — this whole section only appears in the app while a basho is actually live (see Schedule.getLive in js/schedule.js), and shows a 'back for the next basho' message otherwise.",
+    "Livestream channels for the 'Live Streams' tab (see js/streams.js). No longer gated behind a live basho (see that file's header comment) — every enabled entry always renders, live or not.",
     "",
-    "Each entry: { \"id\", \"platform\", \"label\", plus platform-specific fields below }. 'id' just needs to be unique in this file.",
+    "Schema per entry: { id, platform, label, channelUrl, channelId (youtube) | channelName (twitch) | embedUrl (generic), assumeLive, category, contentType, official, language, status, communityRank, disabled, note }.",
+    "  platform: \"youtube\" — channelId is the UC... ID; live status is checked automatically via YouTube's public oEmbed endpoint, no manual toggling needed.",
+    "  platform: \"twitch\"  — channelName is the twitch.tv/<name> username. No public keyless live-status API, so \"assumeLive\" controls the live/offline card by hand.",
+    "  platform: \"generic\" — embedUrl is a full iframe embed URL for some other embeddable player. Same limitation/toggle as Twitch.",
+    "  category/contentType/official/language/status/communityRank mirror data/videos.json's schema — see that file's _readme for what each means. status \"Historical\" is hidden by default (Settings > Show inactive channels reveals it), same as videos.json.",
+    "  disabled: true is a hard, non-toggleable gate for unverified/non-embeddable entries — separate from the status-based show/hide.",
     "",
-    "platform: \"youtube\" — set \"channelId\" to the channel's UC... ID (Channel URL -> right-click -> View Page Source -> search \"channelId\", or use a lookup tool like https://commentpicker.com/youtube-channel-id.php). Live status is checked automatically, no API key needed — the app asks YouTube's public oEmbed endpoint whether https://www.youtube.com/channel/<channelId>/live currently resolves to a live video. You do not need to flip anything manually for YouTube entries.",
+    "On every load, js/streams.js pings each enabled YouTube entry the same CORS-friendly, keyless way it already checks live status, so a taken-down YouTube channel gets hidden automatically rather than sitting there broken. Twitch/generic entries have no equivalent public check and still need periodic manual review.",
     "",
-    "platform: \"twitch\" — set \"channelName\" to the Twitch username (the part after twitch.tv/). Twitch doesn't offer a public, keyless way to check live status from a browser (their live API requires an app Client-ID + access token), so this app CANNOT auto-detect Twitch live status out of the box. Toggle \"assumeLive\": true while you know the stream is running, and back to false when it ends — the pixel 'OFFLINE' card shows automatically whenever assumeLive is false.",
-    "",
-    "platform: \"generic\" — for any other platform's embeddable player. Set \"embedUrl\" to the full iframe embed URL. Same limitation as Twitch: no auto-detection, so control it with \"assumeLive\".",
-    "",
-    "Twitch channel names for midnightsumo/karla_sumoist, and the YouTube channelIds for leodickinsonsumo/lionsumo, were confirmed directly (creator video descriptions / the channels' own About pages) while building this feature. Everything else in this file marked disabled/\"note\" is an unverified best guess or a platform this app genuinely can't embed (see individual notes) — confirm before enabling. Delete this _readme block or leave it, it's ignored at runtime."
+    "Twitch channel names/YouTube channelIds below were either confirmed directly (creator video descriptions, channel About pages) while building this feature, or supplied by the site owner's own researched CSV list — see individual notes for which."
   ],
   "streams": [
     {
       "id": "midnightsumo",
       "platform": "twitch",
       "label": "MidnightSumo",
+      "channelUrl": "https://www.twitch.tv/midnightsumo",
       "channelName": "midnightsumo",
-      "assumeLive": false
-    },
-    {
-      "id": "karla_sumoist",
-      "platform": "twitch",
-      "label": "Karla_Sumoist",
-      "channelName": "karla_sumoist",
-      "assumeLive": false
+      "assumeLive": false,
+      "category": "Livestream",
+      "contentType": "Live Basho",
+      "official": false,
+      "language": "en",
+      "status": "Active",
+      "communityRank": 1
     },
     {
       "id": "queenbee",
       "platform": "twitch",
       "label": "QueenBee",
-      "channelName": "queenbeesumo",
+      "channelUrl": "https://www.twitch.tv/queenbee",
+      "channelName": "queenbee",
       "assumeLive": false,
-      "disabled": true,
-      "note": "channelName is an unverified guess — confirm the actual Twitch username before enabling."
+      "category": "Livestream",
+      "contentType": "Live Basho",
+      "official": false,
+      "language": "en",
+      "status": "Active",
+      "communityRank": 2,
+      "note": "channelName corrected from an earlier unverified guess ('queenbeesumo') to 'queenbee' per the site owner's CSV."
     },
     {
-      "id": "leodickinsonsumo",
+      "id": "leodickinsonsumo-twitch",
+      "platform": "twitch",
+      "label": "LeoDickinsonSumo",
+      "channelUrl": "https://www.twitch.tv/leodickinsonsumo",
+      "channelName": "leodickinsonsumo",
+      "assumeLive": false,
+      "category": "Livestream",
+      "contentType": "Live Basho + Commentary",
+      "official": false,
+      "language": "en",
+      "status": "Active",
+      "communityRank": 3,
+      "note": "Same person as the leodickinsonsumo-youtube entry below, per the site owner."
+    },
+    {
+      "id": "leodickinsonsumo-youtube",
       "platform": "youtube",
       "label": "LeoDickinsonSumo",
-      "channelId": "UCzL-FjJrqBiqehOk-7iPbXw"
+      "channelUrl": "https://www.youtube.com/@LeoDickinsonSumo",
+      "channelId": "UCzL-FjJrqBiqehOk-7iPbXw",
+      "category": "Livestream",
+      "contentType": "Videos + Live",
+      "official": false,
+      "language": "en",
+      "status": "Active",
+      "communityRank": 3,
+      "note": "Confirmed directly via the channel's own About page. Same person as leodickinsonsumo-twitch above."
     },
     {
       "id": "lionsumo",
       "platform": "youtube",
       "label": "LionSumo",
+      "channelUrl": "https://www.youtube.com/@lionsumo",
       "channelId": "UCh1oJaoowVVxYW_aGcYbdGw",
-      "note": "Second channel from the same streamer as leodickinsonsumo above, per user."
+      "category": "Livestream",
+      "contentType": "Live Basho",
+      "official": false,
+      "language": "en",
+      "status": "Active",
+      "communityRank": null,
+      "note": "Second channel from the same streamer as leodickinsonsumo, per the site owner. Not in the site owner's CSV list, added earlier from a direct link."
+    },
+    {
+      "id": "karla_sumoist",
+      "platform": "twitch",
+      "label": "Karla_Sumoist",
+      "channelUrl": "https://www.twitch.tv/karla_sumoist",
+      "channelName": "karla_sumoist",
+      "assumeLive": false,
+      "category": "Livestream",
+      "contentType": "Live Basho",
+      "official": false,
+      "language": "en",
+      "status": "Occasional",
+      "communityRank": 4
     },
     {
       "id": "saltcitysumo",
-      "platform": "twitch",
+      "platform": "youtube",
       "label": "Salt City Sumo",
-      "channelName": "saltcitysumo",
-      "assumeLive": false,
-      "disabled": true,
-      "note": "channelName is an unverified guess — confirm before enabling."
+      "channelUrl": "https://www.youtube.com/channel/UCRLAhtN_zyGmDSgWN1Fcd4w",
+      "channelId": "UCRLAhtN_zyGmDSgWN1Fcd4w",
+      "category": "Livestream",
+      "contentType": "Live Commentary",
+      "official": false,
+      "language": "en",
+      "status": "Active",
+      "communityRank": 5,
+      "note": "Platform corrected from an earlier unverified Twitch guess to YouTube, with a real channelId, per the site owner's CSV."
     },
     {
-      "id": "nhkworld",
-      "platform": "generic",
-      "label": "NHK World (official)",
-      "embedUrl": "",
-      "assumeLive": false,
-      "disabled": true,
-      "note": "NHK World doesn't offer a public embeddable player for this. Point people to https://www3.nhk.or.jp/nhkworld/en/live/ directly instead of trying to embed it — set embedUrl only if NHK ever ships one."
+      "id": "nhkworldjapan",
+      "platform": "youtube",
+      "label": "NHK WORLD-JAPAN",
+      "channelUrl": "https://www.youtube.com/@NHKWORLDJAPAN",
+      "channelId": "UCSPEjw8F2nQDtmUKPFNF7_A",
+      "category": "Official",
+      "contentType": "Highlights + Occasional Live",
+      "official": true,
+      "language": "en",
+      "status": "Active",
+      "communityRank": 6,
+      "note": "General NHK World channel; occasionally streams live sumo. Confirmed via the channel's own About page. Also listed in data/videos.json for its highlight uploads."
     },
     {
       "id": "abema",
       "platform": "generic",
       "label": "Abema (official)",
+      "channelUrl": "https://abema.tv/lp/sumo-onair",
       "embedUrl": "",
       "assumeLive": false,
+      "category": "Official",
+      "contentType": "Official Live Broadcast",
+      "official": true,
+      "language": "ja",
+      "status": "Active",
+      "communityRank": 7,
       "disabled": true,
-      "note": "Japan-only, account-gated, no public embeddable/keyless player. Not realistically embeddable here — this entry exists mainly so it's not forgotten if that ever changes."
+      "note": "Japan-only, account-gated, no public embeddable/keyless player — not realistically embeddable here. Kept disabled/link-only so it's not forgotten if that ever changes."
     }
   ]
 }

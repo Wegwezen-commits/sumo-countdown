@@ -1,5 +1,5 @@
 {
-  "_comment": "Official Japan Sumo Association honbasho dates. Only confirmed/official dates belong here — anything after the last entry is generated at runtime by js/schedule.js using the six-tournament yearly cadence (Jan/Mar/May/Jul/Sep/Nov, rotating Tokyo-Osaka-Tokyo-Nagoya-Tokyo-Fukuoka). When new official dates are published, add them here (or let the weekly GitHub Action do it) and the generator will stop fabricating that slot.",
+  "_comment": "Official Japan Sumo Association honbasho dates. Only confirmed/official dates belong here — anything after the last entry is generated at runtime by js/schedule.js using the six-tournament yearly cadence (Jan/Mar/May/Jul/Sep/Nov, rotating Tokyo-Osaka-Tokyo-Nagoya-Tokyo-Fukuoka). When new official dates are published, add them here (or let the weekly GitHub Action do it) and the generator will stop fabricating that slot. 'banzukeDate' (added below) is the official date the banzuke ranking list is announced for that tournament, per https://sumo.or.jp/EnTicket/year_schedule/ (checked 2026-08-01, covers through 2028). Basho entries without an explicit banzukeDate (i.e. anything js/schedule.js generates beyond this file) get an estimated one: start date minus 13 days, which matches every officially confirmed gap except January (which runs ~20 days early due to the New Year break) — treat generated banzukeDate the same way as generated basho dates themselves: a placeholder, not a fact.",
   "lastVerified": "2026-07-28",
   "source": "Japan Sumo Association (sumo.or.jp)",
   "basho": [
@@ -17,7 +17,8 @@
       "champion": "Aonishiki",
       "championJa": "安青錦",
       "record": "12-3 (playoff)",
-      "runnerUp": "Atamifuji"
+      "runnerUp": "Atamifuji",
+      "banzukeDate": "2025-12-22"
     },
     {
       "id": "2026-03",
@@ -33,7 +34,8 @@
       "champion": "Kirishima",
       "championJa": "霧島",
       "record": "12-3",
-      "runnerUp": "—"
+      "runnerUp": "—",
+      "banzukeDate": "2026-02-24"
     },
     {
       "id": "2026-05",
@@ -49,7 +51,8 @@
       "champion": "Wakatakakage",
       "championJa": "若隆景",
       "record": "12-3 (playoff)",
-      "runnerUp": "Kirishima"
+      "runnerUp": "Kirishima",
+      "banzukeDate": "2026-04-27"
     },
     {
       "id": "2026-07",
@@ -65,7 +68,8 @@
       "champion": "Aonishiki",
       "championJa": "安青錦",
       "record": "12-3 (playoff)",
-      "runnerUp": "Atamifuji"
+      "runnerUp": "Atamifuji",
+      "banzukeDate": "2026-06-29"
     },
     {
       "id": "2026-09",
@@ -77,7 +81,8 @@
       "startDate": "2026-09-13",
       "endDate": "2026-09-27",
       "official": true,
-      "status": "scheduled"
+      "status": "scheduled",
+      "banzukeDate": "2026-08-31"
     },
     {
       "id": "2026-11",
@@ -89,7 +94,8 @@
       "startDate": "2026-11-08",
       "endDate": "2026-11-22",
       "official": true,
-      "status": "scheduled"
+      "status": "scheduled",
+      "banzukeDate": "2026-10-26"
     }
   ]
 }

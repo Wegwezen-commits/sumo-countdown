@@ -71,7 +71,20 @@
     "watchSumo": "Watch Sumo",
     "videoChannels": "Video Channels",
     "videosPanelNote": "Recent uploads from community-recommended highlight channels.",
-    "openChannel": "Open channel"
+    "openChannel": "Open channel",
+    "officialBadge": "Official",
+    "watchEmbedded": "Watch Embedded",
+    "openOnPlatform": "Open on {platform}",
+    "filterAllCategories": "All categories",
+    "filterAllLanguages": "All languages",
+    "filterOfficialOnly": "Official only",
+    "filterLiveNow": "Live now",
+    "filterNoResults": "No channels match these filters.",
+    "showInactiveChannels": "Show inactive channels",
+    "newsSourcesPref": "News sources",
+    "banzukeStatus": "Banzuke",
+    "banzukeIn": "in {n}d",
+    "banzukeReleased": "Released ✓"
   },
   "ja": {
     "title": "大相撲場所カウントダウン",
@@ -145,7 +158,20 @@
     "watchSumo": "相撲を見る",
     "videoChannels": "動画チャンネル",
     "videosPanelNote": "コミュニティで人気のハイライトチャンネルの最新動画です。",
-    "openChannel": "チャンネルを開く"
+    "openChannel": "チャンネルを開く",
+    "officialBadge": "公式",
+    "watchEmbedded": "埋め込みで見る",
+    "openOnPlatform": "{platform}で開く",
+    "filterAllCategories": "すべてのカテゴリー",
+    "filterAllLanguages": "すべての言語",
+    "filterOfficialOnly": "公式のみ",
+    "filterLiveNow": "現在配信中",
+    "filterNoResults": "条件に一致するチャンネルがありません。",
+    "showInactiveChannels": "非アクティブなチャンネルを表示",
+    "newsSourcesPref": "ニュースソース",
+    "banzukeStatus": "番付",
+    "banzukeIn": "あと{n}日",
+    "banzukeReleased": "発表済み ✓"
   },
   "nl": {
     "title": "Sumo Basho Aftelklok",
@@ -219,6 +245,19 @@
     "watchSumo": "Sumo kijken",
     "videoChannels": "Videokanalen",
     "videosPanelNote": "Recente video's van door de community aanbevolen kanalen.",
-    "openChannel": "Kanaal openen"
+    "openChannel": "Kanaal openen",
+    "officialBadge": "Officieel",
+    "watchEmbedded": "Ingesloten bekijken",
+    "openOnPlatform": "Openen op {platform}",
+    "filterAllCategories": "Alle categorieën",
+    "filterAllLanguages": "Alle talen",
+    "filterOfficialOnly": "Alleen officieel",
+    "filterLiveNow": "Nu live",
+    "filterNoResults": "Geen kanalen komen overeen met deze filters.",
+    "showInactiveChannels": "Inactieve kanalen tonen",
+    "newsSourcesPref": "Nieuwsbronnen",
+    "banzukeStatus": "Banzuke",
+    "banzukeIn": "over {n}d",
+    "banzukeReleased": "Gepubliceerd ✓"
   }
 }
