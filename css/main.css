@@ -791,6 +791,42 @@ button, select, input { font-family: inherit; }
   text-decoration: none;
 }
 .panel-external-link:hover { text-decoration: underline; }
+
+.banzuke-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 10px; }
+.banzuke-column-head {
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 6px;
+}
+.banzuke-row { display: flex; justify-content: space-between; gap: 8px; padding: 4px 0; font-size: 13px; }
+.banzuke-rank { color: var(--ink-soft); font-size: 11px; flex: 0 0 auto; }
+.banzuke-name { font-weight: 600; text-align: right; }
+@media (max-width: 640px) {
+  .banzuke-columns { grid-template-columns: 1fr; gap: 4px; }
+}
+
+.torikumi-list { display: flex; flex-direction: column; gap: 6px; }
+.torikumi-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+.torikumi-row.is-decided { background: var(--paper-alt, rgba(0,0,0,0.03)); }
+.torikumi-east, .torikumi-west { font-weight: 600; }
+.torikumi-east.is-winner, .torikumi-west.is-winner { color: var(--accent-deep); }
+.torikumi-vs { color: var(--ink-soft); font-size: 11px; }
+.torikumi-result { flex: 1 0 100%; text-align: center; font-size: 11px; color: var(--ink-soft); }
 .video-badge {
   font-size: 9px;
   font-weight: 700;
