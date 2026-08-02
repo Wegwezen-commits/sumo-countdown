@@ -4,6 +4,8 @@
 (function () {
   "use strict";
 
+  const BANZUKE_URL = "https://sumo.or.jp/EnHonbashoBanzuke/index/"; // official JSA banzuke page — linked from the "Basho Live"/"Banzuke" panel while no basho is live
+
   function statusLabel(status) {
     return I18n.t({
       completed: "statusCompleted",
@@ -41,22 +43,27 @@
 
   function renderLivePanel() {
     const container = document.getElementById("liveCard");
+    const title = document.getElementById("liveCardTitle");
     const now = new Date();
     const live = Schedule.getLive(now);
     if (!live) {
+      if (title) title.textContent = I18n.t("banzukeLive");
       const banzuke = Schedule.getBanzukeInfo(now);
       if (!banzuke) {
         container.innerHTML = `<div class="row"><span class="k">${I18n.t("status")}</span><span class="v">—</span></div>`;
         return;
       }
       const dateStr = SumoUtil.formatRange(banzuke.banzukeDate, banzuke.banzukeDate, I18n.locale()).split("–").pop().trim();
-      container.innerHTML = banzuke.released
+      const banzukeLink = `<a class="panel-external-link" href="${BANZUKE_URL}" target="_blank" rel="noopener noreferrer">${I18n.t("viewBanzuke")} ↗</a>`;
+      container.innerHTML = (banzuke.released
         ? `<div class="row"><span class="k">${I18n.t("banzukeStatus")}</span><span class="v">${I18n.t("banzukeReleased")}</span></div>
            <div class="row"><span class="k">${I18n.t("nextBasho")}</span><span class="v">${banzuke.basho.name}</span></div>`
         : `<div class="row"><span class="k">${I18n.t("banzukeStatus")}</span><span class="v">${I18n.t("banzukeIn", { n: banzuke.daysUntil })}</span></div>
-           <div class="row"><span class="k">${banzuke.basho.name}</span><span class="v">${dateStr}</span></div>`;
+           <div class="row"><span class="k">${banzuke.basho.name}</span><span class="v">${dateStr}</span></div>`)
+        + banzukeLink;
       return;
     }
+    if (title) title.textContent = I18n.t("basholive");
     const info = Live.status(live, now);
     const venue = VenueModule.get(live.venueId);
     container.innerHTML = `
