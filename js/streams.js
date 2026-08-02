@@ -26,7 +26,7 @@
 // entries instead of "assumeLive" — real live status AND viewer counts,
 // no manual toggling. Leave it "" to keep using assumeLive (default,
 // works with zero setup).
-const VIEWER_STATS_ENDPOINT = "";
+const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.dev";
 
 // DEAD-CHANNEL CHECK: on every load, each enabled YouTube entry is pinged
 // the same CORS-friendly way its live status is already checked, and
