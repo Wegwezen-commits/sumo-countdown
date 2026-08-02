@@ -21,18 +21,23 @@
 // OPTIONAL: VIEWER_STATS_ENDPOINT. If you deploy a small Cloudflare Worker
 // (or any tiny backend) that holds a Twitch app Client-ID/token and
 // exposes GET <endpoint>?platform=twitch&channel=<name> returning JSON
-// { live: bool, viewers: number|null, title: string|null }, set its URL
-// below and this file will use it automatically for Twitch/generic
-// entries instead of "assumeLive" — real live status AND viewer counts,
-// no manual toggling. Leave it "" to keep using assumeLive (default,
-// works with zero setup).
+// { exists: bool, live: bool, viewers: number|null, title: string|null },
+// set its URL below and this file will use it automatically for Twitch/
+// generic entries instead of "assumeLive" — real live status, viewer
+// counts, AND dead-channel detection (see "exists"), no manual toggling.
+// Leave it "" to keep using assumeLive (default, works with zero setup,
+// but no viewer counts and no Twitch dead-channel detection).
 const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.dev";
 
 // DEAD-CHANNEL CHECK: on every load, each enabled YouTube entry is pinged
 // the same CORS-friendly way its live status is already checked, and
-// hidden for this session if it 404s (very likely deleted/renamed). Same
-// caveat as videos.js: can't do this for Twitch/Rumble/website entries —
-// no public CORS-friendly way to ask — those still need manual review.
+// hidden for this session if it 404s (very likely deleted/renamed).
+// Twitch entries get the same treatment IF VIEWER_STATS_ENDPOINT is
+// configured (see its "exists" field above) — that Worker holds real
+// Twitch credentials, so it can actually ask Twitch whether the channel
+// exists, which a browser can't do directly. Without that endpoint
+// configured, Twitch/generic/Rumble/website entries still can't be
+// checked at all and need manual review.
 (function (global) {
   "use strict";
 
@@ -43,7 +48,7 @@ const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.de
   const STATUS_ORDER = { Active: 0, Occasional: 1, Intermittent: 2, Historical: 3 };
 
   let entries = null; // loaded once, cached
-  let aliveIds = null; // Set — YouTube entries confirmed reachable this session
+  let aliveIds = null; // Set — entries (YouTube + Twitch) confirmed reachable this session; null until the first check completes
   let refreshTimer = null;
   let els = null;
   let filters = { category: "all", language: "all", liveOnly: false };
@@ -101,10 +106,21 @@ const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.de
     }
   }
 
-  async function refreshAliveSet(data) {
-    const ytEntries = data.filter((e) => e.platform === "youtube");
-    const results = await Promise.all(ytEntries.map(async (e) => [e.id, await checkYouTubeChannelAlive(e.channelId)]));
-    aliveIds = new Set(results.filter(([, ok]) => ok).map(([id]) => id));
+  // Combines YouTube's own dead-channel check (a dedicated oEmbed ping)
+  // with Twitch's, which piggybacks on the viewer-stats worker instead of
+  // a separate request — see VIEWER_STATS_ENDPOINT's v2 "exists" field.
+  // `statuses` is `lastStatuses` — already has that field for any Twitch
+  // entry once resolveStatus() has run once.
+  async function refreshAliveSet(statuses) {
+    const ytEntries = statuses.filter((e) => e.platform === "youtube");
+    const ytResults = await Promise.all(ytEntries.map(async (e) => [e.id, await checkYouTubeChannelAlive(e.channelId)]));
+    const dead = new Set(ytResults.filter(([, ok]) => !ok).map(([id]) => id));
+    // Twitch: only mark dead if the worker positively said exists:false.
+    // No worker configured, or the check failed for that entry -> exists
+    // is undefined -> treated as alive (same permissive default as
+    // before this existed), since "unknown" shouldn't hide a channel.
+    statuses.forEach((e) => { if (e.platform === "twitch" && e.exists === false) dead.add(e.id); });
+    aliveIds = new Set(statuses.map((e) => e.id).filter((id) => !dead.has(id)));
   }
 
   async function checkViewerStats(entry) {
@@ -113,7 +129,7 @@ const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.de
     try {
       const res = await withTimeout((signal) => fetch(url, { signal, cache: "no-cache" }), YT_OEMBED_TIMEOUT_MS);
       if (!res.ok) return null;
-      return await res.json(); // { live, viewers, title }
+      return await res.json(); // { exists, live, viewers, title }
     } catch (e) {
       return null;
     }
@@ -125,9 +141,10 @@ const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.de
       return { ...entry, live: result.live, title: result.title, viewers: null };
     }
     // Twitch / generic: use the viewer-stats worker if configured, else
-    // fall back to the manual "assumeLive" flag (no viewer count).
+    // fall back to the manual "assumeLive" flag (no viewer count, and
+    // `exists` stays undefined — see refreshAliveSet for what that means).
     const stats = await checkViewerStats(entry);
-    if (stats) return { ...entry, live: !!stats.live, viewers: stats.viewers ?? null, title: stats.title || null };
+    if (stats) return { ...entry, live: !!stats.live, viewers: stats.viewers ?? null, title: stats.title || null, exists: stats.exists };
     return { ...entry, live: !!entry.assumeLive, viewers: null };
   }
 
@@ -218,7 +235,7 @@ const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.de
     const showInactive = !!(global.Settings && Settings.prefs.showInactiveChannels);
     return lastStatuses
       .filter((e) => showInactive || e.status !== "Historical")
-      .filter((e) => e.platform !== "youtube" || !aliveIds || aliveIds.has(e.id))
+      .filter((e) => !aliveIds || aliveIds.has(e.id))
       .filter((e) => filters.category === "all" || e.category === filters.category)
       .filter((e) => filters.language === "all" || e.language === filters.language)
       .filter((e) => !filters.liveOnly || e.live)
@@ -282,7 +299,7 @@ const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.de
     renderFilterBar(data);
     lastStatuses = await Promise.all(data.map(resolveStatus));
     renderFromCache();
-    refreshAliveSet(data).then(renderFromCache);
+    refreshAliveSet(lastStatuses).then(renderFromCache);
   }
 
   function init() {

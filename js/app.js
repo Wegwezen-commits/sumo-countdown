@@ -55,12 +55,19 @@
       }
       const dateStr = SumoUtil.formatRange(banzuke.banzukeDate, banzuke.banzukeDate, I18n.locale()).split("–").pop().trim();
       const banzukeLink = `<a class="panel-external-link" href="${BANZUKE_URL}" target="_blank" rel="noopener noreferrer">${I18n.t("viewBanzuke")} ↗</a>`;
-      container.innerHTML = (banzuke.released
-        ? `<div class="row"><span class="k">${I18n.t("banzukeStatus")}</span><span class="v">${I18n.t("banzukeReleased")}</span></div>
-           <div class="row"><span class="k">${I18n.t("nextBasho")}</span><span class="v">${banzuke.basho.name}</span></div>`
-        : `<div class="row"><span class="k">${I18n.t("banzukeStatus")}</span><span class="v">${I18n.t("banzukeIn", { n: banzuke.daysUntil })}</span></div>
-           <div class="row"><span class="k">${banzuke.basho.name}</span><span class="v">${dateStr}</span></div>`)
-        + banzukeLink;
+      if (banzuke.released) {
+        container.innerHTML = `
+          <div class="row"><span class="k">${I18n.t("banzukeStatus")}</span><span class="v">${I18n.t("banzukeReleased")}</span></div>
+          <div class="row"><span class="k">${I18n.t("nextBasho")}</span><span class="v">${banzuke.basho.name}</span></div>
+          <div id="banzukeRankList"></div>`
+          + banzukeLink;
+        if (window.Banzuke) Banzuke.renderRankList(document.getElementById("banzukeRankList"), banzuke.basho.id, "Makuuchi");
+      } else {
+        container.innerHTML = `
+          <div class="row"><span class="k">${I18n.t("banzukeStatus")}</span><span class="v">${I18n.t("banzukeIn", { n: banzuke.daysUntil })}</span></div>
+          <div class="row"><span class="k">${banzuke.basho.name}</span><span class="v">${dateStr}</span></div>`
+          + banzukeLink;
+      }
       return;
     }
     if (title) title.textContent = I18n.t("basholive");
@@ -161,6 +168,7 @@
     renderPreviousPanel();
     renderVenuesPanel();
     updateVenueScene();
+    if (window.Torikumi) Torikumi.render();
     if (window.Streams) Streams.render();
     if (window.Videos) Videos.render();
     if (window.News) News.render();
