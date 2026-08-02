@@ -163,6 +163,7 @@
     updateVenueScene();
     if (window.Streams) Streams.render();
     if (window.Videos) Videos.render();
+    if (window.News) News.render();
   }
 
   // ---------- Settings dialog ----------
@@ -197,6 +198,8 @@
     const sUltra = document.getElementById("prefUltra");
     const sTv = document.getElementById("prefTv");
     const sShowInactive = document.getElementById("prefShowInactive");
+    const sNotifications = document.getElementById("prefNotifications");
+    const notifyBlockedNote = document.getElementById("notifyBlockedNote");
     const sTheme = document.getElementById("prefTheme");
     const sTz = document.getElementById("tzSelect");
     const sLang = document.getElementById("langSelect");
@@ -210,6 +213,12 @@
     sUltra.checked = p.ultra;
     sTv.checked = p.tv;
     sShowInactive.checked = p.showInactiveChannels;
+    if (sNotifications) {
+      const blocked = window.Notify && Notify.supported && typeof Notification !== "undefined" && Notification.permission === "denied";
+      sNotifications.checked = p.notifications && !blocked;
+      sNotifications.disabled = !(window.Notify && Notify.supported) || blocked;
+      if (notifyBlockedNote) notifyBlockedNote.classList.toggle("hidden", !blocked);
+    }
     sTheme.value = p.theme;
     sTz.value = p.timezone;
     sLang.value = I18n.lang;
@@ -225,6 +234,19 @@
     sUltra.addEventListener("change", () => Settings.set("ultra", sUltra.checked));
     sTv.addEventListener("change", () => Settings.set("tv", sTv.checked));
     sShowInactive.addEventListener("change", () => Settings.set("showInactiveChannels", sShowInactive.checked));
+    if (sNotifications) {
+      sNotifications.addEventListener("change", async () => {
+        if (sNotifications.checked) {
+          const granted = window.Notify && await Notify.enable();
+          if (!granted) {
+            sNotifications.checked = false;
+            if (notifyBlockedNote) notifyBlockedNote.classList.remove("hidden");
+          }
+        } else if (window.Notify) {
+          Notify.disable();
+        }
+      });
+    }
     sTheme.addEventListener("change", () => Settings.set("theme", sTheme.value));
     sTz.addEventListener("change", () => { Settings.set("timezone", sTz.value); renderVenuesPanel(); updateTzPreview(); });
     sLang.addEventListener("change", () => { I18n.set(sLang.value); renderAllPanels(); Countdown.render(); });
@@ -252,6 +274,7 @@
     setInterval(updateTzPreview, 1000);
     Countdown.start();
     PWA.init();
+    if (window.Notify) Notify.init();
 
     if (window.News) {
       News.init();

@@ -150,6 +150,7 @@
 
   let rawItems = []; // everything fetched/cached, before source-exclusion filtering
   let sourceList = []; // config.feeds, for building the toggle checkboxes
+  let lastStatus = { kind: "loading", cachedAt: null }; // for re-translating the status line on language change
 
   function excludedSources() {
     return (global.Settings && Settings.prefs.excludedNewsSources) || [];
@@ -158,6 +159,17 @@
   function filteredItems() {
     const excluded = excludedSources();
     return rawItems.filter((it) => !it.sourceId || !excluded.includes(it.sourceId)).slice(0, MAX_ITEMS);
+  }
+
+  function setStatus(kind, cachedAt) {
+    lastStatus = { kind, cachedAt: cachedAt || null };
+    const status = document.getElementById("newsUpdated");
+    if (!status) return;
+    if (kind === "loading") status.textContent = I18n.t("newsLoading");
+    else if (kind === "live") status.textContent = I18n.t("newsLive");
+    else if (kind === "offline") status.textContent = I18n.t("newsOffline");
+    else if (kind === "unavailable") status.textContent = I18n.t("newsUnavailable");
+    else if (kind === "cached") status.textContent = I18n.t("newsUpdated", { time: timeAgo(new Date(lastStatus.cachedAt || Date.now()), I18n.locale()) });
   }
 
   function renderSourceToggles() {
@@ -186,7 +198,7 @@
       const status = document.getElementById("newsUpdated");
       const sourcesEl = document.getElementById("newsSources");
       if (!list) return;
-      if (status) status.textContent = I18n.t("newsLoading");
+      setStatus("loading");
 
       let config;
       try { config = await SumoUtil.fetchJSON("data/news-sources.json"); }
@@ -200,7 +212,7 @@
       if (cached && cached.length) {
         rawItems = cached;
         renderItems(list, filteredItems());
-        if (status) status.textContent = I18n.t("newsUpdated", { time: timeAgo(new Date(SumoUtil.storage.get(CACHE_KEY, { at: Date.now() }).at), I18n.locale()) });
+        setStatus("cached", SumoUtil.storage.get(CACHE_KEY, { at: Date.now() }).at);
       }
 
       if (!config.feeds || !config.feeds.length) {
@@ -214,13 +226,13 @@
           rawItems = items;
           renderItems(list, filteredItems());
           saveToCache(items.map((it) => ({ ...it, date: it.date ? it.date.toISOString() : null })));
-          if (status) status.textContent = I18n.t("newsLive");
+          setStatus("live");
         } else if (!cached) {
           this.showUnavailable();
         }
       } catch (e) {
         if (!cached) this.showUnavailable();
-        else if (status) status.textContent = I18n.t("newsOffline");
+        else setStatus("offline");
       }
 
       document.addEventListener("prefschange", (e) => {
@@ -228,10 +240,19 @@
       });
     },
 
+    // Cheap re-render for language changes — no network, just re-applies
+    // the current language to already-fetched items and the status line.
+    // (Doesn't re-run the source-toggle checkboxes; their labels are
+    // channel names, not translated strings, so there's nothing to redo.)
+    render() {
+      const list = document.getElementById("newsList");
+      if (list && rawItems.length) renderItems(list, filteredItems());
+      setStatus(lastStatus.kind, lastStatus.cachedAt);
+    },
+
     showUnavailable() {
       const list = document.getElementById("newsList");
-      const status = document.getElementById("newsUpdated");
-      if (status) status.textContent = I18n.t("newsUnavailable");
+      setStatus("unavailable");
       if (list) list.innerHTML = "";
     }
   };

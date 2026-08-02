@@ -17,7 +17,8 @@
     timezone: "auto",
     contrast: "normal",
     showInactiveChannels: false,
-    excludedNewsSources: []
+    excludedNewsSources: [],
+    notifications: false
   };
 
   function isMobileViewport() {
