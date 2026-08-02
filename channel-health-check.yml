@@ -1,0 +1,90 @@
+name: Channel health check
+
+on:
+  schedule:
+    # Every Monday 06:00 UTC. Cron in Actions can lag by a few minutes to
+    # ~an hour at busy times — that's fine for a weekly check.
+    - cron: "0 6 * * 1"
+  workflow_dispatch: {} # lets you trigger it manually from the Actions tab, for testing
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Check YouTube channels
+        id: check
+        run: |
+          node scripts/check-channel-health.mjs > report.md
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+        continue-on-error: true # a non-zero exit here means "found dead channels", not "the workflow failed"
+
+      - name: Open or update tracking issue
+        if: steps.check.outputs.exit_code != '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('report.md', 'utf-8');
+            const title = 'Channel health check: unreachable channel(s) found';
+            const label = 'channel-health';
+
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: label
+            });
+
+            if (existing.data.length) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.data[0].number,
+                body
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: [label]
+              });
+            }
+
+      - name: Close tracking issue if everything's healthy again
+        if: steps.check.outputs.exit_code == '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const label = 'channel-health';
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: label
+            });
+            for (const issue of existing.data) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed'
+              });
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: 'All enabled YouTube channels are reachable again — closing.'
+              });
+            }
