@@ -143,32 +143,25 @@
         </div>
       </article>
 
+      <article class="panel panel-wide" id="torikumiPanel">
+        <div class="panel-head">
+          <h2 data-i18n="torikumi">Torikumi</h2>
+          <div class="panel-note" data-i18n="torikumiNote">Today's Makuuchi bouts, live during honbasho.</div>
+        </div>
+        <div id="torikumiCard" class="stack"></div>
+      </article>
+
+      <article class="panel panel-wide">
+        <h2 id="liveCardTitle">Basho Live</h2>
+        <div id="liveCard" class="stack"></div>
+      </article>
+
       <article class="panel panel-wide">
         <div class="panel-head">
           <h2 data-i18n="upcoming">Upcoming Tournaments</h2>
           <div class="panel-note">JSA official dates where published, generated estimates beyond that.</div>
         </div>
         <div id="nextSix" class="tournament-grid"></div>
-      </article>
-
-      <article class="panel">
-        <h2 id="liveCardTitle">Basho Live</h2>
-        <div id="liveCard" class="stack"></div>
-      </article>
-
-      <article class="panel">
-        <h2 data-i18n="stats">Statistics</h2>
-        <div id="statsCard" class="stack"></div>
-      </article>
-
-      <article class="panel">
-        <h2 data-i18n="previous">Previous Basho</h2>
-        <div id="previousCard" class="stack"></div>
-      </article>
-
-      <article class="panel">
-        <h2 data-i18n="venues">Venues & Time Zones</h2>
-        <div id="venueCard" class="stack"></div>
       </article>
 
       <article class="panel panel-wide" id="newsPanel">
@@ -178,6 +171,21 @@
         </div>
         <div id="newsList" class="news-grid" aria-live="polite"></div>
         <div class="news-sources" id="newsSources"></div>
+      </article>
+
+      <article class="panel">
+        <h2 data-i18n="previous">Previous Basho</h2>
+        <div id="previousCard" class="stack"></div>
+      </article>
+
+      <article class="panel">
+        <h2 data-i18n="stats">Statistics</h2>
+        <div id="statsCard" class="stack"></div>
+      </article>
+
+      <article class="panel">
+        <h2 data-i18n="venues">Venues & Time Zones</h2>
+        <div id="venueCard" class="stack"></div>
       </article>
     </section>
   </main>
@@ -296,6 +304,9 @@
 <script src="js/schedule.js"></script>
 <script src="js/venue.js"></script>
 <script src="js/live.js"></script>
+<script src="js/sumoapi.js"></script>
+<script src="js/banzuke.js"></script>
+<script src="js/torikumi.js"></script>
 <script src="js/animations.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/countdown.js"></script>
