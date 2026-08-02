@@ -84,7 +84,9 @@
     "newsSourcesPref": "News sources",
     "banzukeStatus": "Banzuke",
     "banzukeIn": "in {n}d",
-    "banzukeReleased": "Released ✓"
+    "banzukeReleased": "Released ✓",
+    "banzukeLive": "Banzuke",
+    "viewBanzuke": "View official banzuke"
   },
   "ja": {
     "title": "大相撲場所カウントダウン",
@@ -171,7 +173,9 @@
     "newsSourcesPref": "ニュースソース",
     "banzukeStatus": "番付",
     "banzukeIn": "あと{n}日",
-    "banzukeReleased": "発表済み ✓"
+    "banzukeReleased": "発表済み ✓",
+    "banzukeLive": "番付",
+    "viewBanzuke": "公式の番付を見る"
   },
   "nl": {
     "title": "Sumo Basho Aftelklok",
@@ -258,6 +262,8 @@
     "newsSourcesPref": "Nieuwsbronnen",
     "banzukeStatus": "Banzuke",
     "banzukeIn": "over {n}d",
-    "banzukeReleased": "Gepubliceerd ✓"
+    "banzukeReleased": "Gepubliceerd ✓",
+    "banzukeLive": "Banzuke",
+    "viewBanzuke": "Officiële banzuke bekijken"
   }
 }

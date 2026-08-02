@@ -132,43 +132,41 @@
       "id": "sumostew",
       "label": "Sumostew",
       "channelUrl": "https://www.youtube.com/@Sumostew",
-      "channelId": null,
+      "channelId": "UCClMvLPowPLwZ-YrYo4ybBw",
       "category": "Analysis",
       "contentType": "Documentaries",
       "official": false,
       "language": "en",
       "status": "Active",
       "communityRank": 7,
-      "disabled": true,
-      "note": "Handle matches the site owner's CSV but channelId not independently confirmed yet — verify before enabling."
+      "disabled": false
     },
     {
       "id": "dohyo-jwags",
       "label": "The Dohyo (JWags)",
       "channelUrl": "https://www.youtube.com/@TheDohyo",
-      "channelId": null,
+      "channelId": "UCtxtHMB7y4pSWRI1iuynuqg",
       "category": "Analysis",
       "contentType": "Technical Analysis",
       "official": false,
       "language": "en",
       "status": "Active",
       "communityRank": 9,
-      "disabled": true,
-      "note": "Handle matches the site owner's CSV but channelId not independently confirmed yet — verify before enabling."
+      "disabled": false
     },
     {
       "id": "worldofsumo",
-      "label": "World of Sumo",
-      "channelUrl": "https://www.youtube.com/@WorldOfSumo",
-      "channelId": null,
+      "label": "Sumo Scott (formerly World of Sumo)",
+      "channelUrl": "https://www.youtube.com/channel/UCFrn2HOKLNEuPu6-r7h0cVA",
+      "channelId": "UCFrn2HOKLNEuPu6-r7h0cVA",
       "category": "Analysis",
       "contentType": "History + Profiles",
       "official": false,
       "language": "en",
       "status": "Active",
       "communityRank": 10,
-      "disabled": true,
-      "note": "Handle matches the site owner's CSV but channelId not independently confirmed yet — verify before enabling."
+      "disabled": false,
+      "note": "Rebranded from 'World of Sumo' to 'Sumo Scott' at some point — the @WorldOfSumo handle now 404s. Confirmed via the channel's own About page, which explicitly says 'formerly World of Sumo'."
     },
     {
       "id": "hookedonsumo",
@@ -202,169 +200,157 @@
       "id": "allgoodsumo",
       "label": "AllGoodSumo",
       "channelUrl": "https://www.youtube.com/@allgoodsumo",
-      "channelId": null,
+      "channelId": "UCGQgFaRW7NNTWdembkwqXfg",
       "category": "Analysis",
       "contentType": "Mixed",
       "official": false,
       "language": "en",
       "status": "Active",
       "communityRank": null,
-      "disabled": true,
-      "note": "From the site owner's honorable-mentions list — handle not independently confirmed, verify before enabling."
+      "disabled": false
     },
     {
       "id": "sumospiffysbarandgrill",
       "label": "Sumo Spiffy's Bar & Grill",
       "channelUrl": "https://www.youtube.com/@sumospiffysbarandgrill",
-      "channelId": null,
+      "channelId": "UCv3ebcOjBeGI7Lg4SUUuyTA",
       "category": "Analysis",
       "contentType": "Discussion",
       "official": false,
       "language": "en",
       "status": "Active",
       "communityRank": null,
-      "disabled": true,
-      "note": "From the site owner's honorable-mentions list — handle not independently confirmed, verify before enabling."
+      "disabled": false
     },
     {
       "id": "grandsumobreakdown",
       "label": "Grand Sumo Breakdown",
       "channelUrl": "https://www.youtube.com/@grandsumobreakdown",
-      "channelId": null,
+      "channelId": "UCwCKsyGA7lzbcdJ8Jlhqhdw",
       "category": "Podcast",
       "contentType": "Podcast",
       "official": false,
       "language": "en",
       "status": "Active",
       "communityRank": null,
-      "disabled": true,
-      "note": "From the site owner's honorable-mentions list — handle not independently confirmed, verify before enabling."
+      "disabled": false
     },
     {
       "id": "sumokaboom",
       "label": "Sumo Kaboom",
       "channelUrl": "https://www.youtube.com/@SumoKaboom",
-      "channelId": null,
+      "channelId": "UC0afau4An1hiO69Umr4igKA",
       "category": "Podcast",
       "contentType": "Podcast",
       "official": false,
       "language": "en",
       "status": "Active",
       "communityRank": null,
-      "disabled": true,
-      "note": "From the site owner's honorable-mentions list — handle not independently confirmed, verify before enabling."
+      "disabled": false
     },
     {
       "id": "usasumo",
       "label": "USA SUMO",
       "channelUrl": "https://www.youtube.com/@USASUMO",
-      "channelId": null,
+      "channelId": "UCFmas0hAjOt1oay8QBQaNsA",
       "category": "Organization",
       "contentType": "Amateur Sumo",
       "official": true,
       "language": "en",
       "status": "Active",
       "communityRank": null,
-      "disabled": true,
-      "note": "From the site owner's honorable-mentions list — handle not independently confirmed, verify before enabling."
+      "disabled": false
     },
     {
       "id": "sumotime",
       "label": "Sumo Time",
       "channelUrl": "https://www.youtube.com/@sumotime2996",
-      "channelId": null,
+      "channelId": "UCLRa_QX8ijsFBrxC0YrX9YA",
       "category": "Highlights",
       "contentType": "Mixed",
       "official": false,
       "language": "en",
       "status": "Active",
       "communityRank": null,
-      "disabled": true,
-      "note": "From the site owner's honorable-mentions list — handle not independently confirmed, verify before enabling."
+      "disabled": false
     },
     {
       "id": "raijinsumoclub",
       "label": "Raijin Sumo Club",
       "channelUrl": "https://www.youtube.com/@NCSUMO",
-      "channelId": null,
+      "channelId": "UCPUcALTc0JYeA6SJIYCw77w",
       "category": "Club",
       "contentType": "Amateur Sumo",
       "official": false,
       "language": "en",
       "status": "Active",
       "communityRank": null,
-      "disabled": true,
-      "note": "From the site owner's honorable-mentions list — handle not independently confirmed, verify before enabling."
+      "disabled": false
     },
     {
       "id": "lonestarsumo",
       "label": "Lonestar Sumo",
-      "channelUrl": "https://www.youtube.com/user/calbacflims",
-      "channelId": null,
+      "channelUrl": "https://www.youtube.com/@lonestarsumo",
+      "channelId": "UCLgbh1ytnydSmPp1cxVlVcw",
       "category": "Club",
       "contentType": "Amateur Sumo",
       "official": false,
       "language": "en",
       "status": "Active",
       "communityRank": null,
-      "disabled": true,
-      "note": "From the site owner's honorable-mentions list — handle not independently confirmed, verify before enabling."
+      "disabled": false
     },
     {
       "id": "futagoyamastable",
       "label": "Futagoyama Stable",
       "channelUrl": "https://www.youtube.com/@futagoyama-sumofood",
-      "channelId": null,
+      "channelId": "UCq2bD4BLzP0hdtBw3c7BYEw",
       "category": "Stable",
       "contentType": "Stable Life",
       "official": true,
       "language": "ja",
       "status": "Active",
       "communityRank": null,
-      "disabled": true,
-      "note": "From the site owner's honorable-mentions list — handle not independently confirmed, verify before enabling."
+      "disabled": false
     },
     {
       "id": "musashigawastable",
       "label": "Musashigawa Stable",
       "channelUrl": "https://www.youtube.com/@ALOHA-SUMO-LIFE",
-      "channelId": null,
+      "channelId": "UCO52y9pO_RUO2GkzyXQfvlg",
       "category": "Stable",
       "contentType": "Stable Life",
       "official": true,
       "language": "ja",
       "status": "Active",
       "communityRank": null,
-      "disabled": true,
-      "note": "From the site owner's honorable-mentions list — handle not independently confirmed, verify before enabling."
+      "disabled": false
     },
     {
       "id": "tatsunamistable",
       "label": "Tatsunami Stable",
       "channelUrl": "https://www.youtube.com/@tatsunami-beya",
-      "channelId": null,
+      "channelId": "UCUJrVwo3_mgUmOyZN81oLkg",
       "category": "Stable",
       "contentType": "Training",
       "official": true,
       "language": "ja",
       "status": "Active",
       "communityRank": null,
-      "disabled": true,
-      "note": "From the site owner's honorable-mentions list — handle not independently confirmed, verify before enabling."
+      "disabled": false
     },
     {
       "id": "isegahamastable",
       "label": "Isegahama Stable",
       "channelUrl": "https://www.youtube.com/@isegahamabeya",
-      "channelId": null,
+      "channelId": "UC1oS9raqjGaD7Ey2dUpLkdA",
       "category": "Stable",
       "contentType": "Training",
       "official": true,
       "language": "ja",
       "status": "Active",
       "communityRank": null,
-      "disabled": true,
-      "note": "From the site owner's honorable-mentions list — handle not independently confirmed, verify before enabling."
+      "disabled": false
     }
   ]
 }
