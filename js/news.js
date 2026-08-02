@@ -186,6 +186,7 @@
       const status = document.getElementById("newsUpdated");
       const sourcesEl = document.getElementById("newsSources");
       if (!list) return;
+      if (status) status.textContent = I18n.t("newsLoading");
 
       let config;
       try { config = await SumoUtil.fetchJSON("data/news-sources.json"); }
