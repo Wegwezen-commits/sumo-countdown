@@ -1007,6 +1007,7 @@ footer.site-footer {
 .setting-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--line); gap: 10px; }
 .setting-row:last-child { border-bottom: none; }
 .setting-row label:first-child { font-size: 13px; font-weight: 600; }
+.setting-note { font-size: 11px; color: var(--ink-soft); padding: 0 0 10px; margin-top: -6px; }
 
 .switch { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
 .switch input {
