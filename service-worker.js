@@ -3,7 +3,7 @@
 // fixed deploy is never masked by a stale cached copy of the code
 // itself; images/audio (which rarely change) stay cache-first for
 // speed and offline reliability.
-const CACHE_VERSION = "sumo-countdown-v24-fix-i18n-stomp";
+const CACHE_VERSION = "sumo-countdown-v25-notifications-health-check";
 const NETWORK_FIRST_EXT = [".html", ".js", ".css", ".json"];
 const APP_SHELL = [
   "./",
@@ -29,6 +29,7 @@ const APP_SHELL = [
   "./js/videos.js",
   "./js/watch-tabs.js",
   "./js/pwa.js",
+  "./js/notify.js",
   "./js/app.js",
   "./data/schedule.json",
   "./data/venues.json",
@@ -130,4 +131,18 @@ self.addEventListener("fetch", (event) => {
 
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
+});
+
+// Local notifications (see js/notify.js) — focus an already-open tab if
+// there is one, otherwise open a new one, rather than just dismissing.
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if ("focus" in client) return client.focus();
+      }
+      if (self.clients.openWindow) return self.clients.openWindow("./");
+    })
+  );
 });
