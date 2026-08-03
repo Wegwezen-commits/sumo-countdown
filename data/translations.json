@@ -87,7 +87,7 @@
     "banzukeReleased": "Released ✓",
     "banzukeLive": "Banzuke",
     "viewBanzuke": "View official banzuke",
-    "notificationsPref": "Notifications (banzuke & basho start)",
+    "notificationsPref": "Notifications (banzuke, basho start &amp; torikumi)",
     "notificationsBlocked": "Notifications are blocked in your browser settings — enable them there first.",
     "notifyBanzukeTitle": "Banzuke released",
     "notifyBanzukeBody": "The banzuke for {basho} is out.",
@@ -105,7 +105,9 @@
     "banzukeLoading": "Loading banzuke…",
     "banzukeUnavailable": "Banzuke not available right now.",
     "banzukeEast": "East",
-    "banzukeWest": "West"
+    "banzukeWest": "West",
+    "notifyTorikumiTitle": "Today's torikumi is up",
+    "notifyTorikumiBody": "Day {day} bouts for {basho} are posted."
   },
   "ja": {
     "title": "大相撲場所カウントダウン",
@@ -195,7 +197,7 @@
     "banzukeReleased": "発表済み ✓",
     "banzukeLive": "番付",
     "viewBanzuke": "公式の番付を見る",
-    "notificationsPref": "通知（番付・本場所開始）",
+    "notificationsPref": "通知（番付・本場所開始・取組）",
     "notificationsBlocked": "ブラウザの設定で通知がブロックされています。先にそちらで有効にしてください。",
     "notifyBanzukeTitle": "番付発表",
     "notifyBanzukeBody": "{basho}の番付が発表されました。",
@@ -213,7 +215,9 @@
     "banzukeLoading": "番付を読み込み中…",
     "banzukeUnavailable": "現在番付を利用できません。",
     "banzukeEast": "東",
-    "banzukeWest": "西"
+    "banzukeWest": "西",
+    "notifyTorikumiTitle": "本日の取組が発表されました",
+    "notifyTorikumiBody": "{basho} {day}日目の取組が発表されました。"
   },
   "nl": {
     "title": "Sumo Basho Aftelklok",
@@ -303,7 +307,7 @@
     "banzukeReleased": "Gepubliceerd ✓",
     "banzukeLive": "Banzuke",
     "viewBanzuke": "Officiële banzuke bekijken",
-    "notificationsPref": "Meldingen (banzuke & start basho)",
+    "notificationsPref": "Meldingen (banzuke, start basho &amp; torikumi)",
     "notificationsBlocked": "Meldingen zijn geblokkeerd in je browserinstellingen — schakel ze daar eerst in.",
     "notifyBanzukeTitle": "Banzuke gepubliceerd",
     "notifyBanzukeBody": "De banzuke voor {basho} is gepubliceerd.",
@@ -321,6 +325,8 @@
     "banzukeLoading": "Banzuke laden…",
     "banzukeUnavailable": "Banzuke momenteel niet beschikbaar.",
     "banzukeEast": "Oost",
-    "banzukeWest": "West"
+    "banzukeWest": "West",
+    "notifyTorikumiTitle": "Torikumi van vandaag is beschikbaar",
+    "notifyTorikumiBody": "Dag {day} partijen voor {basho} zijn geplaatst."
   }
 }
