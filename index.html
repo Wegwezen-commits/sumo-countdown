@@ -148,20 +148,13 @@
           <h2 data-i18n="torikumi">Torikumi</h2>
           <div class="panel-note" data-i18n="torikumiNote">Today's Makuuchi bouts, live during honbasho.</div>
         </div>
+        <div id="torikumiFilterBar" class="filter-bar"></div>
         <div id="torikumiCard" class="stack"></div>
       </article>
 
       <article class="panel panel-wide">
         <h2 id="liveCardTitle">Basho Live</h2>
         <div id="liveCard" class="stack"></div>
-      </article>
-
-      <article class="panel panel-wide">
-        <div class="panel-head">
-          <h2 data-i18n="upcoming">Upcoming Tournaments</h2>
-          <div class="panel-note">JSA official dates where published, generated estimates beyond that.</div>
-        </div>
-        <div id="nextSix" class="tournament-grid"></div>
       </article>
 
       <article class="panel panel-wide" id="newsPanel">
@@ -181,6 +174,14 @@
       <article class="panel">
         <h2 data-i18n="stats">Statistics</h2>
         <div id="statsCard" class="stack"></div>
+      </article>
+
+      <article class="panel panel-wide">
+        <div class="panel-head">
+          <h2 data-i18n="upcoming">Upcoming Tournaments</h2>
+          <div class="panel-note">JSA official dates where published, generated estimates beyond that.</div>
+        </div>
+        <div id="nextSix" class="tournament-grid"></div>
       </article>
 
       <article class="panel">
@@ -278,7 +279,7 @@
       </div>
 
       <div class="setting-row">
-        <label for="prefNotifications" data-i18n="notificationsPref">Notifications (banzuke &amp; basho start)</label>
+        <label for="prefNotifications" data-i18n="notificationsPref">Notifications (banzuke, basho start &amp; torikumi)</label>
         <span class="switch"><input id="prefNotifications" type="checkbox" /><span class="track"></span><span class="thumb"></span></span>
       </div>
       <div id="notifyBlockedNote" class="setting-note hidden" data-i18n="notificationsBlocked">Notifications are blocked in your browser settings — enable them there first.</div>
