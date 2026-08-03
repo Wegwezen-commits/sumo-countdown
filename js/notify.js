@@ -1,7 +1,9 @@
-// notify.js — local notifications for two events: the banzuke being
-// released, and a basho starting (both "starts tomorrow" and "starts
-// today/now live"). Each fires at most once per basho (tracked via
-// SumoUtil.storage flags) so re-opening the app doesn't repeat them.
+// notify.js — local notifications for: the banzuke being released, a
+// basho starting (both "starts tomorrow" and "starts today/now live"),
+// and — while a basho is live — each day's torikumi (bout list) actually
+// being posted. Each fires at most once per basho (or per basho+day, for
+// torikumi) via SumoUtil.storage flags, so re-opening the app doesn't
+// repeat them.
 //
 // IMPORTANT LIMITATION: these are NOT push notifications. They only fire
 // while this site is open in a tab (checked on load, hourly while open,
@@ -56,6 +58,24 @@
       if (!seen(key)) {
         fire(I18n.t("notifyLiveTitle"), I18n.t("notifyLiveBody", { basho: live.name }), key);
         markSeen(key);
+      }
+
+      // Torikumi for "today" — reuses the exact same fetch js/torikumi.js
+      // itself uses, so "posted" here means the same thing it does in
+      // that panel (a non-empty bout list for the current day), not just
+      // "the day rolled over". SumoAPI caches for 15 min, so checking
+      // this hourly doesn't add real extra load.
+      const dayIndex = Live.status(live, now).dayIndex;
+      const torikumiKey = `torikumi:${live.id}:day${dayIndex}`;
+      if (global.SumoAPI && !seen(torikumiKey)) {
+        try {
+          const data = await SumoAPI.getTorikumi(live.id, "Makuuchi", dayIndex);
+          const bouts = Array.isArray(data) ? data : (data && (data.torikumi || data.matches)) || [];
+          if (bouts.length) {
+            fire(I18n.t("notifyTorikumiTitle"), I18n.t("notifyTorikumiBody", { basho: live.name, day: dayIndex }), torikumiKey);
+            markSeen(torikumiKey);
+          }
+        } catch (e) { /* not posted yet, or a network hiccup — just try again next check */ }
       }
     } else {
       const next = Schedule.getNextUpcoming(now);

@@ -1,5 +1,8 @@
-// torikumi.js — renders the current day's Makuuchi torikumi (bout list)
-// during a live basho, via SumoAPI.getTorikumi.
+// torikumi.js — renders the current day's torikumi (bout list) during a
+// live basho, via SumoAPI.getTorikumi. Division is a dropdown (see
+// js/banzuke.js's DIVISIONS — reused here for consistency), persisted via
+// SumoUtil.storage under its own key so Torikumi and Banzuke can be set
+// to different divisions independently if someone wants that.
 //
 // FIELD-NAME UNCERTAINTY: sumo-api.com's torikumi endpoint returns a flat
 // list of bout objects. The only fields independently confirmed (via a
@@ -7,10 +10,10 @@
 // based — eastId, westId, winnerId, loserId, winnerRank, loserRank — not
 // wrestler names or the winning technique directly. Rather than guess at
 // those two, this cross-references eastId/westId against the SAME
-// basho's banzuke (already fetched for the Banzuke panel — SumoAPI caches
-// it, so this doesn't cost a second real network request) to get
-// shikonaEn for the name. "kimarite" is tried directly as a field name
-// with reasonable but not confirmed confidence.
+// basho+division's banzuke (already fetched — SumoAPI caches it, so this
+// doesn't cost a second real network request) to get shikonaEn for the
+// name. "kimarite" is tried directly as a field name with reasonable but
+// not confirmed confidence.
 // If the live display looks off once this is actually deployed (wrong/
 // missing names, no technique shown), that's the first place to check —
 // open browser devtools' Network tab on a real torikumi request and
@@ -19,6 +22,10 @@
   "use strict";
 
   const KIMARITE_KEYS = ["kimarite", "technique", "winningTechnique"];
+  const DIVISION_KEY = "torikumiDivision";
+
+  function getDivision() { return SumoUtil.storage.get(DIVISION_KEY, "Makuuchi"); }
+  function setDivision(d) { SumoUtil.storage.set(DIVISION_KEY, d); }
 
   function pick(obj, keys) {
     for (const k of keys) {
@@ -59,34 +66,54 @@
       </div>`;
   }
 
-  async function render() {
-    const container = document.getElementById("torikumiCard");
-    if (!container) return;
-    if (!global.SumoAPI) return;
-    const now = new Date();
-    const live = global.Schedule && Schedule.getLive(now);
-    if (!live) {
-      container.innerHTML = `<p class="filter-empty">${I18n.t("torikumiInactive")}</p>`;
-      return;
-    }
-    const info = Live.status(live, now);
+  function renderFilterBar(filterBarEl, live, onChange) {
+    if (!filterBarEl) return;
+    const current = getDivision();
+    filterBarEl.innerHTML = `
+      <select id="torikumiFilterDivision" class="mini filter-select">
+        ${Banzuke.DIVISIONS.map((d) => `<option value="${d}" ${d === current ? "selected" : ""}>${d}</option>`).join("")}
+      </select>`;
+    document.getElementById("torikumiFilterDivision").addEventListener("change", (e) => {
+      setDivision(e.target.value);
+      onChange(e.target.value);
+    });
+  }
+
+  async function renderList(listEl, live, division) {
+    const info = Live.status(live, new Date());
     const day = info.dayIndex;
+    listEl.innerHTML = `<p class="filter-empty">${I18n.t("torikumiLoading")}</p>`;
     try {
       const [banzuke, torikumiData] = await Promise.all([
-        SumoAPI.getBanzuke(live.id, "Makuuchi"),
-        SumoAPI.getTorikumi(live.id, "Makuuchi", day)
+        SumoAPI.getBanzuke(live.id, division),
+        SumoAPI.getTorikumi(live.id, division, day)
       ]);
       const bouts = Array.isArray(torikumiData) ? torikumiData
         : (torikumiData && (torikumiData.torikumi || torikumiData.matches)) || [];
       if (!bouts.length) {
-        container.innerHTML = `<p class="filter-empty">${I18n.t("torikumiNotPosted")}</p>`;
+        listEl.innerHTML = `<p class="filter-empty">${I18n.t("torikumiNotPosted")}</p>`;
         return;
       }
       const nameMap = buildNameMap(banzuke);
-      container.innerHTML = `<div class="torikumi-list">${bouts.map((b) => boutHTML(b, nameMap)).join("")}</div>`;
+      listEl.innerHTML = `<div class="torikumi-list">${bouts.map((b) => boutHTML(b, nameMap)).join("")}</div>`;
     } catch (e) {
-      container.innerHTML = `<p class="filter-empty">${I18n.t("torikumiNotPosted")}</p>`;
+      listEl.innerHTML = `<p class="filter-empty">${I18n.t("torikumiNotPosted")}</p>`;
     }
+  }
+
+  async function render() {
+    const filterBarEl = document.getElementById("torikumiFilterBar");
+    const listEl = document.getElementById("torikumiCard");
+    if (!listEl || !global.SumoAPI || !global.Banzuke) return;
+    const now = new Date();
+    const live = global.Schedule && Schedule.getLive(now);
+    if (!live) {
+      if (filterBarEl) filterBarEl.innerHTML = "";
+      listEl.innerHTML = `<p class="filter-empty">${I18n.t("torikumiInactive")}</p>`;
+      return;
+    }
+    renderFilterBar(filterBarEl, live, (division) => renderList(listEl, live, division));
+    renderList(listEl, live, getDivision());
   }
 
   global.Torikumi = { render };

@@ -59,9 +59,12 @@
         container.innerHTML = `
           <div class="row"><span class="k">${I18n.t("banzukeStatus")}</span><span class="v">${I18n.t("banzukeReleased")}</span></div>
           <div class="row"><span class="k">${I18n.t("nextBasho")}</span><span class="v">${banzuke.basho.name}</span></div>
+          <div id="banzukeFilterBar" class="filter-bar"></div>
           <div id="banzukeRankList"></div>`
           + banzukeLink;
-        if (window.Banzuke) Banzuke.renderRankList(document.getElementById("banzukeRankList"), banzuke.basho.id, "Makuuchi");
+        if (window.Banzuke) {
+          Banzuke.render(document.getElementById("banzukeFilterBar"), document.getElementById("banzukeRankList"), banzuke.basho.id);
+        }
       } else {
         container.innerHTML = `
           <div class="row"><span class="k">${I18n.t("banzukeStatus")}</span><span class="v">${I18n.t("banzukeIn", { n: banzuke.daysUntil })}</span></div>
