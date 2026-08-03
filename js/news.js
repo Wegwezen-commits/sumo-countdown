@@ -19,6 +19,17 @@
   const FETCH_TIMEOUT_MS = 8000;
   const MAX_ITEMS = 9;
 
+  // Primary path: your own Worker (same one used for Twitch viewer stats,
+  // see js/streams.js's VIEWER_STATS_ENDPOINT), fetching feeds server-side
+  // — no CORS issue at all, since a Worker isn't a browser. This replaced
+  // the two third-party CORS proxies below, which were the actual cause
+  // of "Couldn't load live headlines": api.allorigins.win has no uptime
+  // guarantee and a 20 req/min limit, and corsproxy.io's free tier is now
+  // restricted to an origin allowlist that doesn't reliably cover a real
+  // deployed site. Leave NEWS_PROXY_ENDPOINT "" to skip straight to the
+  // fallback proxies (worse, but zero setup).
+  const NEWS_PROXY_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.dev";
+
   const PROXIES = [
     (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
     (url) => `https://corsproxy.io/?url=${encodeURIComponent(url)}`
@@ -38,9 +49,15 @@
   }
 
   async function fetchFeedXML(feedUrl) {
-    // Try direct first (works if the source ever adds CORS headers), then
-    // each proxy in turn.
-    const attempts = [feedUrl, ...PROXIES.map((build) => build(feedUrl))];
+    // Order: our own Worker (reliable, controlled) -> direct (works if the
+    // source ever adds CORS headers, unlikely but free to try) -> the two
+    // third-party proxies as a last resort if the Worker isn't configured
+    // or is down for some reason.
+    const attempts = [
+      ...(NEWS_PROXY_ENDPOINT ? [`${NEWS_PROXY_ENDPOINT}?mode=feed&url=${encodeURIComponent(feedUrl)}`] : []),
+      feedUrl,
+      ...PROXIES.map((build) => build(feedUrl))
+    ];
     let lastErr = null;
     for (const url of attempts) {
       try {
