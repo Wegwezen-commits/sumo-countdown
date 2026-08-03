@@ -1017,6 +1017,9 @@ footer.site-footer {
   max-width: 1200px; margin: 0 auto; padding: 20px; text-align: center;
   color: var(--ink-soft); font-size: 12px;
 }
+.footer-credit { display: block; margin-top: 6px; font-size: 11px; }
+.footer-credit a { color: var(--accent-deep); text-decoration: none; }
+.footer-credit a:hover { text-decoration: underline; }
 
 /* ---------- Settings panel ---------- */
 .settings-dialog {
