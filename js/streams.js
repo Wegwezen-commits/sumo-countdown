@@ -47,11 +47,18 @@ const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.de
 
   const STATUS_ORDER = { Active: 0, Occasional: 1, Intermittent: 2, Historical: 3 };
 
+  const LIVE_ONLY_KEY = "streamsLiveOnlyFilter";
+
   let entries = null; // loaded once, cached
   let aliveIds = null; // Set — entries (YouTube + Twitch) confirmed reachable this session; null until the first check completes
   let refreshTimer = null;
   let els = null;
-  let filters = { category: "all", language: "all", liveOnly: false };
+  // liveOnly defaults to true — only show currently-live streams by
+  // default (offline cards used to clutter the tab most of the time,
+  // since most channels aren't live most hours of the day). The "Live
+  // now" checkbox below is really an "include offline too" toggle in
+  // practice; persisted so the choice sticks across visits.
+  let filters = { category: "all", language: "all", liveOnly: SumoUtil.storage.get(LIVE_ONLY_KEY, true) };
   let lastStatuses = []; // cached render input, so filter changes don't refetch
 
   function cacheEls() {
@@ -259,21 +266,25 @@ const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.de
     list.filterBar.innerHTML = `
       <select id="streamsFilterCategory" class="mini filter-select">
         <option value="all" data-i18n="filterAllCategories">All categories</option>
-        ${categories.map((c) => `<option value="${SumoUtil.escapeHTML(c)}">${SumoUtil.escapeHTML(c)}</option>`).join("")}
+        ${categories.map((c) => `<option value="${SumoUtil.escapeHTML(c)}" ${c === filters.category ? "selected" : ""}>${SumoUtil.escapeHTML(c)}</option>`).join("")}
       </select>
       <select id="streamsFilterLanguage" class="mini filter-select">
         <option value="all" data-i18n="filterAllLanguages">All languages</option>
-        <option value="en">English</option>
-        <option value="ja">日本語</option>
+        <option value="en" ${filters.language === "en" ? "selected" : ""}>English</option>
+        <option value="ja" ${filters.language === "ja" ? "selected" : ""}>日本語</option>
       </select>
       <label class="filter-checkbox">
-        <input type="checkbox" id="streamsFilterLive" />
+        <input type="checkbox" id="streamsFilterLive" ${filters.liveOnly ? "checked" : ""} />
         <span data-i18n="filterLiveNow">Live now</span>
       </label>
     `;
     document.getElementById("streamsFilterCategory").addEventListener("change", (e) => { filters.category = e.target.value; renderFromCache(); });
     document.getElementById("streamsFilterLanguage").addEventListener("change", (e) => { filters.language = e.target.value; renderFromCache(); });
-    document.getElementById("streamsFilterLive").addEventListener("change", (e) => { filters.liveOnly = e.target.checked; renderFromCache(); });
+    document.getElementById("streamsFilterLive").addEventListener("change", (e) => {
+      filters.liveOnly = e.target.checked;
+      SumoUtil.storage.set(LIVE_ONLY_KEY, filters.liveOnly);
+      renderFromCache();
+    });
     if (global.I18n) I18n.applyStaticText();
   }
 
