@@ -1,0 +1,5 @@
+{
+  "lastRunAt": null,
+  "deadChannelsFound": null,
+  "note": "Populated automatically by .github/workflows/channel-health-check.yml. This file exists mainly to give that scheduled workflow a real weekly commit to make — GitHub auto-disables scheduled workflows after 60 days with no repository activity, and a workflow simply running doesn't count as activity, only a commit does."
+}
