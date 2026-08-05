@@ -1,7 +1,7 @@
 {
   "en": {
-    "title": "Sumo Basho Countdown",
-    "subtitle": "The countdown to the next Grand Sumo Tournament",
+    "title": "Sumo Countdown",
+    "subtitle": "Countdown, banzuke, torikumi, streams & news for Grand Sumo.",
     "daysUntil": "Days until",
     "days": "Days",
     "hours": "Hours",
@@ -107,11 +107,20 @@
     "banzukeEast": "East",
     "banzukeWest": "West",
     "notifyTorikumiTitle": "Today's torikumi is up",
-    "notifyTorikumiBody": "Day {day} bouts for {basho} are posted."
+    "notifyTorikumiBody": "Day {day} bouts for {basho} are posted.",
+    "rikishiLoading": "Loading profile…",
+    "rikishiRank": "Rank",
+    "rikishiStable": "Stable",
+    "rikishiHeight": "Height",
+    "rikishiWeight": "Weight",
+    "rikishiDebut": "Debut",
+    "rikishiFullProfile": "Full profile on sumo-api.com",
+    "rikishiUnavailable": "Profile not available right now.",
+    "specialPrizes": "Special Prizes"
   },
   "ja": {
-    "title": "大相撲場所カウントダウン",
-    "subtitle": "次の本場所までのカウントダウン",
+    "title": "大相撲カウントダウン",
+    "subtitle": "カウントダウン、番付、取組、配信、ニュースをひとつに。",
     "daysUntil": "開催まで",
     "days": "日",
     "hours": "時間",
@@ -217,11 +226,20 @@
     "banzukeEast": "東",
     "banzukeWest": "西",
     "notifyTorikumiTitle": "本日の取組が発表されました",
-    "notifyTorikumiBody": "{basho} {day}日目の取組が発表されました。"
+    "notifyTorikumiBody": "{basho} {day}日目の取組が発表されました。",
+    "rikishiLoading": "プロフィールを読み込み中…",
+    "rikishiRank": "番付",
+    "rikishiStable": "部屋",
+    "rikishiHeight": "身長",
+    "rikishiWeight": "体重",
+    "rikishiDebut": "初土俵",
+    "rikishiFullProfile": "sumo-api.comで詳細を見る",
+    "rikishiUnavailable": "現在プロフィールを利用できません。",
+    "specialPrizes": "三賞"
   },
   "nl": {
-    "title": "Sumo Basho Aftelklok",
-    "subtitle": "Het aftellen naar het volgende Grote Sumotoernooi",
+    "title": "Sumo Aftelklok",
+    "subtitle": "Countdown, banzuke, torikumi, streams en nieuws voor grote sumo.",
     "daysUntil": "Dagen tot",
     "days": "Dagen",
     "hours": "Uren",
@@ -327,6 +345,15 @@
     "banzukeEast": "Oost",
     "banzukeWest": "West",
     "notifyTorikumiTitle": "Torikumi van vandaag is beschikbaar",
-    "notifyTorikumiBody": "Dag {day} partijen voor {basho} zijn geplaatst."
+    "notifyTorikumiBody": "Dag {day} partijen voor {basho} zijn geplaatst.",
+    "rikishiLoading": "Profiel laden…",
+    "rikishiRank": "Rang",
+    "rikishiStable": "Stal",
+    "rikishiHeight": "Lengte",
+    "rikishiWeight": "Gewicht",
+    "rikishiDebut": "Debuut",
+    "rikishiFullProfile": "Volledig profiel op sumo-api.com",
+    "rikishiUnavailable": "Profiel momenteel niet beschikbaar.",
+    "specialPrizes": "Speciale Prijzen"
   }
 }
