@@ -24,7 +24,11 @@
   function rowHTML(rikishi) {
     const name = SumoUtil.escapeHTML(rikishi.shikonaEn || rikishi.shikonaJp || "?");
     const rank = SumoUtil.escapeHTML(rikishi.rank || "");
-    return `<div class="banzuke-row"><span class="banzuke-rank">${rank}</span><span class="banzuke-name">${name}</span></div>`;
+    const id = rikishi.rikishiID;
+    const nameHTML = id != null
+      ? `<button type="button" class="banzuke-name rikishi-link" data-rikishi-id="${id}">${name}</button>`
+      : `<span class="banzuke-name">${name}</span>`;
+    return `<div class="banzuke-row"><span class="banzuke-rank">${rank}</span>${nameHTML}</div>`;
   }
 
   function renderFilterBar(filterBarEl, onChange) {

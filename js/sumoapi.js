@@ -66,6 +66,27 @@
     // { date, division, day, torikumi: [{ east, west, eastShikona, westShikona, kimarite, winnerEn, ... }] }
     async getTorikumi(appBashoId, division, day) {
       return getJSON(`/basho/${toApiBashoId(appBashoId)}/torikumi/${division || "Makuuchi"}/${day}`);
+    },
+
+    // Tournament results — yusho (championship) winners per division and
+    // special prizes (sansho). FIELD NAMES NOT INDEPENDENTLY CONFIRMED —
+    // I couldn't get a live sample of this specific endpoint's shape while
+    // building this (only that it exists and returns "yusho winners,
+    // special prizes", per a third-party app's own README). js/previousbasho.js
+    // tries several plausible key names defensively; verify against a
+    // real response (browser devtools Network tab) if the display looks
+    // wrong once deployed.
+    async getBashoResult(appBashoId) {
+      return getJSON(`/basho/${toApiBashoId(appBashoId)}`);
+    },
+
+    // Single rikishi's profile — used for the tap-a-name popup (see
+    // js/rikishi.js). Shape per that same third-party app plus sumo-api's
+    // own guide: { rikishiID, shikonaEn, shikonaJp, currentRank, heya,
+    // height, weight, birthDate, debut, ... } — also best-effort on the
+    // less-central fields.
+    async getRikishi(rikishiId) {
+      return getJSON(`/rikishi/${encodeURIComponent(rikishiId)}`);
     }
   };
 

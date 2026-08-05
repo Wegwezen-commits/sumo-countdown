@@ -41,27 +41,35 @@
     return map;
   }
 
+  function nameHTML(cls, name, id, isWinner) {
+    const safeName = SumoUtil.escapeHTML(name);
+    const classes = `${cls}${isWinner ? " is-winner" : ""}`;
+    return id != null
+      ? `<button type="button" class="${classes} rikishi-link" data-rikishi-id="${id}">${safeName}</button>`
+      : `<span class="${classes}">${safeName}</span>`;
+  }
+
   function boutHTML(bout, nameMap) {
     const eastId = pick(bout, ["eastId", "eastID", "eastRikishiId"]);
     const westId = pick(bout, ["westId", "westID", "westRikishiId"]);
     const winnerId = pick(bout, ["winnerId", "winnerID"]);
-    const eastName = SumoUtil.escapeHTML((eastId != null && nameMap.get(String(eastId))) || pick(bout, ["eastShikona", "eastShikonaEn"]) || "?");
-    const westName = SumoUtil.escapeHTML((westId != null && nameMap.get(String(westId))) || pick(bout, ["westShikona", "westShikonaEn"]) || "?");
+    const eastName = (eastId != null && nameMap.get(String(eastId))) || pick(bout, ["eastShikona", "eastShikonaEn"]) || "?";
+    const westName = (westId != null && nameMap.get(String(westId))) || pick(bout, ["westShikona", "westShikonaEn"]) || "?";
     const kimarite = pick(bout, KIMARITE_KEYS);
     let resultHTML = "";
     if (winnerId != null && eastId != null && westId != null) {
       const winnerName = String(winnerId) === String(eastId) ? eastName : (String(winnerId) === String(westId) ? westName : null);
       if (winnerName) {
         resultHTML = kimarite
-          ? `<span class="torikumi-result">${I18n.t("torikumiWonBy", { winner: winnerName, kimarite: SumoUtil.escapeHTML(kimarite) })}</span>`
-          : `<span class="torikumi-result">${I18n.t("torikumiWon", { winner: winnerName })}</span>`;
+          ? `<span class="torikumi-result">${I18n.t("torikumiWonBy", { winner: SumoUtil.escapeHTML(winnerName), kimarite: SumoUtil.escapeHTML(kimarite) })}</span>`
+          : `<span class="torikumi-result">${I18n.t("torikumiWon", { winner: SumoUtil.escapeHTML(winnerName) })}</span>`;
       }
     }
     return `
       <div class="torikumi-row${winnerId != null ? " is-decided" : ""}">
-        <span class="torikumi-east${String(winnerId) === String(eastId) ? " is-winner" : ""}">${eastName}</span>
+        ${nameHTML("torikumi-east", eastName, eastId, String(winnerId) === String(eastId))}
         <span class="torikumi-vs">–</span>
-        <span class="torikumi-west${String(winnerId) === String(westId) ? " is-winner" : ""}">${westName}</span>
+        ${nameHTML("torikumi-west", westName, westId, String(winnerId) === String(westId))}
         ${resultHTML}
       </div>`;
   }

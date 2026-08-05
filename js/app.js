@@ -118,6 +118,7 @@
       <div class="row"><span class="k">${I18n.t("venue")}</span><span class="v">${venue ? venue.name : ""}</span></div>
       <div class="row"><span class="k">${I18n.t("dates")}</span><span class="v">${range}</span></div>
     `;
+    if (window.PreviousBasho) PreviousBasho.enrich(prev.id);
   }
 
   function updateTzPreview() {
@@ -172,6 +173,18 @@
     renderVenuesPanel();
     updateVenueScene();
     if (window.Torikumi) Torikumi.render();
+  }
+
+  // Streams/Videos/News all embed iframes or otherwise hold content that
+  // must NOT be blindly rebuilt on a timer — rebuilding innerHTML resets
+  // any actively-playing video (this was a real, reported bug: streams
+  // and videos would stop and reset every ~60s because renderAllPanels
+  // used to call these too, on the same interval as everything else).
+  // Call this only on language change, where a rebuild is actually
+  // necessary (retranslating labels/badges) and rare enough that
+  // interrupting anything currently playing is an acceptable, expected
+  // trade-off — not something that should happen every single minute.
+  function retranslateDynamicPanels() {
     if (window.Streams) Streams.render();
     if (window.Videos) Videos.render();
     if (window.News) News.render();
@@ -260,7 +273,7 @@
     }
     sTheme.addEventListener("change", () => Settings.set("theme", sTheme.value));
     sTz.addEventListener("change", () => { Settings.set("timezone", sTz.value); renderVenuesPanel(); updateTzPreview(); });
-    sLang.addEventListener("change", () => { I18n.set(sLang.value); renderAllPanels(); Countdown.render(); });
+    sLang.addEventListener("change", () => { I18n.set(sLang.value); renderAllPanels(); retranslateDynamicPanels(); Countdown.render(); });
 
     document.getElementById("tvExitButton").addEventListener("click", () => {
       sTv.checked = false;
@@ -286,6 +299,7 @@
     Countdown.start();
     PWA.init();
     if (window.Notify) Notify.init();
+    if (window.RikishiProfile) RikishiProfile.init();
 
     if (window.News) {
       News.init();

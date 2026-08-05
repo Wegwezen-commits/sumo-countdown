@@ -48,6 +48,8 @@ const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.de
   const STATUS_ORDER = { Active: 0, Occasional: 1, Intermittent: 2, Historical: 3 };
 
   const LIVE_ONLY_KEY = "streamsLiveOnlyFilter";
+  const CATEGORY_KEY = "streamsCategoryFilter";
+  const LANGUAGE_KEY = "streamsLanguageFilter";
 
   let entries = null; // loaded once, cached
   let aliveIds = null; // Set — entries (YouTube + Twitch) confirmed reachable this session; null until the first check completes
@@ -58,7 +60,11 @@ const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.de
   // since most channels aren't live most hours of the day). The "Live
   // now" checkbox below is really an "include offline too" toggle in
   // practice; persisted so the choice sticks across visits.
-  let filters = { category: "all", language: "all", liveOnly: SumoUtil.storage.get(LIVE_ONLY_KEY, true) };
+  let filters = {
+    category: SumoUtil.storage.get(CATEGORY_KEY, "all"),
+    language: SumoUtil.storage.get(LANGUAGE_KEY, "all"),
+    liveOnly: SumoUtil.storage.get(LIVE_ONLY_KEY, true)
+  };
   let lastStatuses = []; // cached render input, so filter changes don't refetch
 
   function cacheEls() {
@@ -224,6 +230,14 @@ const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.de
       </div>`;
   }
 
+  // Set once the person clicks "Watch Embedded" on any card, and never
+  // cleared again this session — see renderGrid() below for why. A false
+  // positive here (still "active" after they've actually stopped
+  // watching) just means other, unwatched cards' live/viewer-count
+  // status goes a bit stale for the rest of the session, which is a far
+  // smaller problem than resetting whatever they're actually watching.
+  let embedActive = false;
+
   function wireWatchButtons(container) {
     container.querySelectorAll(".stream-watch-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -234,6 +248,7 @@ const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.de
         wrap.innerHTML = `<iframe class="stream-embed" src="${src}" title="stream"
           loading="lazy" allow="autoplay; encrypted-media; picture-in-picture"
           allowfullscreen frameborder="0"></iframe>`;
+        embedActive = true;
       });
     });
   }
@@ -278,8 +293,16 @@ const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.de
         <span data-i18n="filterLiveNow">Live now</span>
       </label>
     `;
-    document.getElementById("streamsFilterCategory").addEventListener("change", (e) => { filters.category = e.target.value; renderFromCache(); });
-    document.getElementById("streamsFilterLanguage").addEventListener("change", (e) => { filters.language = e.target.value; renderFromCache(); });
+    document.getElementById("streamsFilterCategory").addEventListener("change", (e) => {
+      filters.category = e.target.value;
+      SumoUtil.storage.set(CATEGORY_KEY, filters.category);
+      renderFromCache();
+    });
+    document.getElementById("streamsFilterLanguage").addEventListener("change", (e) => {
+      filters.language = e.target.value;
+      SumoUtil.storage.set(LANGUAGE_KEY, filters.language);
+      renderFromCache();
+    });
     document.getElementById("streamsFilterLive").addEventListener("change", (e) => {
       filters.liveOnly = e.target.checked;
       SumoUtil.storage.set(LIVE_ONLY_KEY, filters.liveOnly);
@@ -302,6 +325,7 @@ const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.de
   async function renderGrid() {
     const list = cacheEls();
     if (!list.grid) return;
+    if (embedActive) return; // don't rebuild and reset whatever's currently playing — see the flag's own comment above
     const data = await loadData();
     if (!data.length) {
       list.grid.innerHTML = "";

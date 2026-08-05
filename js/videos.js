@@ -41,7 +41,15 @@
   let allEntries = null; // everything from the JSON, disabled ones already dropped
   let aliveIds = null;   // Set of ids confirmed reachable this session (null = not checked yet)
   let grid = null, filterBar = null;
-  let filters = { category: "all", language: "all", official: false, platform: "all" };
+  const CATEGORY_KEY = "videosCategoryFilter";
+  const LANGUAGE_KEY = "videosLanguageFilter";
+  const OFFICIAL_KEY = "videosOfficialFilter";
+  let filters = {
+    category: SumoUtil.storage.get(CATEGORY_KEY, "all"),
+    language: SumoUtil.storage.get(LANGUAGE_KEY, "all"),
+    official: SumoUtil.storage.get(OFFICIAL_KEY, false),
+    platform: "all"
+  };
 
   function cacheEls() {
     if (!grid) grid = document.getElementById("videosGrid");
@@ -162,21 +170,33 @@
     filterBar.innerHTML = `
       <select id="videosFilterCategory" class="mini filter-select">
         <option value="all" data-i18n="filterAllCategories">All categories</option>
-        ${categories.map((c) => `<option value="${SumoUtil.escapeHTML(c)}">${SumoUtil.escapeHTML(c)}</option>`).join("")}
+        ${categories.map((c) => `<option value="${SumoUtil.escapeHTML(c)}" ${c === filters.category ? "selected" : ""}>${SumoUtil.escapeHTML(c)}</option>`).join("")}
       </select>
       <select id="videosFilterLanguage" class="mini filter-select">
         <option value="all" data-i18n="filterAllLanguages">All languages</option>
-        <option value="en">English</option>
-        <option value="ja">日本語</option>
+        <option value="en" ${filters.language === "en" ? "selected" : ""}>English</option>
+        <option value="ja" ${filters.language === "ja" ? "selected" : ""}>日本語</option>
       </select>
       <label class="filter-checkbox">
-        <input type="checkbox" id="videosFilterOfficial" />
+        <input type="checkbox" id="videosFilterOfficial" ${filters.official ? "checked" : ""} />
         <span data-i18n="filterOfficialOnly">Official only</span>
       </label>
     `;
-    document.getElementById("videosFilterCategory").addEventListener("change", (e) => { filters.category = e.target.value; render(); });
-    document.getElementById("videosFilterLanguage").addEventListener("change", (e) => { filters.language = e.target.value; render(); });
-    document.getElementById("videosFilterOfficial").addEventListener("change", (e) => { filters.official = e.target.checked; render(); });
+    document.getElementById("videosFilterCategory").addEventListener("change", (e) => {
+      filters.category = e.target.value;
+      SumoUtil.storage.set(CATEGORY_KEY, filters.category);
+      render();
+    });
+    document.getElementById("videosFilterLanguage").addEventListener("change", (e) => {
+      filters.language = e.target.value;
+      SumoUtil.storage.set(LANGUAGE_KEY, filters.language);
+      render();
+    });
+    document.getElementById("videosFilterOfficial").addEventListener("change", (e) => {
+      filters.official = e.target.checked;
+      SumoUtil.storage.set(OFFICIAL_KEY, filters.official);
+      render();
+    });
     if (global.I18n) I18n.applyStaticText();
   }
 
