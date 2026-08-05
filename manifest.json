@@ -1,7 +1,7 @@
 {
-  "name": "Sumo Basho Countdown",
-  "short_name": "Basho Countdown",
-  "description": "A live countdown to the next Grand Sumo Tournament (Honbasho).",
+  "name": "Sumo Countdown",
+  "short_name": "Sumo Countdown",
+  "description": "Countdown, banzuke, torikumi, streams & news for Grand Sumo (Honbasho).",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
