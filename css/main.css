@@ -827,6 +827,34 @@ button, select, input { font-family: inherit; }
 .torikumi-east.is-winner, .torikumi-west.is-winner { color: var(--accent-deep); }
 .torikumi-vs { color: var(--ink-soft); font-size: 11px; }
 .torikumi-result { flex: 1 0 100%; text-align: center; font-size: 11px; color: var(--ink-soft); }
+
+.rikishi-link {
+  background: none; border: none; padding: 0; margin: 0;
+  font: inherit; color: inherit; cursor: pointer;
+  text-decoration: underline dotted; text-underline-offset: 2px;
+}
+.rikishi-link:hover { color: var(--accent-deep); }
+
+.rikishi-modal { position: fixed; inset: 0; z-index: 70; display: flex; align-items: center; justify-content: center; }
+.rikishi-modal.hidden { display: none; }
+.rikishi-modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.55); }
+.rikishi-modal-body {
+  position: relative;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 20px;
+  max-width: 340px;
+  width: calc(100% - 40px);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.rikishi-modal-body h3 { margin: 0 0 12px; font-size: 18px; }
+.rikishi-modal-close {
+  position: absolute; top: 8px; right: 8px;
+  background: none; border: none; font-size: 22px; line-height: 1;
+  color: var(--ink-soft); cursor: pointer; padding: 4px 8px;
+}
+.rikishi-modal-close:hover { color: var(--ink); }
 .video-badge {
   font-size: 9px;
   font-weight: 700;
