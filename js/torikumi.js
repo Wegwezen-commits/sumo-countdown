@@ -90,7 +90,7 @@
     if (!filterBar) return;
     filterBar.innerHTML = `
       <select id="torikumiFilterBasho" class="mini filter-select">
-        ${selectableBasho.map((b) => `<option value="${b.id}" ${b.id === state.bashoId ? "selected" : ""}>${SumoUtil.escapeHTML(b.name)} (${b.year})</option>`).join("")}
+        ${selectableBasho.map((b) => `<option value="${b.id}" ${b.id === state.bashoId ? "selected" : ""}>${SumoUtil.escapeHTML(b.name)} — ${SumoUtil.formatRange(b.startDate, b.endDate, I18n.locale())}</option>`).join("")}
       </select>
       <select id="torikumiFilterDivision" class="mini filter-select">
         ${global.Banzuke.DIVISIONS.map((d) => `<option value="${d}" ${d === state.division ? "selected" : ""}>${d}</option>`).join("")}

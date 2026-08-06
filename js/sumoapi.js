@@ -87,6 +87,14 @@
     // less-central fields.
     async getRikishi(rikishiId) {
       return getJSON(`/rikishi/${encodeURIComponent(rikishiId)}`);
+    },
+
+    // Per-division career record (wins/losses/absences/yusho) — used to
+    // enrich the rikishi popup beyond the basic profile fields. Field
+    // names best-effort (not independently confirmed), same caveat as
+    // getBashoResult.
+    async getRikishiStats(rikishiId) {
+      return getJSON(`/rikishi/${encodeURIComponent(rikishiId)}/stats`);
     }
   };
 
