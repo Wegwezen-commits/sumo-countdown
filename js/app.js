@@ -4,8 +4,6 @@
 (function () {
   "use strict";
 
-  const BANZUKE_URL = "https://sumo.or.jp/EnHonbashoBanzuke/index/"; // official JSA banzuke page — linked from the "Basho Live"/"Banzuke" panel while no basho is live
-
   function statusLabel(status) {
     return I18n.t({
       completed: "statusCompleted",
@@ -39,47 +37,6 @@
           <div class="t-count">${countText}</div>
         </article>`;
     }).join("");
-  }
-
-  function renderLivePanel() {
-    const container = document.getElementById("liveCard");
-    const title = document.getElementById("liveCardTitle");
-    const now = new Date();
-    const live = Schedule.getLive(now);
-    if (!live) {
-      if (title) title.textContent = I18n.t("banzukeLive");
-      const banzuke = Schedule.getBanzukeInfo(now);
-      if (!banzuke) {
-        container.innerHTML = `<div class="row"><span class="k">${I18n.t("status")}</span><span class="v">—</span></div>`;
-        return;
-      }
-      const dateStr = SumoUtil.formatRange(banzuke.banzukeDate, banzuke.banzukeDate, I18n.locale()).split("–").pop().trim();
-      const banzukeLink = `<a class="panel-external-link" href="${BANZUKE_URL}" target="_blank" rel="noopener noreferrer">${I18n.t("viewBanzuke")} ↗</a>`;
-      if (banzuke.released) {
-        container.innerHTML = `
-          <div class="row"><span class="k">${I18n.t("banzukeStatus")}</span><span class="v">${I18n.t("banzukeReleased")}</span></div>
-          <div class="row"><span class="k">${I18n.t("nextBasho")}</span><span class="v">${banzuke.basho.name}</span></div>
-          <div id="banzukeFilterBar" class="filter-bar"></div>
-          <div id="banzukeRankList"></div>`
-          + banzukeLink;
-        if (window.Banzuke) {
-          Banzuke.render(document.getElementById("banzukeFilterBar"), document.getElementById("banzukeRankList"), banzuke.basho.id);
-        }
-      } else {
-        container.innerHTML = `
-          <div class="row"><span class="k">${I18n.t("banzukeStatus")}</span><span class="v">${I18n.t("banzukeIn", { n: banzuke.daysUntil })}</span></div>
-          <div class="row"><span class="k">${banzuke.basho.name}</span><span class="v">${dateStr}</span></div>`
-          + banzukeLink;
-      }
-      return;
-    }
-    if (title) title.textContent = I18n.t("basholive");
-    const info = Live.status(live, now);
-    const venue = VenueModule.get(live.venueId);
-    container.innerHTML = `
-      <div class="row"><span class="k">${I18n.t("nextBasho")}</span><span class="v">${live.name}</span></div>
-      <div class="row"><span class="k">${I18n.t("venue")}</span><span class="v">${venue ? venue.name : ""}</span></div>
-      <div class="row"><span class="k">${I18n.t("dayOf", { current: info.dayIndex, total: info.totalDays })}</span><span class="v">${I18n.t("daysRemaining", { n: info.daysRemaining })}</span></div>`;
   }
 
   function renderStatsPanel() {
@@ -167,12 +124,12 @@
 
   function renderAllPanels() {
     renderUpcomingSix();
-    renderLivePanel();
     renderStatsPanel();
     renderPreviousPanel();
     renderVenuesPanel();
     updateVenueScene();
     if (window.Torikumi) Torikumi.render();
+    if (window.Banzuke) Banzuke.render();
   }
 
   // Streams/Videos/News all embed iframes or otherwise hold content that
@@ -188,6 +145,8 @@
     if (window.Streams) Streams.render();
     if (window.Videos) Videos.render();
     if (window.News) News.render();
+    if (window.Banzuke) Banzuke.render();
+    if (window.Torikumi) Torikumi.render();
   }
 
   // ---------- Settings dialog ----------
@@ -309,6 +268,10 @@
     if (window.Streams) Streams.init();
     if (window.Videos) Videos.init();
     if (window.WatchTabs) WatchTabs.init();
+    if (window.Torikumi) Torikumi.init();
+    if (window.Banzuke) Banzuke.init();
+    if (window.Banzuke) Banzuke.init();
+    if (window.Torikumi) Torikumi.init();
 
     document.querySelectorAll(".ghost-button, .icon-button").forEach((btn) => {
       btn.addEventListener("click", () => SumoAudio.playClick());

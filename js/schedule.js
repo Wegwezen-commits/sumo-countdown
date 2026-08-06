@@ -61,7 +61,15 @@
 
     const now = new Date();
     const seedYears = seed.basho.map((b) => b.year);
-    const earliestYear = Math.min(...seedYears);
+    // Generate back at least 5 years regardless of what's in the seed
+    // file, so the Banzuke/Torikumi basho selectors (see js/banzuke.js,
+    // js/torikumi.js) have real history to browse, not just whatever
+    // happens to be officially seeded. These generated-past entries are
+    // "estimated" the same way generated-future ones already were — only
+    // used to get a plausible bashoId (YYYYMM) to query sumo-api.com
+    // with, which has the real historical data regardless of how
+    // accurate our own guessed startDate/endDate is for that entry.
+    const earliestYear = Math.min(...seedYears, now.getUTCFullYear() - 5);
     const targetYear = now.getUTCFullYear() + 6; // always keep 6+ years generated ahead
 
     const list = [];
@@ -103,6 +111,20 @@
       const live = this.getLive(now);
       if (live) return live;
       return this.all().find((b) => new Date(b.startDate + "T00:00:00Z") > now) || null;
+    },
+
+    // Basho selectable in the Banzuke/Torikumi dropdowns: every past
+    // tournament plus the current/live one plus the single next upcoming
+    // one (further-future placeholders have no banzuke/torikumi to show
+    // yet, so there's no point listing them). Sorted most-recent-first,
+    // which is the natural default for a "look back at past tournaments"
+    // selector.
+    getSelectableBasho(now) {
+      now = now || new Date();
+      const next = this.getNextUpcoming(now);
+      return this.all()
+        .filter((b) => new Date(b.startDate + "T00:00:00Z") <= now || (next && b.id === next.id))
+        .sort((a, b) => b.startDate.localeCompare(a.startDate));
     },
 
     getPrevious(now) {
