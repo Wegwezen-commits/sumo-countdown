@@ -119,7 +119,13 @@
     "specialPrizes": "Special Prizes",
     "banzuke": "Banzuke",
     "banzukeNote": "Rank lists by basho and division, past and present.",
-    "torikumiDayOption": "Day {day}"
+    "torikumiDayOption": "Day {day}",
+    "rikishiBirthDate": "Born",
+    "rikishiBirthplace": "From",
+    "rikishiDivision": "Division",
+    "rikishiWins": "W",
+    "rikishiLosses": "L",
+    "rikishiYusho": "Yusho"
   },
   "ja": {
     "title": "大相撲カウントダウン",
@@ -241,7 +247,13 @@
     "specialPrizes": "三賞",
     "banzuke": "番付",
     "banzukeNote": "過去から現在までの場所・階級別番付。",
-    "torikumiDayOption": "{day}日目"
+    "torikumiDayOption": "{day}日目",
+    "rikishiBirthDate": "生年月日",
+    "rikishiBirthplace": "出身",
+    "rikishiDivision": "階級",
+    "rikishiWins": "勝",
+    "rikishiLosses": "負",
+    "rikishiYusho": "優勝"
   },
   "nl": {
     "title": "Sumo Aftelklok",
@@ -363,6 +375,12 @@
     "specialPrizes": "Speciale Prijzen",
     "banzuke": "Banzuke",
     "banzukeNote": "Ranglijsten per basho en divisie, verleden en heden.",
-    "torikumiDayOption": "Dag {day}"
+    "torikumiDayOption": "Dag {day}",
+    "rikishiBirthDate": "Geboren",
+    "rikishiBirthplace": "Herkomst",
+    "rikishiDivision": "Divisie",
+    "rikishiWins": "W",
+    "rikishiLosses": "V",
+    "rikishiYusho": "Yusho"
   }
 }
