@@ -96,7 +96,7 @@
     "notifyTomorrowTitle": "Basho starts tomorrow",
     "notifyTomorrowBody": "{basho} begins tomorrow.",
     "torikumi": "Torikumi",
-    "torikumiNote": "Today's bouts, live during honbasho.",
+    "torikumiNote": "Bouts by basho, division, and day — including the next day's, once published.",
     "torikumiInactive": "No basho live right now — bouts will appear here once the next tournament starts.",
     "torikumiLoading": "Loading today's bouts…",
     "torikumiNotPosted": "Today's bouts aren't posted yet — usually up by evening, Japan time.",
@@ -116,7 +116,10 @@
     "rikishiDebut": "Debut",
     "rikishiFullProfile": "Full profile on sumo-api.com",
     "rikishiUnavailable": "Profile not available right now.",
-    "specialPrizes": "Special Prizes"
+    "specialPrizes": "Special Prizes",
+    "banzuke": "Banzuke",
+    "banzukeNote": "Rank lists by basho and division, past and present.",
+    "torikumiDayOption": "Day {day}"
   },
   "ja": {
     "title": "大相撲カウントダウン",
@@ -215,7 +218,7 @@
     "notifyTomorrowTitle": "本場所は明日開始",
     "notifyTomorrowBody": "{basho}は明日始まります。",
     "torikumi": "取組",
-    "torikumiNote": "本場所開催中の本日の取組。",
+    "torikumiNote": "場所・階級・日ごとの取組（翌日分は発表され次第表示）。",
     "torikumiInactive": "現在開催中の本場所はありません。次の場所が始まるとここに取組が表示されます。",
     "torikumiLoading": "本日の取組を読み込み中…",
     "torikumiNotPosted": "本日の取組はまだ発表されていません。通常は日本時間の夕方までに発表されます。",
@@ -235,7 +238,10 @@
     "rikishiDebut": "初土俵",
     "rikishiFullProfile": "sumo-api.comで詳細を見る",
     "rikishiUnavailable": "現在プロフィールを利用できません。",
-    "specialPrizes": "三賞"
+    "specialPrizes": "三賞",
+    "banzuke": "番付",
+    "banzukeNote": "過去から現在までの場所・階級別番付。",
+    "torikumiDayOption": "{day}日目"
   },
   "nl": {
     "title": "Sumo Aftelklok",
@@ -334,7 +340,7 @@
     "notifyTomorrowTitle": "Basho begint morgen",
     "notifyTomorrowBody": "{basho} begint morgen.",
     "torikumi": "Torikumi",
-    "torikumiNote": "Vandaag's partijen, live tijdens een basho.",
+    "torikumiNote": "Partijen per basho, divisie en dag — inclusief de volgende dag zodra gepubliceerd.",
     "torikumiInactive": "Momenteel geen live basho — partijen verschijnen hier zodra het volgende toernooi begint.",
     "torikumiLoading": "Partijen van vandaag laden…",
     "torikumiNotPosted": "De partijen van vandaag zijn nog niet geplaatst — meestal beschikbaar rond de avond, Japanse tijd.",
@@ -354,6 +360,9 @@
     "rikishiDebut": "Debuut",
     "rikishiFullProfile": "Volledig profiel op sumo-api.com",
     "rikishiUnavailable": "Profiel momenteel niet beschikbaar.",
-    "specialPrizes": "Speciale Prijzen"
+    "specialPrizes": "Speciale Prijzen",
+    "banzuke": "Banzuke",
+    "banzukeNote": "Ranglijsten per basho en divisie, verleden en heden.",
+    "torikumiDayOption": "Dag {day}"
   }
 }
