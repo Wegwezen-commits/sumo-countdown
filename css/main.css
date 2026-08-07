@@ -716,12 +716,18 @@ button, select, input { font-family: inherit; }
 .news-time { font-size: 11px; color: var(--ink-soft); margin-top: auto; }
 
 .news-sources {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 16px;
   margin-top: 14px;
   padding-top: 12px;
   border-top: 1px dashed var(--line);
+}
+.news-source-links { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.news-source-links-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 10px 0 6px;
 }
 .news-sources a {
   font-size: 11px;
@@ -855,6 +861,11 @@ button, select, input { font-family: inherit; }
   color: var(--ink-soft); cursor: pointer; padding: 4px 8px;
 }
 .rikishi-modal-close:hover { color: var(--ink); }
+.rikishi-modal-jp { font-size: 12px; font-weight: 400; color: var(--ink-soft); }
+.rikishi-stats-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 12px; }
+.rikishi-stats-table th, .rikishi-stats-table td { padding: 4px 6px; text-align: center; border-bottom: 1px solid var(--line); }
+.rikishi-stats-table th { color: var(--ink-soft); font-weight: 600; }
+.rikishi-stats-table td:first-child, .rikishi-stats-table th:first-child { text-align: left; }
 .video-badge {
   font-size: 9px;
   font-weight: 700;
