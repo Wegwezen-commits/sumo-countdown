@@ -8,24 +8,32 @@ GitHub Pages.
 ## Features
 
 - **Live countdown** to the next Honbasho, with day/night hero art tied
-  to Japan time and a Live Basho mode (day-of-15 tracker) while a
-  tournament is running.
-- **Banzuke** — countdown to the rank list's release, then the real
-  East/West Makuuchi rank list once it's out, with a division dropdown
-  (Makuuchi through Jonokuchi).
-- **Torikumi** — today's bout list during a live basho, division
-  selectable, winner + technique shown once results are in.
+  to Japan time and a live-basho mode (day-of-15 tracker) in the hero
+  area while a tournament is running.
+- **Banzuke** — Basho + Division selectors (Makuuchi through Jonokuchi),
+  browsable across any past tournament back to 1958 as well as the
+  live/upcoming one, independent of whether anything's currently live.
+  Shows a release countdown for the upcoming basho until its rank list
+  is actually out, the real East/West rank list once it is.
+- **Torikumi** — same Basho selector plus Division and Day (1–15), so
+  you can look back at any past day of any tournament, or — during a
+  live basho — ahead to a day that hasn't started yet, since the next
+  day's bout list is typically published in advance. Winner + technique
+  shown once results are in.
 - **Watch Sumo** — a tabbed panel for Live Streams (YouTube/Twitch, with
   real live-status and viewer counts) and Video Channels (auto-updating
   embeds of community-recommended highlight/analysis channels), both
-  filterable by category/language/official, with dead-channel
-  auto-detection.
+  filterable by category/language/official (filter choices persist
+  across visits), with dead-channel auto-detection.
 - **Previous Basho** — venue, dates, and (when available) the real
   yusho winner and special prizes for the last tournament.
 - **Rikishi profiles** — tap a wrestler's name in Banzuke or Torikumi
-  for a quick profile popup.
+  for a profile popup: rank, stable, birthplace, measurements, debut,
+  and a per-division career record where available.
 - **Sumo News** — aggregated headlines from Tachiai, The Japan Times,
-  and r/Sumo, with per-source filtering.
+  and r/Sumo, with per-source filtering that also governs which of
+  those three show up in the source links at the bottom (plus two
+  always-shown non-feed resources: the JSA official site and NHK World).
 - **Notifications** — local (foreground) alerts for banzuke release,
   basho start, and each day's torikumi going up.
 - **i18n** — English, 日本語, and Nederlands, switchable without a reload.
@@ -54,6 +62,14 @@ on outside services:
   (less reliable).
 - **YouTube's public oEmbed endpoint** — used to auto-detect live status
   and dead/deleted channels for YouTube entries, no API key needed.
+
+Basho dates/IDs outside the officially confirmed ones in
+`data/schedule.json` (currently 2026) are generated estimates based on
+Grand Sumo's regular odd-month schedule, going back to 1958 and forward
+indefinitely (`js/schedule.js`) — good enough to get a plausible
+`bashoId` for querying sumo-api.com, which has the real historical data
+regardless of how exact our own guessed calendar dates are for that
+tournament.
 
 ## Project structure
 
