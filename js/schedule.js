@@ -69,7 +69,14 @@
     // used to get a plausible bashoId (YYYYMM) to query sumo-api.com
     // with, which has the real historical data regardless of how
     // accurate our own guessed startDate/endDate is for that entry.
-    const earliestYear = Math.min(...seedYears, now.getUTCFullYear() - 5);
+    // 1958 is when Grand Sumo's modern 6-tournament, odd-month calendar
+    // was standardized — also exactly where sumo-api.com's own historical
+    // coverage starts (see its basho dashboard), so this generates back
+    // as far as there's real tournament data to browse via the Banzuke/
+    // Torikumi selectors (Schedule.getSelectableBasho). No reason to cap
+    // this shorter — the earlier 5-year cutoff here was just an arbitrary
+    // "keep the dropdown short" choice, not a real technical limit.
+    const earliestYear = Math.min(...seedYears, 1958);
     const targetYear = now.getUTCFullYear() + 6; // always keep 6+ years generated ahead
 
     const list = [];
