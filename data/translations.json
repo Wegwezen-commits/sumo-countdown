@@ -125,7 +125,8 @@
     "rikishiDivision": "Division",
     "rikishiWins": "W",
     "rikishiLosses": "L",
-    "rikishiYusho": "Yusho"
+    "rikishiYusho": "Yusho",
+    "newsMoreResources": "More resources"
   },
   "ja": {
     "title": "大相撲カウントダウン",
@@ -253,7 +254,8 @@
     "rikishiDivision": "階級",
     "rikishiWins": "勝",
     "rikishiLosses": "負",
-    "rikishiYusho": "優勝"
+    "rikishiYusho": "優勝",
+    "newsMoreResources": "その他のリソース"
   },
   "nl": {
     "title": "Sumo Aftelklok",
@@ -381,6 +383,7 @@
     "rikishiDivision": "Divisie",
     "rikishiWins": "W",
     "rikishiLosses": "V",
-    "rikishiYusho": "Yusho"
+    "rikishiYusho": "Yusho",
+    "newsMoreResources": "Meer bronnen"
   }
 }

@@ -4,11 +4,9 @@
     { "id": "japantimes", "name": "The Japan Times", "feedUrl": "https://www.japantimes.co.jp/tag/sumo/feed/", "siteUrl": "https://www.japantimes.co.jp/tag/sumo/" },
     { "id": "reddit", "name": "r/Sumo", "feedUrl": "https://www.reddit.com/r/Sumo/.rss", "siteUrl": "https://www.reddit.com/r/Sumo/" }
   ],
-  "curatedLinks": [
-    { "name": "Tachiai", "url": "https://www.tachiai.org/" },
+  "_curatedLinksNote": "Removed the old separate 'curatedLinks' list — it duplicated these same three feeds (as plain links, unaffected by the Settings > News sources toggle, which was genuinely confusing: unchecking a source there didn't hide its link at the bottom) plus two non-feed resources. js/news.js now builds the feed links directly from the list above (so they DO respect the toggle), and 'extraLinks' below covers the two resources that aren't RSS feeds at all — kept clearly separate since there's nothing to toggle for those.",
+  "extraLinks": [
     { "name": "Japan Sumo Association (official)", "url": "https://www.sumo.or.jp/En/" },
-    { "name": "NHK World — Sumo", "url": "https://www3.nhk.or.jp/nhkworld/en/tv/sumo/" },
-    { "name": "The Japan Times — Sumo", "url": "https://www.japantimes.co.jp/tag/sumo/" },
-    { "name": "r/Sumo", "url": "https://www.reddit.com/r/Sumo/" }
+    { "name": "NHK World — Sumo", "url": "https://www3.nhk.or.jp/nhkworld/en/tv/sumo/" }
   ]
 }
