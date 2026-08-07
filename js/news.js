@@ -133,11 +133,17 @@
       </a>`).join("");
   }
 
-  function renderCuratedLinks(container, links) {
+  function renderSourceLinks(container, feeds, extraLinks) {
     if (!container) return;
-    container.innerHTML = links.map((l) =>
-      `<a href="${escapeHTML(l.url)}" target="_blank" rel="noopener noreferrer">${escapeHTML(l.name)} ↗</a>`
-    ).join("");
+    const excluded = excludedSources();
+    const feedLinks = feeds
+      .filter((s) => !excluded.includes(s.id))
+      .map((s) => `<a href="${escapeHTML(s.siteUrl || s.feedUrl)}" target="_blank" rel="noopener noreferrer">${escapeHTML(s.name)} ↗</a>`);
+    const extra = (extraLinks || []).map((l) => `<a href="${escapeHTML(l.url)}" target="_blank" rel="noopener noreferrer">${escapeHTML(l.name)} ↗</a>`);
+    container.innerHTML = `
+      <div class="news-source-links">${feedLinks.join("")}</div>
+      ${extra.length ? `<div class="news-source-links-label" data-i18n="newsMoreResources">More resources</div><div class="news-source-links">${extra.join("")}</div>` : ""}`;
+    if (global.I18n) I18n.applyStaticText();
   }
 
   async function loadFromCache() {
@@ -167,6 +173,7 @@
 
   let rawItems = []; // everything fetched/cached, before source-exclusion filtering
   let sourceList = []; // config.feeds, for building the toggle checkboxes
+  let extraLinksList = []; // config.extraLinks — non-feed resources, always shown
   let lastStatus = { kind: "loading", cachedAt: null }; // for re-translating the status line on language change
 
   function excludedSources() {
@@ -205,6 +212,7 @@
         const next = input.checked ? current.filter((x) => x !== id) : [...current, id];
         Settings.set("excludedNewsSources", next);
         renderItems(document.getElementById("newsList"), filteredItems());
+        renderSourceLinks(document.getElementById("newsSources"), sourceList, extraLinksList);
       });
     });
   }
@@ -219,11 +227,12 @@
 
       let config;
       try { config = await SumoUtil.fetchJSON("data/news-sources.json"); }
-      catch (e) { config = { feeds: [], curatedLinks: [] }; }
+      catch (e) { config = { feeds: [], extraLinks: [] }; }
 
       sourceList = config.feeds || [];
+      extraLinksList = config.extraLinks || [];
       renderSourceToggles();
-      renderCuratedLinks(sourcesEl, config.curatedLinks || []);
+      renderSourceLinks(sourcesEl, sourceList, extraLinksList);
 
       const cached = await loadFromCache();
       if (cached && cached.length) {
@@ -253,7 +262,10 @@
       }
 
       document.addEventListener("prefschange", (e) => {
-        if (e.detail && e.detail.key === "excludedNewsSources") renderItems(list, filteredItems());
+        if (e.detail && e.detail.key === "excludedNewsSources") {
+          renderItems(list, filteredItems());
+          renderSourceLinks(sourcesEl, sourceList, extraLinksList);
+        }
       });
     },
 
