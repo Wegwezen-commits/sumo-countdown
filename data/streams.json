@@ -27,6 +27,7 @@
       "language": "en",
       "status": "Active",
       "communityRank": 1
+      "disabled": true
     },
     {
       "id": "queenbee",
@@ -42,6 +43,7 @@
       "status": "Active",
       "communityRank": 2,
       "note": "channelName corrected from an earlier unverified guess ('queenbeesumo') to 'queenbee' per the site owner's CSV."
+      "disabled": true
     },
     {
       "id": "leodickinsonsumo-twitch",
