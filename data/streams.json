@@ -131,6 +131,21 @@
       "note": "General NHK World channel; occasionally streams live sumo. Confirmed via the channel's own About page. Also listed in data/videos.json for its highlight uploads."
     },
     {
+      "id": "kappasumo",
+      "platform": "twitch",
+      "label": "KappaSumo",
+      "channelUrl": "https://www.twitch.tv/kappasumo",
+      "channelName": "kappasumo",
+      "assumeLive": true,
+      "category": "Livestream",
+      "contentType": "Live Basho",
+      "official": false,
+      "language": "en",
+      "status": "Active",
+      "communityRank": null,
+      "note": "Added per user request; confirmed live by user on 2026-09-27."
+    },
+    {
       "id": "abema",
       "platform": "generic",
       "label": "Abema (official)",
