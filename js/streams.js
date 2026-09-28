@@ -39,7 +39,7 @@ const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.de
 //    and put its URL below. Entries with an http:// hlsUrl (or with
 //    "useProxy": true) are routed through it. Leave "" to disable — such
 //    entries then render a "needs proxy" card instead of a broken player.
-const HLS_PROXY_ENDPOINT = "";
+const HLS_PROXY_ENDPOINT = "https://hls-proxy.veeken-joost.workers.dev/";
 const HLS_LIB_URL = "js/vendor/hls.light.min.js";
 
 // DEAD-CHANNEL CHECK: on every load, each enabled YouTube entry is pinged
