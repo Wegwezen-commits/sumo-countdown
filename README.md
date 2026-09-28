@@ -60,6 +60,12 @@ on outside services:
   back to a manual `assumeLive` flag in `data/streams.json` (no viewer
   counts), and news falls back to third-party public CORS proxies
   (less reliable).
+- **An optional HLS proxy** (`workers/hls-proxy.js`, a second Cloudflare
+  Worker) — needed for `platform: "hls"` entries in `data/streams.json`
+  whose `.m3u8` is plain `http://` or lacks CORS headers (browsers block
+  both from an https page). Deploy it, then set `HLS_PROXY_ENDPOINT` in
+  `js/streams.js`. Playback itself uses vendored hls.js
+  (`js/vendor/`, Apple Safari plays HLS natively instead).
 - **YouTube's public oEmbed endpoint** — used to auto-detect live status
   and dead/deleted channels for YouTube entries, no API key needed.
 
@@ -80,10 +86,11 @@ sumo-countdown/
 ├── js/       util, language, settings, schedule, venue, live, sumoapi,
 │             banzuke, torikumi, previousbasho, rikishi, animations, audio,
 │             countdown, hero, news, streams, videos, watch-tabs, notify,
-│             pwa, app
+│             pwa, app, vendor/hls.light.min.js
 ├── assets/   pixel/ (art), audio/ (composed tracks), icons/ (PWA icons)
 ├── data/     schedule.json, venues.json, champions.json, translations.json,
 │             news-sources.json, streams.json, videos.json
+├── workers/  hls-proxy.js (CORS/HTTPS proxy for .m3u8 streams)
 ├── scripts/  check_schedule.py + test (schedule sync), check-channel-health.mjs
 │             (dead-channel sweep), last-health-check.json (keepalive record)
 ├── manifest.json, service-worker.js, robots.txt, sitemap.xml
