@@ -7,6 +7,7 @@
     "  platform: \"twitch\"  — channelName is the twitch.tv/<name> username. No public keyless live-status API, so \"assumeLive\" controls the live/offline card by hand.",
     "  platform: \"generic\" — embedUrl is a full iframe embed URL for some other embeddable player. Same limitation/toggle as Twitch.",
     "  category/contentType/official/language/status/communityRank mirror data/videos.json's schema — see that file's _readme for what each means. status \"Historical\" is hidden by default (Settings > Show inactive channels reveals it), same as videos.json.",
+    "  platform: \"hls\"     — hlsUrl is a direct .m3u8 playlist, played natively in a <video> via hls.js (see js/streams.js, HLS_PROXY_ENDPOINT). http:// sources need the CORS/HTTPS proxy in workers/hls-proxy.js; set useProxy:true to force the proxy for an https source that lacks CORS headers. Live status = whether the playlist itself can be fetched.",
     "  disabled: true is a hard, non-toggleable gate for unverified/non-embeddable entries — separate from the status-based show/hide.",
     "",
     "On every load, js/streams.js pings each enabled YouTube entry the same CORS-friendly, keyless way it already checks live status, so a taken-down YouTube channel gets hidden automatically rather than sitting there broken. Twitch/generic entries have no equivalent public check and still need periodic manual review.",
@@ -144,6 +145,20 @@
       "status": "Active",
       "communityRank": null,
       "note": "Added per user request; confirmed live by user on 2026-09-27."
+    },
+    {
+      "id": "nhkworld-hls",
+      "platform": "hls",
+      "label": "NHK WORLD-JAPAN (HLS)",
+      "channelUrl": "https://www3.nhk.or.jp/nhkworld/en/live/",
+      "hlsUrl": "http://170.83.16.50/NHK_WORLD/index.m3u8",
+      "category": "Livestream",
+      "contentType": "24/7 Channel (sumo coverage when live)",
+      "official": false,
+      "language": "en",
+      "status": "Active",
+      "communityRank": null,
+      "note": "Third-party restream of NHK WORLD-JAPAN on a bare IP address (http only, no CORS) — unofficial and could vanish without notice; plays through the workers/hls-proxy.js Worker. channelUrl points at NHK's own official live page."
     },
     {
       "id": "abema",
