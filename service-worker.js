@@ -3,7 +3,7 @@
 // fixed deploy is never masked by a stale cached copy of the code
 // itself; images/audio (which rarely change) stay cache-first for
 // speed and offline reliability.
-const CACHE_VERSION = "sumo-countdown-v40-hls-player";
+const CACHE_VERSION = "sumo-countdown-v41-hls-fixes";
 const NETWORK_FIRST_EXT = [".html", ".js", ".css", ".json"];
 const APP_SHELL = [
   "./",
@@ -31,7 +31,6 @@ const APP_SHELL = [
   "./js/hero.js",
   "./js/news.js",
   "./js/streams.js",
-  "./js/vendor/hls.light.min.js",
   "./js/videos.js",
   "./js/watch-tabs.js",
   "./js/pwa.js",
@@ -72,7 +71,9 @@ const APP_SHELL = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_VERSION).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting())
+    caches.open(CACHE_VERSION)
+      .then((cache) => cache.addAll(APP_SHELL).then(() => cache.add("./js/vendor/hls.light.min.js").catch(() => {})))
+      .then(() => self.skipWaiting())
   );
 });
 
