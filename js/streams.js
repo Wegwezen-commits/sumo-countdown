@@ -41,6 +41,7 @@ const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.de
 //    entries then render a "needs proxy" card instead of a broken player.
 const HLS_PROXY_ENDPOINT = "https://hls-proxy.veeken-joost.workers.dev/";
 const HLS_LIB_URL = "js/vendor/hls.light.min.js";
+const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouTube's oEmbed
 
 // DEAD-CHANNEL CHECK: on every load, each enabled YouTube entry is pinged
 // the same CORS-friendly way its live status is already checked, and
@@ -166,13 +167,19 @@ const HLS_LIB_URL = "js/vendor/hls.light.min.js";
   // #EXTM3U body = live; anything else (CORS block, 4xx/5xx, timeout,
   // no proxy for an http:// source) = offline, which is also exactly
   // when playback would fail, so the card never promises a dead player.
-  async function checkHlsLive(src) {
+  async function checkHlsLive(src, label) {
     if (!src) return false;
     try {
-      const res = await withTimeout((signal) => fetch(src, { signal, cache: "no-cache" }), YT_OEMBED_TIMEOUT_MS);
-      if (!res.ok) return false;
-      return (await res.text()).trimStart().startsWith("#EXTM3U");
+      const res = await withTimeout((signal) => fetch(src, { signal, cache: "no-cache" }), HLS_PROBE_TIMEOUT_MS);
+      if (!res.ok) {
+        console.warn(`[streams] ${label}: playlist probe got HTTP ${res.status} from ${src}`);
+        return false;
+      }
+      const ok = (await res.text()).trimStart().startsWith("#EXTM3U");
+      if (!ok) console.warn(`[streams] ${label}: response wasn't an HLS playlist (${src})`);
+      return ok;
     } catch (e) {
+      console.warn(`[streams] ${label}: playlist probe failed (${e && e.name}: ${e && e.message}) — CORS block, timeout or network error. URL: ${src}`);
       return false;
     }
   }
@@ -180,7 +187,10 @@ const HLS_LIB_URL = "js/vendor/hls.light.min.js";
   async function resolveStatus(entry) {
     if (entry.platform === "hls") {
       const src = hlsSourceFor(entry);
-      return { ...entry, live: await checkHlsLive(src), viewers: null, needsProxy: !src };
+      // "assumeLive": true skips trusting the probe (same manual override
+      // Twitch entries use) — the player then reports any real error.
+      const live = (await checkHlsLive(src, entry.label)) || (!!src && entry.assumeLive === true);
+      return { ...entry, live, viewers: null, needsProxy: !src };
     }
     if (entry.platform === "youtube") {
       const result = await checkYouTubeLive(entry.channelId);
