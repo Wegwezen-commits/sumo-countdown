@@ -60,12 +60,16 @@ on outside services:
   back to a manual `assumeLive` flag in `data/streams.json` (no viewer
   counts), and news falls back to third-party public CORS proxies
   (less reliable).
-- **An optional HLS proxy** (`workers/hls-proxy.js`, a second Cloudflare
-  Worker) — needed for `platform: "hls"` entries in `data/streams.json`
-  whose `.m3u8` is plain `http://` or lacks CORS headers (browsers block
-  both from an https page). Deploy it, then set `HLS_PROXY_ENDPOINT` in
-  `js/streams.js`. Playback itself uses vendored hls.js
-  (`js/vendor/`, Apple Safari plays HLS natively instead).
+- **An optional, password-protected HLS proxy** (`workers/hls-proxy.js`, a
+  second Cloudflare Worker) — for `platform: "hls"` entries in
+  `data/streams.json`. It fixes the mixed-content/CORS blocks on plain
+  `http://` streams, keeps the stream's real address out of this repo
+  (entries use a `sourceId`; the URL lives in the Worker's
+  `STREAM_SOURCES` secret), and only serves people who've entered the
+  password (`STREAM_PASSWORD` / `TOKEN_SECRET` secrets — setup steps in
+  the Worker's header comment). Set `HLS_PROXY_ENDPOINT` in
+  `js/streams.js`. Playback uses vendored hls.js (`js/vendor/`; Apple
+  Safari plays HLS natively).
 - **YouTube's public oEmbed endpoint** — used to auto-detect live status
   and dead/deleted channels for YouTube entries, no API key needed.
 
