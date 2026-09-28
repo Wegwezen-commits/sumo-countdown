@@ -29,6 +29,19 @@
 // but no viewer counts and no Twitch dead-channel detection).
 const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.dev";
 
+// HLS (.m3u8) PLAYBACK — platform "hls" entries play natively in a <video>
+// element (hls.js, vendored in js/vendor/, everywhere except Apple Safari
+// which plays HLS itself). Two browser rules matter here:
+//  - MIXED CONTENT: this site is served over https, so a plain http://
+//    stream URL is blocked outright. Same for CORS: hls.js fetches the
+//    playlist/segments with XHR, so the origin must send CORS headers.
+//  - Fix for both: deploy workers/hls-proxy.js (see its header comment)
+//    and put its URL below. Entries with an http:// hlsUrl (or with
+//    "useProxy": true) are routed through it. Leave "" to disable — such
+//    entries then render a "needs proxy" card instead of a broken player.
+const HLS_PROXY_ENDPOINT = "";
+const HLS_LIB_URL = "js/vendor/hls.light.min.js";
+
 // DEAD-CHANNEL CHECK: on every load, each enabled YouTube entry is pinged
 // the same CORS-friendly way its live status is already checked, and
 // hidden for this session if it 404s (very likely deleted/renamed).
@@ -66,6 +79,7 @@ const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.de
     liveOnly: SumoUtil.storage.get(LIVE_ONLY_KEY, true)
   };
   let lastStatuses = []; // cached render input, so filter changes don't refetch
+  const hlsInstances = new Set(); // live hls.js players, destroyed before any re-render so nothing leaks
 
   function cacheEls() {
     if (els) return els;
@@ -148,7 +162,26 @@ const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.de
     }
   }
 
+  // HLS entries: probe the (possibly proxied) playlist itself. A valid
+  // #EXTM3U body = live; anything else (CORS block, 4xx/5xx, timeout,
+  // no proxy for an http:// source) = offline, which is also exactly
+  // when playback would fail, so the card never promises a dead player.
+  async function checkHlsLive(src) {
+    if (!src) return false;
+    try {
+      const res = await withTimeout((signal) => fetch(src, { signal, cache: "no-cache" }), YT_OEMBED_TIMEOUT_MS);
+      if (!res.ok) return false;
+      return (await res.text()).trimStart().startsWith("#EXTM3U");
+    } catch (e) {
+      return false;
+    }
+  }
+
   async function resolveStatus(entry) {
+    if (entry.platform === "hls") {
+      const src = hlsSourceFor(entry);
+      return { ...entry, live: await checkHlsLive(src), viewers: null, needsProxy: !src };
+    }
     if (entry.platform === "youtube") {
       const result = await checkYouTubeLive(entry.channelId);
       return { ...entry, live: result.live, title: result.title, viewers: null };
@@ -161,7 +194,20 @@ const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.de
     return { ...entry, live: !!entry.assumeLive, viewers: null };
   }
 
+  // Resolves the URL the <video> should actually load. "" = can't be
+  // played from this page (http:// source, https site, no proxy set).
+  function hlsSourceFor(entry) {
+    const raw = entry.hlsUrl || "";
+    if (!raw) return "";
+    const insecure = /^http:\/\//i.test(raw) && window.location.protocol === "https:";
+    if (insecure || entry.useProxy) {
+      return HLS_PROXY_ENDPOINT ? `${HLS_PROXY_ENDPOINT}?url=${encodeURIComponent(raw)}` : "";
+    }
+    return raw;
+  }
+
   function embedUrlFor(entry) {
+    if (entry.platform === "hls") return hlsSourceFor(entry);
     if (entry.platform === "youtube") {
       return `https://www.youtube.com/embed/live_stream?channel=${encodeURIComponent(entry.channelId)}&autoplay=1`;
     }
@@ -176,6 +222,7 @@ const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.de
     if (platform === "youtube") return "YouTube";
     if (platform === "twitch") return "Twitch";
     if (platform === "generic") return "Web";
+    if (platform === "hls") return "HLS";
     return "Live";
   }
 
@@ -192,11 +239,26 @@ const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.de
     const badges = badgeHTML(status);
     const openUrl = SumoUtil.escapeHTML(status.channelUrl || "#");
     const src = SumoUtil.escapeHTML(embedUrlFor(status));
+    if (status.needsProxy) {
+      return `
+      <div class="stream-card pixel-corners is-offline">
+        <div class="stream-card-head">
+          <span class="stream-platform">${plat}</span>
+        </div>
+        <div class="stream-offline-sign">
+          <span class="stream-offline-text stream-needs-proxy" data-i18n="streamNeedsProxy">Can't play here</span>
+        </div>
+        <div class="stream-card-badges">${badges}</div>
+        <div class="stream-card-foot">
+          <span>${label}</span>
+        </div>
+      </div>`;
+    }
     if (status.live) {
       const viewers = typeof status.viewers === "number"
         ? `<span class="stream-viewers">👥 ${status.viewers.toLocaleString()}</span>` : "";
       return `
-        <div class="stream-card pixel-corners is-live" data-embed-src="${src}">
+        <div class="stream-card pixel-corners is-live" data-embed-src="${src}" data-embed-kind="${status.platform === "hls" ? "hls" : "iframe"}">
           <div class="stream-card-head">
             <span class="stream-platform">${plat}</span>
             <span class="live-badge stream-live-dot"><span class="dot" aria-hidden="true"></span> ${I18n.t("liveBadge")}</span>
@@ -210,7 +272,7 @@ const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.de
           <div class="stream-card-badges">${badges}</div>
           <div class="stream-card-foot">
             <span>${label}</span>
-            <a href="${openUrl}" target="_blank" rel="noopener noreferrer">${I18n.t("openOnPlatform", { platform: plat })}</a>
+            ${status.channelUrl ? `<a href="${openUrl}" target="_blank" rel="noopener noreferrer">${I18n.t("openOnPlatform", { platform: plat })}</a>` : ""}
           </div>
         </div>`;
     }
@@ -238,6 +300,92 @@ const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.de
   // smaller problem than resetting whatever they're actually watching.
   let embedActive = false;
 
+  // ---- HLS player -------------------------------------------------------
+  let hlsLibPromise = null;
+  function loadHlsLib() {
+    if (global.Hls) return Promise.resolve(global.Hls);
+    if (!hlsLibPromise) {
+      hlsLibPromise = new Promise((resolve, reject) => {
+        const tag = document.createElement("script");
+        tag.src = HLS_LIB_URL;
+        tag.onload = () => resolve(global.Hls);
+        tag.onerror = () => { hlsLibPromise = null; reject(new Error("hls.js failed to load")); };
+        document.head.appendChild(tag);
+      });
+    }
+    return hlsLibPromise;
+  }
+
+  // Apple Safari (macOS + every iOS browser/PWA) plays HLS natively, which
+  // also gives AirPlay and lock-screen controls — prefer that there.
+  function prefersNativeHls(video) {
+    const isSafari = /^((?!chrome|chromium|android|crios|fxios|edg).)*safari/i.test(navigator.userAgent);
+    return isSafari && !!video.canPlayType("application/vnd.apple.mpegurl");
+  }
+
+  function showPlayerError(wrap) {
+    const msg = document.createElement("div");
+    msg.className = "stream-embed-error";
+    msg.textContent = global.I18n ? I18n.t("streamPlayError") : "Stream unavailable right now.";
+    wrap.appendChild(msg);
+  }
+
+  function startPlayback(video) {
+    const p = video.play();
+    if (p && p.catch) {
+      // Unmuted autoplay can still be refused (e.g. some PWA/webview
+      // contexts). Fall back to muted rather than a dead first frame; the
+      // native controls let the person unmute.
+      p.catch(() => { video.muted = true; video.play().catch(() => {}); });
+    }
+  }
+
+  async function mountHls(wrap, src) {
+    destroyHls();
+    wrap.innerHTML = `<video class="stream-embed stream-video" controls playsinline
+      webkit-playsinline preload="auto"></video>`;
+    const video = wrap.querySelector("video");
+    try {
+      if (prefersNativeHls(video)) {
+        video.src = src;
+        video.addEventListener("error", () => showPlayerError(wrap), { once: true });
+        startPlayback(video);
+        return;
+      }
+      const Hls = await loadHlsLib();
+      if (!Hls.isSupported()) {
+        if (video.canPlayType("application/vnd.apple.mpegurl")) { video.src = src; startPlayback(video); return; }
+        throw new Error("HLS unsupported");
+      }
+      const hls = new Hls({ lowLatencyMode: false, liveSyncDurationCount: 3, maxBufferLength: 30 });
+      hlsInstances.add(hls);
+      let netRetries = 0;
+      hls.on(Hls.Events.ERROR, (_evt, data) => {
+        if (!data.fatal) return;
+        if (data.type === Hls.ErrorTypes.NETWORK_ERROR && netRetries++ < 3) {
+          setTimeout(() => hls.startLoad(), 1000 * netRetries);
+        } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR && netRetries++ < 3) {
+          hls.recoverMediaError();
+        } else {
+          hls.destroy();
+          hlsInstances.delete(hls);
+          showPlayerError(wrap);
+        }
+      });
+      hls.on(Hls.Events.MANIFEST_PARSED, () => startPlayback(video));
+      hls.loadSource(src);
+      hls.attachMedia(video);
+    } catch (e) {
+      showPlayerError(wrap);
+    }
+  }
+
+  function destroyHls() {
+    hlsInstances.forEach((h) => { try { h.destroy(); } catch (e) { /* already gone */ } });
+    hlsInstances.clear();
+  }
+  window.addEventListener("pagehide", destroyHls);
+
   function wireWatchButtons(container) {
     container.querySelectorAll(".stream-watch-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -245,6 +393,11 @@ const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.de
         const src = card && card.getAttribute("data-embed-src");
         const wrap = card && card.querySelector(".stream-embed-wrap");
         if (!src || !wrap) return;
+        if (card.getAttribute("data-embed-kind") === "hls") {
+          mountHls(wrap, src);
+          embedActive = true;
+          return;
+        }
         wrap.innerHTML = `<iframe class="stream-embed" src="${src}" title="stream"
           loading="lazy" allow="autoplay; encrypted-media; picture-in-picture"
           allowfullscreen frameborder="0"></iframe>`;
@@ -315,6 +468,7 @@ const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.de
     const list = cacheEls();
     if (!list.grid) return;
     const visible = visibleStatuses();
+    destroyHls();
     list.grid.innerHTML = visible.length
       ? visible.map(cardHTML).join("")
       : `<p class="filter-empty" data-i18n="filterNoResults">No channels match these filters.</p>`;
