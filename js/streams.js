@@ -172,19 +172,29 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
     try {
       const res = await withTimeout((signal) => fetch(src, { signal, cache: "no-cache" }), HLS_PROBE_TIMEOUT_MS);
       if (!res.ok) {
-        console.warn(`[streams] ${label}: playlist probe got HTTP ${res.status} from ${src}`);
+        if (res.status === 401) clearHlsToken(); // expired/revoked token — falls back to the locked card
+        console.warn(`[streams] ${label}: playlist probe got HTTP ${res.status}`);
         return false;
       }
       const ok = (await res.text()).trimStart().startsWith("#EXTM3U");
-      if (!ok) console.warn(`[streams] ${label}: response wasn't an HLS playlist (${src})`);
+      if (!ok) console.warn(`[streams] ${label}: response wasn't an HLS playlist`);
       return ok;
     } catch (e) {
-      console.warn(`[streams] ${label}: playlist probe failed (${e && e.name}: ${e && e.message}) — CORS block, timeout or network error. URL: ${src}`);
+      console.warn(`[streams] ${label}: playlist probe failed (${e && e.name}: ${e && e.message}) — CORS block, timeout or network error. `);
       return false;
     }
   }
 
   async function resolveStatus(entry) {
+    if (entry.platform === "hls" && entry.sourceId) {
+      if (!HLS_PROXY_ENDPOINT) return { ...entry, live: false, viewers: null, needsProxy: true };
+      // No token yet: can't probe. Show the card as available-but-locked
+      // (so the "live only" filter doesn't hide the way in).
+      if (!getHlsToken()) return { ...entry, live: true, locked: true, viewers: null };
+      const ok = await checkHlsLive(hlsSourceFor(entry), entry.label);
+      if (!getHlsToken()) return { ...entry, live: true, locked: true, viewers: null }; // token rejected mid-probe
+      return { ...entry, live: ok || entry.assumeLive === true, viewers: null };
+    }
     if (entry.platform === "hls") {
       const src = hlsSourceFor(entry);
       // "assumeLive": true skips trusting the probe (same manual override
@@ -204,9 +214,50 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
     return { ...entry, live: !!entry.assumeLive, viewers: null };
   }
 
+  // ---- Password-protected HLS ------------------------------------------
+  // Entries with a "sourceId" don't carry a URL at all: the stream's real
+  // address lives only in the Worker's secrets. The person types a
+  // password once; the Worker returns a signed token that's kept in
+  // localStorage and appended to every proxied request (see
+  // workers/hls-proxy.js).
+  const HLS_TOKEN_KEY = "hlsToken";
+
+  function hlsProxyBase() { return HLS_PROXY_ENDPOINT.replace(/\/?$/, "/"); }
+
+  function getHlsToken() {
+    const saved = SumoUtil.storage.get(HLS_TOKEN_KEY, null);
+    if (saved && saved.token && saved.exp * 1000 > Date.now() + 60000) return saved.token;
+    return null;
+  }
+  function clearHlsToken() { SumoUtil.storage.set(HLS_TOKEN_KEY, null); }
+
+  function protectedSrc(sourceId, token) {
+    return `${hlsProxyBase()}?s=${encodeURIComponent(sourceId)}&t=${encodeURIComponent(token)}`;
+  }
+
+  // Resolves to the token on success; throws Error("wrong") / Error("network").
+  async function hlsLogin(password) {
+    let res;
+    try {
+      res = await withTimeout((signal) => fetch(`${hlsProxyBase()}login`, {
+        method: "POST", signal, headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password })
+      }), 10000);
+    } catch (e) { throw new Error("network"); }
+    if (res.status === 401) throw new Error("wrong");
+    if (!res.ok) throw new Error("network");
+    const data = await res.json();
+    SumoUtil.storage.set(HLS_TOKEN_KEY, { token: data.token, exp: data.exp });
+    return data.token;
+  }
+
   // Resolves the URL the <video> should actually load. "" = can't be
-  // played from this page (http:// source, https site, no proxy set).
+  // played from this page right now.
   function hlsSourceFor(entry) {
+    if (entry.sourceId) {
+      const token = getHlsToken();
+      return HLS_PROXY_ENDPOINT && token ? protectedSrc(entry.sourceId, token) : "";
+    }
     const raw = entry.hlsUrl || "";
     if (!raw) return "";
     const insecure = /^http:\/\//i.test(raw) && window.location.protocol === "https:";
@@ -268,7 +319,7 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
       const viewers = typeof status.viewers === "number"
         ? `<span class="stream-viewers">👥 ${status.viewers.toLocaleString()}</span>` : "";
       return `
-        <div class="stream-card pixel-corners is-live" data-embed-src="${src}" data-embed-kind="${status.platform === "hls" ? "hls" : "iframe"}">
+        <div class="stream-card pixel-corners is-live" data-embed-src="${src}" data-embed-kind="${status.locked ? "hls-locked" : status.platform === "hls" ? "hls" : "iframe"}" data-source-id="${SumoUtil.escapeHTML(status.sourceId || "")}">
           <div class="stream-card-head">
             <span class="stream-platform">${plat}</span>
             <span class="live-badge stream-live-dot"><span class="dot" aria-hidden="true"></span> ${I18n.t("liveBadge")}</span>
@@ -276,7 +327,9 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
           <div class="stream-embed-wrap">
             <div class="stream-embed-poster">
               ${viewers}
-              <button type="button" class="ghost-button stream-watch-btn" data-i18n="watchEmbedded">Watch Embedded</button>
+              ${status.locked
+                ? `<button type="button" class="ghost-button stream-watch-btn" data-i18n="streamUnlock">🔒 Unlock</button>`
+                : `<button type="button" class="ghost-button stream-watch-btn" data-i18n="watchEmbedded">Watch Embedded</button>`}
             </div>
           </div>
           <div class="stream-card-badges">${badges}</div>
@@ -372,6 +425,7 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
       let netRetries = 0;
       hls.on(Hls.Events.ERROR, (_evt, data) => {
         if (!data.fatal) return;
+        if (data.response && data.response.code === 401) { clearHlsToken(); netRetries = 99; }
         if (data.type === Hls.ErrorTypes.NETWORK_ERROR && netRetries++ < 3) {
           setTimeout(() => hls.startLoad(), 1000 * netRetries);
         } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR && netRetries++ < 3) {
@@ -390,6 +444,41 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
     }
   }
 
+  function showUnlockForm(card, wrap) {
+    const sourceId = card.getAttribute("data-source-id");
+    const t = (k, fb) => (global.I18n ? I18n.t(k) : fb);
+    wrap.innerHTML = "";
+    const form = document.createElement("form");
+    form.className = "stream-unlock";
+    form.innerHTML = `
+      <input type="password" class="stream-unlock-input" autocomplete="current-password"
+        aria-label="${SumoUtil.escapeHTML(t("streamPassword", "Password"))}"
+        placeholder="${SumoUtil.escapeHTML(t("streamPassword", "Password"))}" required />
+      <button type="submit" class="ghost-button stream-watch-btn">${SumoUtil.escapeHTML(t("streamUnlockGo", "Unlock"))}</button>
+      <div class="stream-unlock-msg" role="alert"></div>`;
+    wrap.appendChild(form);
+    const input = form.querySelector("input");
+    const btn = form.querySelector("button");
+    const msg = form.querySelector(".stream-unlock-msg");
+    input.focus();
+    form.addEventListener("submit", async (ev) => {
+      ev.preventDefault();
+      btn.disabled = true;
+      msg.textContent = "";
+      try {
+        const token = await hlsLogin(input.value);
+        card.setAttribute("data-embed-kind", "hls");
+        embedActive = true;
+        mountHls(wrap, protectedSrc(sourceId, token));
+      } catch (e) {
+        msg.textContent = t(e.message === "wrong" ? "streamWrongPassword" : "streamLoginFailed",
+          e.message === "wrong" ? "Wrong password." : "Couldn't reach the server.");
+        btn.disabled = false;
+        input.select();
+      }
+    });
+  }
+
   function destroyHls() {
     hlsInstances.forEach((h) => { try { h.destroy(); } catch (e) { /* already gone */ } });
     hlsInstances.clear();
@@ -402,6 +491,10 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
         const card = btn.closest(".stream-card");
         const src = card && card.getAttribute("data-embed-src");
         const wrap = card && card.querySelector(".stream-embed-wrap");
+        if (wrap && card.getAttribute("data-embed-kind") === "hls-locked") {
+          showUnlockForm(card, wrap);
+          return;
+        }
         if (!src || !wrap) return;
         if (card.getAttribute("data-embed-kind") === "hls") {
           mountHls(wrap, src);
