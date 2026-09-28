@@ -149,7 +149,7 @@
     {
       "id": "nhkworld-hls",
       "platform": "hls",
-      "label": "NHK WORLD-JAPAN (HLS)",
+      "label": "NHK G (HLS)",
       "channelUrl": "https://www3.nhk.or.jp/nhkworld/en/live/",
       "sourceId": "nhk",
       "category": "Livestream",
