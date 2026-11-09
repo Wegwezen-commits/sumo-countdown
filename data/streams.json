@@ -150,7 +150,7 @@
       "id": "nhkworld-hls",
       "platform": "hls",
       "label": "NHK G (HLS)",
-      "channelUrl": "DM for access",
+      "channelUrl": "https://en.wikipedia.org/wiki/NHK_General_TV",
       "sourceId": "nhk",
       "category": "Livestream",
       "contentType": "24/7 Channel (sumo coverage when live)",
