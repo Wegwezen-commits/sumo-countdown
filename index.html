@@ -71,7 +71,9 @@
   </div>
 
   <main class="content" id="main">
-    <section class="hero-card">
+    <!-- The hero lives INSIDE the info grid (as its first block) so js/layout.js can reorder it like every other block. TV mode (css/tvmode.css) unwraps the grid so only the hero remains. -->
+    <section class="info-grid">
+    <section class="hero-card" id="heroPanel">
       <div class="hero-figure">
         <div id="venueScene" class="venue-scene" aria-hidden="true"></div>
         <div id="venueCrowd" class="venue-crowd" aria-hidden="true"></div>
@@ -119,7 +121,6 @@
       </div>
     </section>
 
-    <section class="info-grid">
       <article class="panel panel-wide quick-panel" id="quickPanel" aria-live="polite"></article>
 
       <article class="panel panel-wide watch-panel" id="watchPanel">

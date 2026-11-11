@@ -26,7 +26,7 @@ GitHub Pages.
   visible at a glance. Counted in Japan calendar days; dates for basho
   beyond the official seed data are marked "estimated".
 - **Page layout** — Settings → Page layout lets you move the main blocks
-  (banzuke strip, Watch, Torikumi, Banzuke, News, …) up/down; saved per
+  (the basho countdown with the rikishi, banzuke strip, Watch, Torikumi, Banzuke, News, …) up/down; saved per
   device. Mainly for phones.
 - **Torikumi** — same Basho selector plus Division and Day (1–15), so
   you can look back at any past day of any tournament, or — during a
