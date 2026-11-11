@@ -29,12 +29,15 @@
 // but no viewer counts and no Twitch dead-channel detection).
 const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.dev";
 
-// YOUTUBE LIVE DETECTION: YouTube's oEmbed endpoint does NOT resolve
-// /channel/<id>/live URLs (it only describes real video URLs), so a purely
-// client-side check can never see a live YouTube channel. Deploy
-// workers/youtube-live.js (a tiny Cloudflare Worker) and put its URL here.
-// It answers ?channelId=UC… with { exists, live, videoId, title }.
-// Leave "" and YouTube channels are shown as "couldn't check" instead of OFFLINE.
+// YOUTUBE LIVE DETECTION (two signals, either one = live):
+//  1. YT_LIVE_ENDPOINT — workers/youtube-live.js (Cloudflare Worker) reads
+//     the channel's /live page server-side. Returns { exists, live, videoId,
+//     title, embeddable }. Leave "" to skip it.
+//  2. YouTube oEmbed on /channel/<id>/live (works for most channels, no
+//     server needed). NOTE: oEmbed answers HTTP 401 when the live video
+//     exists but the streamer has DISABLED EMBEDDING — that means "live", not
+//     "offline", so it is treated as live-but-not-embeddable (card links out
+//     to YouTube instead of offering "Watch Embedded").
 const YT_LIVE_ENDPOINT = "https://youtube-live-979a.veeken-joost.workers.dev";
 
 // HLS (.m3u8) PLAYBACK — platform "hls" entries play natively in a <video>
@@ -138,16 +141,35 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
   // (rate-limited, server error, timeout, offline) — NOT the same as "not
   // live". Other 4xx answers (404 etc.) are YouTube saying there's no live
   // video, i.e. a definite "offline", exactly as before.
-  async function checkYouTubeLive(channelId) {
-    if (!YT_LIVE_ENDPOINT) return { live: false, unknown: true, why: "no YT_LIVE_ENDPOINT" };
+  async function checkYouTubeLiveWorker(channelId) {
+    if (!YT_LIVE_ENDPOINT) return null;
     const url = `${YT_LIVE_ENDPOINT}${YT_LIVE_ENDPOINT.includes("?") ? "&" : "?"}channelId=${encodeURIComponent(channelId)}`;
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
         const res = await withTimeout((signal) => fetch(url, { signal, cache: "no-cache" }), YT_OEMBED_TIMEOUT_MS);
         if (res.ok) {
           const d = await res.json();
-          return { live: !!d.live, title: d.title || null, videoId: d.videoId || null, exists: d.exists };
+          return { live: !!d.live, title: d.title || null, videoId: d.videoId || null, exists: d.exists, embeddable: d.embeddable };
         }
+      } catch (e) { /* retry */ }
+      if (attempt === 0) await sleep(RETRY_DELAY_MS);
+    }
+    return null; // worker unreachable / couldn't read the page — unknown, not "offline"
+  }
+
+  async function checkYouTubeLiveOembed(channelId) {
+    const liveUrl = `https://www.youtube.com/channel/${encodeURIComponent(channelId)}/live`;
+    const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(liveUrl)}&format=json`;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const res = await withTimeout((signal) => fetch(oembedUrl, { signal, cache: "no-cache" }), YT_OEMBED_TIMEOUT_MS);
+        if (res.ok) {
+          const data = await res.json();
+          return { live: true, title: data.title };
+        }
+        // 401 = a live video exists but embedding is disabled by the owner.
+        if (res.status === 401) return { live: true, embeddable: false };
+        if (res.status !== 429 && res.status < 500) return { live: false };
         if (attempt === 0) { await sleep(RETRY_DELAY_MS); continue; }
         return { live: false, unknown: true, why: `HTTP ${res.status}` };
       } catch (e) {
@@ -155,6 +177,15 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
         return { live: false, unknown: true, why: (e && e.name) || "network" };
       }
     }
+  }
+
+  async function checkYouTubeLive(channelId) {
+    const [w, o] = await Promise.all([checkYouTubeLiveWorker(channelId), checkYouTubeLiveOembed(channelId)]);
+    if (w && w.live) return { ...w, live: true };
+    if (o && o.live) return { live: true, title: o.title || (w && w.title) || null, embeddable: o.embeddable, videoId: w && w.videoId };
+    if (w && !o.unknown) return { live: false, exists: w.exists };
+    if (w) return { live: false, exists: w.exists, unknown: !!o.unknown && !w };
+    return o;
   }
 
   // Separate, cheap "does the channel itself still exist" check (independent
@@ -176,8 +207,7 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
   // `statuses` is `lastStatuses` — already has that field for any Twitch
   // entry once resolveStatus() has run once.
   async function refreshAliveSet(statuses) {
-    // YouTube: only mark dead if the worker positively said exists:false
-    // (oEmbed can't describe channel pages, so it's not used here any more).
+    // YouTube: hide only if the worker positively said exists:false.
     const dead = new Set(statuses.filter((e) => e.platform === "youtube" && e.exists === false && !e.live).map((e) => e.id));
     // Twitch: only mark dead if the worker positively said exists:false.
     // No worker configured, or the check failed for that entry -> exists
@@ -241,7 +271,7 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
     }
     if (entry.platform === "youtube") {
       const result = await checkYouTubeLive(entry.channelId);
-      return { ...entry, live: result.live, title: result.title, videoId: result.videoId || null, exists: result.exists, viewers: null, unknown: !!result.unknown };
+      return { ...entry, live: result.live, title: result.title, videoId: result.videoId || null, exists: result.exists, embeddable: result.embeddable, viewers: null, unknown: !!result.unknown };
     }
     // Twitch / generic: use the viewer-stats worker if configured, else
     // fall back to the manual "assumeLive" flag (no viewer count, and
@@ -379,7 +409,9 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
               ${viewers}
               ${status.locked
                 ? `<button type="button" class="ghost-button stream-watch-btn" data-i18n="streamUnlock">🔒 Unlock</button>`
-                : `<button type="button" class="ghost-button stream-watch-btn" data-i18n="watchEmbedded">Watch Embedded</button>`}
+                : status.platform === "youtube" && status.embeddable === false
+                  ? `<a class="ghost-button" target="_blank" rel="noopener noreferrer" href="${SumoUtil.escapeHTML(status.videoId ? `https://www.youtube.com/watch?v=${status.videoId}` : `https://www.youtube.com/channel/${status.channelId}/live`)}">${I18n.t("openOnPlatform", { platform: plat })}</a>`
+                  : `<button type="button" class="ghost-button stream-watch-btn" data-i18n="watchEmbedded">Watch Embedded</button>`}
             </div>
           </div>
           <div class="stream-card-badges">${badges}</div>
@@ -705,7 +737,7 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
 
   // Handy from the browser console: Streams.debug() → what each channel was judged and why.
   function debug() {
-    return lastStatuses.map((e) => ({ id: e.id, platform: e.platform, live: !!e.live, unknown: !!e.unknown, viewers: e.viewers, hiddenAsDead: !!aliveIds && !aliveIds.has(e.id) }));
+    return lastStatuses.map((e) => ({ id: e.id, platform: e.platform, live: !!e.live, unknown: !!e.unknown, viewers: e.viewers, videoId: e.videoId || null, embeddable: e.embeddable, exists: e.exists, hiddenAsDead: !!aliveIds && !aliveIds.has(e.id) }));
   }
 
   global.Streams = { init, render: renderFromCache, refresh: renderGrid, debug };
