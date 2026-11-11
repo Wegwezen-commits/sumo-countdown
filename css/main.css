@@ -1261,3 +1261,14 @@ select.mini { border: 1px solid var(--line); border-radius: 8px; background: var
 .layout-move { width: 36px; height: 36px; font-size: 12px; }   /* comfortable touch target */
 .layout-move:disabled { opacity: .3; cursor: default; }
 .layout-heading-row .ghost-button { font-size: 12px; padding: 4px 10px; }
+
+
+/* Hero as a reorderable block (js/layout.js): it is the first child of the
+   info grid, spanning every column. The grid's own top margin moved to the
+   hero's bottom edge so spacing looks the same as before. */
+.info-grid { margin-top: 0; }
+.info-grid > .hero-card { grid-column: 1 / -1; width: 100%; margin-bottom: 8px; }
+
+/* Live streams: refresh button + "checked at / couldn't check" line */
+.streams-refresh { padding: 3px 10px; font-size: 12px; }
+.streams-status { flex-basis: 100%; font-size: 11.5px; color: var(--ink-soft); }

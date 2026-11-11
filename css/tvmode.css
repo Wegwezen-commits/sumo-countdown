@@ -2,13 +2,17 @@
    Hides all chrome, blows up the countdown to fill the screen. */
 
 [data-tv="true"] .topbar,
-[data-tv="true"] .info-grid,
+[data-tv="true"] .info-grid > :not(.hero-card),
 [data-tv="true"] footer.site-footer,
 [data-tv="true"] .hero-image,
 [data-tv="true"] .venue-crowd,
 [data-tv="true"] .hero-hint {
   display: none !important;
 }
+
+/* The hero now lives inside .info-grid; dissolve the grid so the hero is
+   laid out directly in .content as before (everything else in it is hidden above). */
+[data-tv="true"] .info-grid { display: contents; }
 
 [data-tv="true"] .content {
   max-width: none;
