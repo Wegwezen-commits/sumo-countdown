@@ -1,0 +1,20 @@
+{
+  "_readme": [
+    "Fred Pinkerton's sumo ranking charts (https://fredpink.com/), linked from the Banzuke panel (js/banzuke.js).",
+    "The three-basho chart is his main one: right after a basho it shows the last three tournaments' results; once the new banzuke is out it shows the last two results plus the new banzuke, with promotions/demotions between Makuuchi and Juryo marked as bars (per his own notes on the site).",
+    "The wp.me short links below are the ones his page uses for 'Save As JPG' / 'Save As PDF'; the address stays the same when he posts a new version, so nothing here needs updating per basho. His site offers JPG and PDF (no PNG).",
+    "Links only, by design: nothing is embedded or hotlinked from his site. Ask him first if you ever want to show the chart inline."
+  ],
+  "author": {
+    "name": "Fred Pinkerton",
+    "url": "https://fredpink.com/"
+  },
+  "charts": [
+    {
+      "id": "three-basho",
+      "title": "Three-basho chart",
+      "jpg": "https://wp.me/aaWa0U-sb",
+      "pdf": "https://wp.me/aaWa0U-sc"
+    }
+  ]
+}

@@ -90,6 +90,21 @@
       "note": "Second channel from the same streamer as leodickinsonsumo, per the site owner. Not in the site owner's CSV list, added earlier from a direct link."
     },
     {
+      "id": "lionsumo-twitch",
+      "platform": "twitch",
+      "label": "LionSumo",
+      "channelUrl": "https://www.twitch.tv/lionsumo",
+      "channelName": "lionsumo",
+      "assumeLive": false,
+      "category": "Livestream",
+      "contentType": "Live Basho",
+      "official": false,
+      "language": "en",
+      "status": "Active",
+      "communityRank": null,
+      "note": "Twitch counterpart of the lionsumo YouTube entry (same streamer; he runs 4 channels in total: 2 Twitch + 2 YouTube, the other pair being leodickinsonsumo). The Twitch handle 'lionsumo' is assumed to match his YouTube handle and was NOT independently confirmed. If the Twitch viewer-stats Worker reports the channel doesn't exist, the card hides itself automatically; otherwise correct channelName/channelUrl here."
+    },
+    {
       "id": "karla_sumoist",
       "platform": "twitch",
       "label": "Karla_Sumoist",
@@ -145,6 +160,20 @@
       "status": "Active",
       "communityRank": null,
       "note": "Added per user request; confirmed live by user on 2026-09-27."
+    },
+    {
+      "id": "avoidingthehenka",
+      "platform": "youtube",
+      "label": "AvoidingTheHenka",
+      "channelUrl": "https://www.youtube.com/@avoidingthehenka",
+      "channelId": "UCd96hAwh8KdyiCG5ySlmeTg",
+      "category": "Livestream",
+      "contentType": "Live Basho",
+      "official": false,
+      "language": "en",
+      "status": "Active",
+      "communityRank": null,
+      "note": "Added per site owner. channelId read from the channel's own page. Same streamer also broadcasts on Twitch (twitch.tv/avoidingthehenka) and Kick (per the channel's About text) — not added here."
     },
     {
       "id": "nhkworld-hls",

@@ -351,6 +351,20 @@
       "status": "Active",
       "communityRank": null,
       "disabled": false
+    },
+    {
+      "id": "narutobeya",
+      "label": "Naruto Stable (鳴戸部屋 | SUMO LIFE)",
+      "channelUrl": "https://www.youtube.com/@narutobeya",
+      "channelId": "UCRYgiEzkMSOytHcNoLKoTlw",
+      "category": "Stable",
+      "contentType": "Stable Life",
+      "official": true,
+      "language": "ja",
+      "status": "Active",
+      "communityRank": null,
+      "disabled": false,
+      "note": "Official channel of Naruto stable (run by former ozeki Kotoōshū), added per site owner; channelId read from the channel's own page. Videos carry subtitles in many languages, English included. Tracking parameter (?si=…) dropped from the URL."
     }
   ]
 }
