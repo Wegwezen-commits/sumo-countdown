@@ -128,6 +128,7 @@
     renderPreviousPanel();
     renderVenuesPanel();
     updateVenueScene();
+    if (window.QuickStrip) QuickStrip.render();
     if (window.Torikumi) Torikumi.render();
     if (window.Banzuke) Banzuke.render();
   }
@@ -183,6 +184,7 @@
     const sShowInactive = document.getElementById("prefShowInactive");
     const sNotifications = document.getElementById("prefNotifications");
     const notifyBlockedNote = document.getElementById("notifyBlockedNote");
+    const sSpoiler = document.getElementById("prefSpoilerFree");
     const sTheme = document.getElementById("prefTheme");
     const sTz = document.getElementById("tzSelect");
     const sLang = document.getElementById("langSelect");
@@ -202,6 +204,7 @@
       sNotifications.disabled = !(window.Notify && Notify.supported) || blocked;
       if (notifyBlockedNote) notifyBlockedNote.classList.toggle("hidden", !blocked);
     }
+    if (sSpoiler) sSpoiler.checked = !!p.spoilerFree;
     sTheme.value = p.theme;
     sTz.value = p.timezone;
     sLang.value = I18n.lang;
@@ -230,6 +233,13 @@
         }
       });
     }
+    if (sSpoiler) {
+      sSpoiler.addEventListener("change", () => Settings.set("spoilerFree", sSpoiler.checked));
+      // The Torikumi panel has its own toggle for the same pref — keep this switch in sync.
+      document.addEventListener("prefschange", (e) => {
+        if (e.detail && e.detail.key === "spoilerFree") sSpoiler.checked = !!e.detail.value;
+      });
+    }
     sTheme.addEventListener("change", () => Settings.set("theme", sTheme.value));
     sTz.addEventListener("change", () => { Settings.set("timezone", sTz.value); renderVenuesPanel(); updateTzPreview(); });
     sLang.addEventListener("change", () => { I18n.set(sLang.value); renderAllPanels(); retranslateDynamicPanels(); Countdown.render(); });
@@ -251,6 +261,7 @@
 
     await Promise.all([Schedule.load(), VenueModule.load()]);
 
+    if (window.Layout) Layout.init();   // reorder blocks before anything renders into them
     wireSettings();
     renderAllPanels();
     updateTzPreview();
@@ -270,8 +281,6 @@
     if (window.WatchTabs) WatchTabs.init();
     if (window.Torikumi) Torikumi.init();
     if (window.Banzuke) Banzuke.init();
-    if (window.Banzuke) Banzuke.init();
-    if (window.Torikumi) Torikumi.init();
 
     document.querySelectorAll(".ghost-button, .icon-button").forEach((btn) => {
       btn.addEventListener("click", () => SumoAudio.playClick());

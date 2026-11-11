@@ -18,7 +18,9 @@
     contrast: "normal",
     showInactiveChannels: false,
     excludedNewsSources: [],
-    notifications: false
+    notifications: false,
+    spoilerFree: false,      // Torikumi: hide winners/techniques until tapped
+    layoutOrder: []          // saved order of the info-grid blocks (see js/layout.js); [] = default
   };
 
   function isMobileViewport() {

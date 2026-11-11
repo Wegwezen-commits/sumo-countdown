@@ -133,6 +133,27 @@
       </a>`).join("");
   }
 
+  // Link groups that can't be pulled in as an RSS feed (e.g. SumoStats —
+  // no feed, blocks bots), one pill per language. The pill matching the
+  // visitor's current UI language is listed first and highlighted, so a
+  // Japanese-UI visitor lands on the Japanese view without hunting for it.
+  function renderTranslatedSources(sources) {
+    if (!sources || !sources.length) return "";
+    const uiLang = (global.I18n && I18n.lang) || "en";
+    const rows = sources.map((src) => {
+      const links = (src.links || []).slice().sort((a, b) => (b.lang === uiLang) - (a.lang === uiLang));
+      const pills = links.map((l) => {
+        const isJa = l.lang === "ja";
+        return `<a class="lang-pill${l.lang === uiLang ? " is-current" : ""}" lang="${isJa ? "ja" : "en"}" href="${escapeHTML(l.url)}" target="_blank" rel="noopener noreferrer">${isJa ? "日本語" : "English"} ↗</a>`;
+      }).join("");
+      return `<div class="news-translated-row"><span class="news-translated-name">${escapeHTML(src.name)}</span>${pills}</div>`;
+    }).join("");
+    return `
+      <div class="news-source-links-label" data-i18n="newsJapaneseSources">Japanese news sources</div>
+      <div class="news-translated-note" data-i18n="newsJapaneseSourcesNote">Japanese press coverage, also readable in English.</div>
+      <div class="news-translated">${rows}</div>`;
+  }
+
   function renderSourceLinks(container, feeds, extraLinks) {
     if (!container) return;
     const excluded = excludedSources();
@@ -142,6 +163,7 @@
     const extra = (extraLinks || []).map((l) => `<a href="${escapeHTML(l.url)}" target="_blank" rel="noopener noreferrer">${escapeHTML(l.name)} ↗</a>`);
     container.innerHTML = `
       <div class="news-source-links">${feedLinks.join("")}</div>
+      ${renderTranslatedSources(translatedSourcesList)}
       ${extra.length ? `<div class="news-source-links-label" data-i18n="newsMoreResources">More resources</div><div class="news-source-links">${extra.join("")}</div>` : ""}`;
     if (global.I18n) I18n.applyStaticText();
   }
@@ -174,6 +196,7 @@
   let rawItems = []; // everything fetched/cached, before source-exclusion filtering
   let sourceList = []; // config.feeds, for building the toggle checkboxes
   let extraLinksList = []; // config.extraLinks — non-feed resources, always shown
+  let translatedSourcesList = []; // config.translatedSources — per-language link groups (no feed available)
   let lastStatus = { kind: "loading", cachedAt: null }; // for re-translating the status line on language change
 
   function excludedSources() {
@@ -231,6 +254,7 @@
 
       sourceList = config.feeds || [];
       extraLinksList = config.extraLinks || [];
+      translatedSourcesList = config.translatedSources || [];
       renderSourceToggles();
       renderSourceLinks(sourcesEl, sourceList, extraLinksList);
 
@@ -277,6 +301,8 @@
       const list = document.getElementById("newsList");
       if (list && rawItems.length) renderItems(list, filteredItems());
       setStatus(lastStatus.kind, lastStatus.cachedAt);
+      const sourcesEl = document.getElementById("newsSources");
+      if (sourcesEl && (sourceList.length || translatedSourcesList.length)) renderSourceLinks(sourcesEl, sourceList, extraLinksList);
     },
 
     showUnavailable() {

@@ -167,6 +167,38 @@
       return { basho: target, banzukeDate: target.banzukeDate, released, daysUntil, live: this.getLive(now) };
     },
 
+    // Today's calendar date in Japan (YYYY-MM-DD). Basho and banzuke dates in
+    // this app are Japan dates, so "is the banzuke out yet" is a question
+    // about the JST calendar day, not the visitor's own.
+    jstToday(now) {
+      now = now || new Date();
+      try {
+        return new Intl.DateTimeFormat("en-CA", {
+          timeZone: "Asia/Tokyo", year: "numeric", month: "2-digit", day: "2-digit"
+        }).format(now);
+      } catch (e) { return now.toISOString().slice(0, 10); }
+    },
+
+    // The banzuke the fan is waiting on (or just got): the first basho that
+    // hasn't started yet. While a basho is live that's the one AFTER it,
+    // which is exactly what "next banzuke in N days" should mean.
+    //   state: "pending"  — release date still ahead (daysUntil > 0)
+    //          "today"    — it's release day in Japan
+    //          "released" — out already, the basho itself hasn't started
+    // `estimated` is true for generated (non-official) entries, whose
+    // banzukeDate is a start-minus-13/20-days placeholder, not a fact.
+    getNextBanzuke(now) {
+      now = now || new Date();
+      const today = this.jstToday(now);
+      const target = this.all().find((b) => b.startDate > today);
+      if (!target || !target.banzukeDate) return null;
+      const daysUntil = Math.round(
+        (Date.parse(target.banzukeDate + "T00:00:00Z") - Date.parse(today + "T00:00:00Z")) / 86400000
+      );
+      const state = daysUntil > 0 ? "pending" : (daysUntil === 0 ? "today" : "released");
+      return { basho: target, banzukeDate: target.banzukeDate, daysUntil, state, estimated: !target.official };
+    },
+
     // Progress between the previous basho's end and the next basho's start, 0-100
     progressBetween(now) {
       now = now || new Date();
