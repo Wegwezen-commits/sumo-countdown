@@ -141,6 +141,22 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
   // (rate-limited, server error, timeout, offline) — NOT the same as "not
   // live". Other 4xx answers (404 etc.) are YouTube saying there's no live
   // video, i.e. a definite "offline", exactly as before.
+  // Kick: no public CORS-friendly API, so the youtube-live Worker asks Kick
+  // server-side (?platform=kick&channel=<slug>). Best-effort: if Kick blocks
+  // the Worker, this returns null -> "couldn't check" (assumeLive still applies).
+  async function checkKickLive(channelName) {
+    if (!YT_LIVE_ENDPOINT || !channelName) return null;
+    const url = `${YT_LIVE_ENDPOINT}${YT_LIVE_ENDPOINT.includes("?") ? "&" : "?"}platform=kick&channel=${encodeURIComponent(channelName)}`;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const res = await withTimeout((signal) => fetch(url, { signal, cache: "no-cache" }), YT_OEMBED_TIMEOUT_MS);
+        if (res.ok) return await res.json(); // { exists, live, viewers, title }
+      } catch (e) { /* retry */ }
+      if (attempt === 0) await sleep(RETRY_DELAY_MS);
+    }
+    return null;
+  }
+
   async function checkYouTubeLiveWorker(channelId) {
     if (!YT_LIVE_ENDPOINT) return null;
     const url = `${YT_LIVE_ENDPOINT}${YT_LIVE_ENDPOINT.includes("?") ? "&" : "?"}channelId=${encodeURIComponent(channelId)}`;
@@ -213,7 +229,7 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
     // No worker configured, or the check failed for that entry -> exists
     // is undefined -> treated as alive (same permissive default as
     // before this existed), since "unknown" shouldn't hide a channel.
-    statuses.forEach((e) => { if (e.platform === "twitch" && e.exists === false) dead.add(e.id); });
+    statuses.forEach((e) => { if ((e.platform === "twitch" || e.platform === "kick") && e.exists === false) dead.add(e.id); });
     aliveIds = new Set(statuses.map((e) => e.id).filter((id) => !dead.has(id)));
   }
 
@@ -272,6 +288,11 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
     if (entry.platform === "youtube") {
       const result = await checkYouTubeLive(entry.channelId);
       return { ...entry, live: result.live, title: result.title, videoId: result.videoId || null, exists: result.exists, embeddable: result.embeddable, viewers: null, unknown: !!result.unknown };
+    }
+    if (entry.platform === "kick") {
+      const k = await checkKickLive(entry.channelName);
+      if (k) return { ...entry, live: !!k.live || entry.assumeLive === true, viewers: k.viewers ?? null, title: k.title || null, exists: k.exists };
+      return { ...entry, live: entry.assumeLive === true, viewers: null, unknown: entry.assumeLive !== true };
     }
     // Twitch / generic: use the viewer-stats worker if configured, else
     // fall back to the manual "assumeLive" flag (no viewer count, and
@@ -352,6 +373,9 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
       if (entry.videoId) return `https://www.youtube.com/embed/${encodeURIComponent(entry.videoId)}?autoplay=1`;
       return `https://www.youtube.com/embed/live_stream?channel=${encodeURIComponent(entry.channelId)}&autoplay=1`;
     }
+    if (entry.platform === "kick") {
+      return `https://player.kick.com/${encodeURIComponent(entry.channelName)}?autoplay=true&muted=false`;
+    }
     if (entry.platform === "twitch") {
       const parent = encodeURIComponent(window.location.hostname || "localhost");
       return `https://player.twitch.tv/?channel=${encodeURIComponent(entry.channelName)}&parent=${parent}&autoplay=true`;
@@ -362,6 +386,7 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
   function platformLabel(platform) {
     if (platform === "youtube") return "YouTube";
     if (platform === "twitch") return "Twitch";
+    if (platform === "kick") return "Kick";
     if (platform === "generic") return "Web";
     if (platform === "hls") return "HLS";
     return "Live";
