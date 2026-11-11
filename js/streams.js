@@ -52,12 +52,30 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
 // exists, which a browser can't do directly. Without that endpoint
 // configured, Twitch/generic/Rumble/website entries still can't be
 // checked at all and need manual review.
+//
+// FRESHNESS & RELIABILITY (why a live channel might not show up):
+//  - A check that merely FAILED (HTTP 429/5xx, timeout, network error) is not
+//    the same as "offline". Those are retried once, and if still unknown the
+//    channel keeps its previous status and is listed under "couldn't check"
+//    in the status line above the cards, instead of silently vanishing.
+//  - Statuses are re-checked every REFRESH_MS, AND whenever the page becomes
+//    visible again after a while (phones freeze timers in the background, so
+//    a resumed PWA used to show a stale list), AND on the Refresh button.
+//  - Watching an embedded stream no longer freezes the list: refreshes carry
+//    on and add newly-live channels, while cards that are playing are left
+//    untouched (moving/re-creating them would restart the player).
+//  - A channel that is live right now is never hidden by the "does this
+//    channel still exist" sweep (a live stream proves it exists).
 (function (global) {
   "use strict";
 
   const DATA_URL = "data/streams.json";
   const YT_OEMBED_TIMEOUT_MS = 6000;
-  const REFRESH_MS = 3 * 60 * 1000; // re-check live status every 3 minutes while shown
+  const REFRESH_MS = 2 * 60 * 1000; // re-check live status every 2 minutes while shown
+  const RESUME_REFRESH_AFTER_MS = 45 * 1000; // …and on returning to the page if the last check is older than this
+  const RETRY_DELAY_MS = 900;
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  let lastCheckedAt = 0;
 
   const STATUS_ORDER = { Active: 0, Occasional: 1, Intermittent: 2, Historical: 3 };
 
@@ -108,16 +126,27 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
     return promiseFactory(controller.signal).finally(() => clearTimeout(timer));
   }
 
+  // Returns { live, title?, unknown? }. `unknown` = the check itself failed
+  // (rate-limited, server error, timeout, offline) — NOT the same as "not
+  // live". Other 4xx answers (404 etc.) are YouTube saying there's no live
+  // video, i.e. a definite "offline", exactly as before.
   async function checkYouTubeLive(channelId) {
     const liveUrl = `https://www.youtube.com/channel/${encodeURIComponent(channelId)}/live`;
     const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(liveUrl)}&format=json`;
-    try {
-      const res = await withTimeout((signal) => fetch(oembedUrl, { signal, cache: "no-cache" }), YT_OEMBED_TIMEOUT_MS);
-      if (!res.ok) return { live: false, reachable: true };
-      const data = await res.json();
-      return { live: true, reachable: true, title: data.title };
-    } catch (e) {
-      return { live: false, reachable: null }; // network hiccup — unknown, not necessarily dead
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const res = await withTimeout((signal) => fetch(oembedUrl, { signal, cache: "no-cache" }), YT_OEMBED_TIMEOUT_MS);
+        if (res.ok) {
+          const data = await res.json();
+          return { live: true, title: data.title };
+        }
+        if (res.status !== 429 && res.status < 500) return { live: false };
+        if (attempt === 0) { await sleep(RETRY_DELAY_MS); continue; }
+        return { live: false, unknown: true, why: `HTTP ${res.status}` };
+      } catch (e) {
+        if (attempt === 0) { await sleep(RETRY_DELAY_MS); continue; }
+        return { live: false, unknown: true, why: (e && e.name) || "network" };
+      }
     }
   }
 
@@ -142,7 +171,8 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
   async function refreshAliveSet(statuses) {
     const ytEntries = statuses.filter((e) => e.platform === "youtube");
     const ytResults = await Promise.all(ytEntries.map(async (e) => [e.id, await checkYouTubeChannelAlive(e.channelId)]));
-    const dead = new Set(ytResults.filter(([, ok]) => !ok).map(([id]) => id));
+    const liveNow = new Set(statuses.filter((e) => e.live).map((e) => e.id));
+    const dead = new Set(ytResults.filter(([id, ok]) => !ok && !liveNow.has(id)).map(([id]) => id));
     // Twitch: only mark dead if the worker positively said exists:false.
     // No worker configured, or the check failed for that entry -> exists
     // is undefined -> treated as alive (same permissive default as
@@ -154,13 +184,14 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
   async function checkViewerStats(entry) {
     if (!VIEWER_STATS_ENDPOINT) return null;
     const url = `${VIEWER_STATS_ENDPOINT}?platform=${encodeURIComponent(entry.platform)}&channel=${encodeURIComponent(entry.channelName || "")}`;
-    try {
-      const res = await withTimeout((signal) => fetch(url, { signal, cache: "no-cache" }), YT_OEMBED_TIMEOUT_MS);
-      if (!res.ok) return null;
-      return await res.json(); // { exists, live, viewers, title }
-    } catch (e) {
-      return null;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const res = await withTimeout((signal) => fetch(url, { signal, cache: "no-cache" }), YT_OEMBED_TIMEOUT_MS);
+        if (res.ok) return await res.json(); // { exists, live, viewers, title }
+      } catch (e) { /* fall through to retry */ }
+      if (attempt === 0) await sleep(RETRY_DELAY_MS);
     }
+    return null;
   }
 
   // HLS entries: probe the (possibly proxied) playlist itself. A valid
@@ -204,14 +235,26 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
     }
     if (entry.platform === "youtube") {
       const result = await checkYouTubeLive(entry.channelId);
-      return { ...entry, live: result.live, title: result.title, viewers: null };
+      return { ...entry, live: result.live, title: result.title, viewers: null, unknown: !!result.unknown };
     }
     // Twitch / generic: use the viewer-stats worker if configured, else
     // fall back to the manual "assumeLive" flag (no viewer count, and
     // `exists` stays undefined — see refreshAliveSet for what that means).
     const stats = await checkViewerStats(entry);
     if (stats) return { ...entry, live: !!stats.live, viewers: stats.viewers ?? null, title: stats.title || null, exists: stats.exists };
-    return { ...entry, live: !!entry.assumeLive, viewers: null };
+    // Worker configured but unreachable → we don't actually know; flag it so
+    // the previous status can be kept (see mergeWithPrevious) and the person is told.
+    return { ...entry, live: !!entry.assumeLive, viewers: null, unknown: !!VIEWER_STATS_ENDPOINT };
+  }
+
+  // A check that failed keeps the channel's last known status rather than
+  // flipping a possibly-live channel to OFFLINE for one bad request.
+  function mergeWithPrevious(fresh) {
+    const prev = new Map(lastStatuses.map((e) => [e.id, e]));
+    return fresh.map((e) => {
+      const old = prev.get(e.id);
+      return e.unknown && old && !old.unknown ? { ...old, unknown: true } : e;
+    });
   }
 
   // ---- Password-protected HLS ------------------------------------------
@@ -302,7 +345,7 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
     const src = SumoUtil.escapeHTML(embedUrlFor(status));
     if (status.needsProxy) {
       return `
-      <div class="stream-card pixel-corners is-offline">
+      <div data-id="${SumoUtil.escapeHTML(status.id || "")}" class="stream-card pixel-corners is-offline">
         <div class="stream-card-head">
           <span class="stream-platform">${plat}</span>
         </div>
@@ -319,7 +362,7 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
       const viewers = typeof status.viewers === "number"
         ? `<span class="stream-viewers">👥 ${status.viewers.toLocaleString()}</span>` : "";
       return `
-        <div class="stream-card pixel-corners is-live" data-embed-src="${src}" data-embed-kind="${status.locked ? "hls-locked" : status.platform === "hls" ? "hls" : "iframe"}" data-source-id="${SumoUtil.escapeHTML(status.sourceId || "")}">
+        <div data-id="${SumoUtil.escapeHTML(status.id || "")}" class="stream-card pixel-corners is-live" data-embed-src="${src}" data-embed-kind="${status.locked ? "hls-locked" : status.platform === "hls" ? "hls" : "iframe"}" data-source-id="${SumoUtil.escapeHTML(status.sourceId || "")}">
           <div class="stream-card-head">
             <span class="stream-platform">${plat}</span>
             <span class="live-badge stream-live-dot"><span class="dot" aria-hidden="true"></span> ${I18n.t("liveBadge")}</span>
@@ -340,7 +383,7 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
         </div>`;
     }
     return `
-      <div class="stream-card pixel-corners is-offline">
+      <div data-id="${SumoUtil.escapeHTML(status.id || "")}" class="stream-card pixel-corners is-offline">
         <div class="stream-card-head">
           <span class="stream-platform">${plat}</span>
         </div>
@@ -355,12 +398,10 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
       </div>`;
   }
 
-  // Set once the person clicks "Watch Embedded" on any card, and never
-  // cleared again this session — see renderGrid() below for why. A false
-  // positive here (still "active" after they've actually stopped
-  // watching) just means other, unwatched cards' live/viewer-count
-  // status goes a bit stale for the rest of the session, which is a far
-  // smaller problem than resetting whatever they're actually watching.
+  // Set once the person clicks "Watch Embedded" on any card (never cleared
+  // this session). While a card is actually playing, refreshes go through
+  // renderSoft(), which leaves playing cards untouched instead of rebuilding
+  // the grid (which would restart whatever they're watching).
   let embedActive = false;
 
   // ---- HLS player -------------------------------------------------------
@@ -548,7 +589,13 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
         <input type="checkbox" id="streamsFilterLive" ${filters.liveOnly ? "checked" : ""} />
         <span data-i18n="filterLiveNow">Live now</span>
       </label>
+      <button type="button" id="streamsRefresh" class="ghost-button streams-refresh" data-i18n="streamsRefresh">Refresh</button>
+      <div id="streamsStatus" class="streams-status" role="status"></div>
     `;
+    document.getElementById("streamsRefresh").addEventListener("click", async (e) => {
+      const btn = e.currentTarget; btn.disabled = true;
+      try { await renderGrid(); } finally { const b = document.getElementById("streamsRefresh"); if (b) b.disabled = false; }
+    });
     document.getElementById("streamsFilterCategory").addEventListener("change", (e) => {
       filters.category = e.target.value;
       SumoUtil.storage.set(CATEGORY_KEY, filters.category);
@@ -567,31 +614,71 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
     if (global.I18n) I18n.applyStaticText();
   }
 
+  function updateStatusLine() {
+    const el = document.getElementById("streamsStatus");
+    if (!el || !lastCheckedAt) return;
+    const liveN = lastStatuses.filter((e) => e.live && (!aliveIds || aliveIds.has(e.id))).length;
+    const time = new Date(lastCheckedAt).toLocaleTimeString(I18n.locale(), { hour: "2-digit", minute: "2-digit" });
+    const unknown = lastStatuses.filter((e) => e.unknown).map((e) => `${e.label} (${platformLabel(e.platform)})`);
+    el.textContent = I18n.t("streamsCheckedAt", { live: liveN, time })
+      + (unknown.length ? " · " + I18n.t("streamsUnknown", { names: unknown.join(", ") }) : "");
+  }
+
+  // While something is playing, only add/remove the cards that are NOT
+  // playing and never move a playing one — re-inserting an iframe restarts it.
+  function renderSoft(list, visible) {
+    const playing = new Map();
+    list.grid.querySelectorAll(".stream-card[data-id]").forEach((c) => {
+      if (c.querySelector("iframe, video")) playing.set(c.getAttribute("data-id"), c);
+    });
+    Array.from(list.grid.children).forEach((n) => {
+      if (!(n.getAttribute && playing.has(n.getAttribute("data-id")))) n.remove();
+    });
+    const tpl = document.createElement("template");
+    visible.forEach((st) => {
+      if (playing.has(st.id)) return;
+      tpl.innerHTML = cardHTML(st).trim();
+      list.grid.appendChild(tpl.content.firstElementChild);
+    });
+    if (!list.grid.children.length) list.grid.innerHTML = `<p class="filter-empty" data-i18n="filterNoResults">No channels match these filters.</p>`;
+    wireWatchButtons(list.grid);
+  }
+
   function renderFromCache() {
     const list = cacheEls();
     if (!list.grid) return;
     const visible = visibleStatuses();
-    destroyHls();
-    list.grid.innerHTML = visible.length
-      ? visible.map(cardHTML).join("")
-      : `<p class="filter-empty" data-i18n="filterNoResults">No channels match these filters.</p>`;
-    wireWatchButtons(list.grid);
+    if (embedActive && list.grid.querySelector(".stream-card iframe, .stream-card video")) {
+      renderSoft(list, visible);
+    } else {
+      destroyHls();
+      list.grid.innerHTML = visible.length
+        ? visible.map(cardHTML).join("")
+        : `<p class="filter-empty" data-i18n="filterNoResults">No channels match these filters.</p>`;
+      wireWatchButtons(list.grid);
+    }
+    updateStatusLine();
     if (global.I18n) I18n.applyStaticText();
   }
 
+  let renderInFlight = null;
   async function renderGrid() {
     const list = cacheEls();
     if (!list.grid) return;
-    if (embedActive) return; // don't rebuild and reset whatever's currently playing — see the flag's own comment above
-    const data = await loadData();
-    if (!data.length) {
-      list.grid.innerHTML = "";
-      return;
-    }
-    renderFilterBar(data);
-    lastStatuses = await Promise.all(data.map(resolveStatus));
-    renderFromCache();
-    refreshAliveSet(lastStatuses).then(renderFromCache);
+    if (renderInFlight) return renderInFlight; // overlapping triggers (timer + resume + button) share one run
+    renderInFlight = (async () => {
+      const data = await loadData();
+      if (!data.length) {
+        list.grid.innerHTML = "";
+        return;
+      }
+      renderFilterBar(data);
+      lastStatuses = mergeWithPrevious(await Promise.all(data.map(resolveStatus)));
+      lastCheckedAt = Date.now();
+      renderFromCache();
+      refreshAliveSet(lastStatuses).then(renderFromCache);
+    })().finally(() => { renderInFlight = null; });
+    return renderInFlight;
   }
 
   function init() {
@@ -601,7 +688,18 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
     document.addEventListener("prefschange", (e) => {
       if (e.detail && e.detail.key === "showInactiveChannels") renderFromCache();
     });
+    // Timers don't run while a phone/PWA is in the background, so re-check
+    // as soon as the person comes back (if the last check is getting old).
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible" && Date.now() - lastCheckedAt > RESUME_REFRESH_AFTER_MS) renderGrid();
+    });
+    window.addEventListener("online", () => renderGrid());
   }
 
-  global.Streams = { init, render: renderFromCache, refresh: renderGrid };
+  // Handy from the browser console: Streams.debug() → what each channel was judged and why.
+  function debug() {
+    return lastStatuses.map((e) => ({ id: e.id, platform: e.platform, live: !!e.live, unknown: !!e.unknown, viewers: e.viewers, hiddenAsDead: !!aliveIds && !aliveIds.has(e.id) }));
+  }
+
+  global.Streams = { init, render: renderFromCache, refresh: renderGrid, debug };
 })(window);

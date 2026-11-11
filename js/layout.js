@@ -1,5 +1,5 @@
 // layout.js — lets the visitor reorder the blocks of the page's info grid
-// (banzuke countdown strip, Watch, Torikumi, Banzuke, News, …), mainly so a
+// (basho countdown with the rikishi, banzuke countdown strip, Watch, Torikumi, Banzuke, News, …), mainly so a
 // phone user can put what they care about first — e.g. the banzuke
 // countdown right under the basho countdown, or Torikumi above Watch.
 //
@@ -17,6 +17,7 @@
 
   // block id → translation key for its name in the settings list
   const NAMES = {
+    heroPanel: "layoutHero",
     quickPanel: "layoutQuick",
     watchPanel: "watchSumo",
     torikumiPanel: "torikumi",
