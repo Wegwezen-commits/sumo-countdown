@@ -166,7 +166,11 @@
     "layoutReset": "Reset order",
     "layoutMoveUp": "Move {name} up",
     "layoutMoveDown": "Move {name} down",
-    "layoutQuick": "Banzuke countdown"
+    "layoutQuick": "Banzuke countdown",
+    "layoutHero": "Basho countdown (rikishi)",
+    "streamsRefresh": "Refresh",
+    "streamsCheckedAt": "{live} live · checked {time}",
+    "streamsUnknown": "couldn't check: {names}"
   },
   "ja": {
     "title": "大相撲カウントダウン",
@@ -335,7 +339,11 @@
     "layoutReset": "並び順をリセット",
     "layoutMoveUp": "{name}を上へ",
     "layoutMoveDown": "{name}を下へ",
-    "layoutQuick": "番付カウントダウン"
+    "layoutQuick": "番付カウントダウン",
+    "layoutHero": "場所カウントダウン（力士）",
+    "streamsRefresh": "更新",
+    "streamsCheckedAt": "配信中 {live}件 · {time} 確認",
+    "streamsUnknown": "確認できず: {names}"
   },
   "nl": {
     "title": "Sumo Aftelklok",
@@ -504,6 +512,10 @@
     "layoutReset": "Standaardvolgorde",
     "layoutMoveUp": "Verplaats {name} omhoog",
     "layoutMoveDown": "Verplaats {name} omlaag",
-    "layoutQuick": "Banzuke-aftelling"
+    "layoutQuick": "Banzuke-aftelling",
+    "layoutHero": "Basho-aftelling (worstelaar)",
+    "streamsRefresh": "Ververs",
+    "streamsCheckedAt": "{live} live · gecontroleerd om {time}",
+    "streamsUnknown": "kon niet controleren: {names}"
   }
 }

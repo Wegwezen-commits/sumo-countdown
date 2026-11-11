@@ -5,23 +5,12 @@
     { "id": "reddit", "name": "r/Sumo", "feedUrl": "https://www.reddit.com/r/Sumo/.rss", "siteUrl": "https://www.reddit.com/r/Sumo/" }
   ],
   "_curatedLinksNote": "Removed the old separate 'curatedLinks' list — it duplicated these same three feeds (as plain links, unaffected by the Settings > News sources toggle, which was genuinely confusing: unchecking a source there didn't hide its link at the bottom) plus two non-feed resources. js/news.js now builds the feed links directly from the list above (so they DO respect the toggle), and 'extraLinks' below covers the two resources that aren't RSS feeds at all — kept clearly separate since there's nothing to toggle for those.",
-  "_translatedSourcesNote": "Japanese-press news hubs that can't be pulled in as an RSS feed (SumoStats blocks automated fetching and publishes no feed that I could find), so js/news.js shows them as link groups with one pill per language instead of mixing them into the headline list. Each link: { lang: 'en' | 'ja', url }. https://sumostats.com/news is the English view and https://sumostats.com/ja/news the Japanese one (the /ja/ prefix is how its individual story pages are addressed). The changelog page could not be opened while building this (bot-blocked), so only the URL supplied by the site owner is listed for it; if it also has a /ja/ variant, add a { lang: 'ja', url } entry.",
+  "_translatedSourcesNote": "Japanese-press news hubs that can't be pulled in as an RSS feed (SumoStats blocks automated fetching and publishes no feed that I could find), so js/news.js shows them as link groups with one pill per language instead of mixing them into the headline list. Each link: { lang: 'en' | 'ja', url }. https://sumostats.com/news is the English view and https://sumostats.com/ja/news the Japanese one (the /ja/ prefix is how its individual story pages are addressed).",
   "translatedSources": [
-    {
-      "id": "sumostats-news",
-      "name": "SumoStats News",
-      "links": [
-        { "lang": "en", "url": "https://sumostats.com/news" },
-        { "lang": "ja", "url": "https://sumostats.com/ja/news" }
-      ]
-    },
-    {
-      "id": "sumostats-changelog-news",
-      "name": "SumoStats News (changelog)",
-      "links": [
-        { "lang": "en", "url": "https://sumostats.com/changelog/news" }
-      ]
-    }
+    { "id": "sumostats-news", "name": "SumoStats News", "links": [
+      { "lang": "en", "url": "https://sumostats.com/news" },
+      { "lang": "ja", "url": "https://sumostats.com/ja/news" }
+    ] }
   ],
   "extraLinks": [
     { "name": "Japan Sumo Association (official)", "url": "https://www.sumo.or.jp/En/" },
