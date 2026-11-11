@@ -475,6 +475,14 @@ button, select, input { font-family: inherit; }
   animation: liveBlink 1.2s ease-in-out infinite;
 }
 
+/* The sign already announces live mode in its own heading ("BASHO LIVE",
+   see countdown.js), and this pill is pinned half above the sign's top edge
+   (top: -10px) — which .hero-overlay's overflow: hidden then clips, leaving
+   only an unlabelled orange sliver plus the blinking dot's edge flashing
+   white. Hidden inside the sign only; the same .live-badge class is still
+   used, unclipped, on the stream cards (js/streams.js). */
+.hero-overlay .live-badge { display: none; }
+
 .eyebrow {
   font-size: clamp(8px, 2.1cqw, 13px);
   text-transform: uppercase;
@@ -1166,3 +1174,90 @@ select.mini { border: 1px solid var(--line); border-radius: 8px; background: var
   --line: rgba(0,0,0,0.4);
   --ink-soft: var(--ink);
 }
+
+
+/* ---------------------------------------------------------------------
+   Added: quick banzuke strip, news language pills, Fred Pinkerton chart
+   card, ▲/▼ projection markers, spoiler-free torikumi, layout list.
+   --------------------------------------------------------------------- */
+
+/* Quick-glance "Next banzuke" strip (js/quickstrip.js) */
+.quick-panel {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 6px 16px; padding: 10px 16px;
+}
+.quick-panel.hidden { display: none; }
+.quick-main { display: flex; flex-direction: column; min-width: 0; }
+.quick-label { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
+.quick-basho { font-size: 15px; font-weight: 700; }
+.quick-right { display: flex; align-items: center; gap: 4px 12px; flex-wrap: wrap; justify-content: flex-end; }
+.quick-count { display: inline-flex; align-items: baseline; gap: 4px; }
+.quick-num { font-family: var(--font-led); font-size: 30px; line-height: 1; color: var(--accent); }
+.quick-num.quick-now, .quick-num.quick-done { font-size: 20px; }
+.quick-unit { font-size: 13px; font-weight: 600; color: var(--ink-soft); }
+.quick-date { font-size: 12px; color: var(--ink-soft); }
+.quick-est {
+  font-size: 10px; padding: 1px 6px; border: 1px dashed var(--ink-soft); border-radius: 999px;
+  margin-left: 4px; white-space: nowrap;
+}
+.quick-view { padding: 4px 10px; font-size: 12px; }
+
+/* News: per-language link pills (SumoStats etc.) */
+.news-translated-note { font-size: 11px; color: var(--ink-soft); margin: -2px 0 6px; }
+.news-translated { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+.news-translated-row { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; font-size: 13px; }
+.news-translated-name { font-weight: 600; margin-right: 2px; }
+.lang-pill {
+  font-size: 12px; padding: 2px 10px; border: 1px solid var(--line); border-radius: 999px;
+  text-decoration: none; color: var(--ink); background: var(--paper-raised);
+}
+.lang-pill:hover, .lang-pill:focus-visible { border-color: var(--accent); }
+.lang-pill.is-current { border-color: var(--accent); color: var(--accent); font-weight: 700; }
+
+/* Banzuke: Fred Pinkerton chart card */
+.charts-card {
+  margin: 0 0 12px; padding: 10px 12px; border: 1px solid var(--line);
+  background: var(--paper-alt, rgba(0,0,0,0.03)); border-radius: var(--radius-sm);
+}
+.charts-card:empty { display: none; }
+.charts-title { font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-soft); }
+.charts-next { font-size: 13px; font-weight: 700; margin-top: 4px; }
+.charts-intro { font-size: 12.5px; line-height: 1.5; margin: 6px 0 8px; color: var(--ink-soft); }
+.charts-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.charts-link { text-decoration: none; font-size: 12.5px; }
+.charts-credit { font-size: 11px; color: var(--ink-soft); margin-top: 8px; }
+.charts-credit a { color: inherit; }
+
+/* Banzuke: rough risers/fallers (shape differs as well as colour) */
+.banzuke-who { display: inline-flex; align-items: baseline; justify-content: flex-end; gap: 6px; min-width: 0; flex-wrap: wrap; }
+.banzuke-rec { font-size: 11px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.banzuke-move { font-size: 10px; letter-spacing: -1px; font-weight: 700; }
+.banzuke-move.is-up { color: #1f7a4d; }
+.banzuke-move.is-down { color: var(--accent); }
+[data-theme="dark"] .banzuke-move.is-up { color: #5fd39a; }
+[data-theme="dark"] .banzuke-move.is-down { color: #ff7b93; }
+.proj-legend { font-size: 11px; line-height: 1.45; color: var(--ink-soft); margin: 10px 0 0; }
+.proj-candidates { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--line); }
+.proj-candidates-title { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+.proj-candidates ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; font-size: 13px; }
+.proj-candidates .banzuke-name { text-align: left; }
+
+/* Torikumi: spoiler-free mode */
+.spoiler-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; cursor: pointer; }
+.spoiler-toggle input { width: 16px; height: 16px; accent-color: var(--accent); }
+.spoiler-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 8px; min-height: 30px; }
+.spoiler-count { font-size: 12px; color: var(--ink-soft); }
+.spoiler-all { padding: 4px 10px; font-size: 12px; }
+.torikumi-reveal {
+  margin-left: auto; font: inherit; font-size: 11px; padding: 2px 10px; cursor: pointer;
+  border: 1px dashed var(--ink-soft); border-radius: 999px; background: transparent; color: var(--ink-soft);
+}
+.torikumi-reveal:hover, .torikumi-reveal:focus-visible { border-color: var(--accent); color: var(--accent); }
+
+/* Settings: page layout list (js/layout.js) */
+.layout-list { list-style: none; margin: 0 0 6px; padding: 0; }
+.layout-item { display: flex; align-items: center; gap: 6px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.layout-name { flex: 1; font-size: 13px; }
+.layout-move { width: 36px; height: 36px; font-size: 12px; }   /* comfortable touch target */
+.layout-move:disabled { opacity: .3; cursor: default; }
+.layout-heading-row .ghost-button { font-size: 12px; padding: 4px 10px; }
