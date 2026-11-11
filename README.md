@@ -104,7 +104,7 @@ sumo-countdown/
 ├── css/      main.css, themes.css, animations.css, responsive.css, tvmode.css
 ├── js/       util, language, settings, schedule, venue, live, sumoapi,
 │             banzuke, torikumi, previousbasho, rikishi, animations, audio,
-│             countdown, quickstrip, layout, hero, news, streams, videos, watch-tabs, notify,
+│             countdown, layout, hero, news, streams, videos, watch-tabs, notify,
 │             pwa, app, vendor/hls.light.min.js
 ├── assets/   pixel/ (art), audio/ (composed tracks), icons/ (PWA icons)
 ├── data/     schedule.json, venues.json, champions.json, translations.json,
