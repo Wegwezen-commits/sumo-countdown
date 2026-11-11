@@ -29,6 +29,14 @@
 // but no viewer counts and no Twitch dead-channel detection).
 const VIEWER_STATS_ENDPOINT = "https://sumo-viewer-stats.veeken-joost.workers.dev";
 
+// YOUTUBE LIVE DETECTION: YouTube's oEmbed endpoint does NOT resolve
+// /channel/<id>/live URLs (it only describes real video URLs), so a purely
+// client-side check can never see a live YouTube channel. Deploy
+// workers/youtube-live.js (a tiny Cloudflare Worker) and put its URL here.
+// It answers ?channelId=UC… with { exists, live, videoId, title }.
+// Leave "" and YouTube channels are shown as "couldn't check" instead of OFFLINE.
+const YT_LIVE_ENDPOINT = "https://youtube-live-979a.veeken-joost.workers.dev";
+
 // HLS (.m3u8) PLAYBACK — platform "hls" entries play natively in a <video>
 // element (hls.js, vendored in js/vendor/, everywhere except Apple Safari
 // which plays HLS itself). Two browser rules matter here:
@@ -131,16 +139,15 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
   // live". Other 4xx answers (404 etc.) are YouTube saying there's no live
   // video, i.e. a definite "offline", exactly as before.
   async function checkYouTubeLive(channelId) {
-    const liveUrl = `https://www.youtube.com/channel/${encodeURIComponent(channelId)}/live`;
-    const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(liveUrl)}&format=json`;
+    if (!YT_LIVE_ENDPOINT) return { live: false, unknown: true, why: "no YT_LIVE_ENDPOINT" };
+    const url = `${YT_LIVE_ENDPOINT}${YT_LIVE_ENDPOINT.includes("?") ? "&" : "?"}channelId=${encodeURIComponent(channelId)}`;
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
-        const res = await withTimeout((signal) => fetch(oembedUrl, { signal, cache: "no-cache" }), YT_OEMBED_TIMEOUT_MS);
+        const res = await withTimeout((signal) => fetch(url, { signal, cache: "no-cache" }), YT_OEMBED_TIMEOUT_MS);
         if (res.ok) {
-          const data = await res.json();
-          return { live: true, title: data.title };
+          const d = await res.json();
+          return { live: !!d.live, title: d.title || null, videoId: d.videoId || null, exists: d.exists };
         }
-        if (res.status !== 429 && res.status < 500) return { live: false };
         if (attempt === 0) { await sleep(RETRY_DELAY_MS); continue; }
         return { live: false, unknown: true, why: `HTTP ${res.status}` };
       } catch (e) {
@@ -169,10 +176,9 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
   // `statuses` is `lastStatuses` — already has that field for any Twitch
   // entry once resolveStatus() has run once.
   async function refreshAliveSet(statuses) {
-    const ytEntries = statuses.filter((e) => e.platform === "youtube");
-    const ytResults = await Promise.all(ytEntries.map(async (e) => [e.id, await checkYouTubeChannelAlive(e.channelId)]));
-    const liveNow = new Set(statuses.filter((e) => e.live).map((e) => e.id));
-    const dead = new Set(ytResults.filter(([id, ok]) => !ok && !liveNow.has(id)).map(([id]) => id));
+    // YouTube: only mark dead if the worker positively said exists:false
+    // (oEmbed can't describe channel pages, so it's not used here any more).
+    const dead = new Set(statuses.filter((e) => e.platform === "youtube" && e.exists === false && !e.live).map((e) => e.id));
     // Twitch: only mark dead if the worker positively said exists:false.
     // No worker configured, or the check failed for that entry -> exists
     // is undefined -> treated as alive (same permissive default as
@@ -235,7 +241,7 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
     }
     if (entry.platform === "youtube") {
       const result = await checkYouTubeLive(entry.channelId);
-      return { ...entry, live: result.live, title: result.title, viewers: null, unknown: !!result.unknown };
+      return { ...entry, live: result.live, title: result.title, videoId: result.videoId || null, exists: result.exists, viewers: null, unknown: !!result.unknown };
     }
     // Twitch / generic: use the viewer-stats worker if configured, else
     // fall back to the manual "assumeLive" flag (no viewer count, and
@@ -313,6 +319,7 @@ const HLS_PROBE_TIMEOUT_MS = 12000; // stream servers are often slower than YouT
   function embedUrlFor(entry) {
     if (entry.platform === "hls") return hlsSourceFor(entry);
     if (entry.platform === "youtube") {
+      if (entry.videoId) return `https://www.youtube.com/embed/${encodeURIComponent(entry.videoId)}?autoplay=1`;
       return `https://www.youtube.com/embed/live_stream?channel=${encodeURIComponent(entry.channelId)}&autoplay=1`;
     }
     if (entry.platform === "twitch") {
