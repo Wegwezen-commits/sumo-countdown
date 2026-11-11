@@ -173,7 +173,37 @@
       "language": "en",
       "status": "Active",
       "communityRank": null,
-      "note": "Added per site owner. channelId read from the channel's own page. Same streamer also broadcasts on Twitch (twitch.tv/avoidingthehenka) and Kick (per the channel's About text) — not added here."
+      "note": "Added per site owner. channelId read from the channel's own page. Same streamer also has Twitch and Kick entries below (avoidingthehenka-twitch, avoidingthehenka-kick); embedding is disabled on his YouTube live streams, so the card links out."
+    },
+    {
+      "id": "avoidingthehenka-twitch",
+      "platform": "twitch",
+      "label": "AvoidingTheHenka",
+      "channelUrl": "https://www.twitch.tv/avoidingthehenka",
+      "channelName": "avoidingthehenka",
+      "assumeLive": false,
+      "category": "Livestream",
+      "contentType": "Live Basho",
+      "official": false,
+      "language": "en",
+      "status": "Active",
+      "communityRank": null,
+      "note": "Twitch counterpart of the avoidingthehenka YouTube entry. Added per site owner; he isn't currently streaming on Twitch, so this card stays hidden until he goes live."
+    },
+    {
+      "id": "avoidingthehenka-kick",
+      "platform": "kick",
+      "label": "AvoidingTheHenka",
+      "channelUrl": "https://kick.com/avoidingthehenka",
+      "channelName": "avoidingthehenka",
+      "assumeLive": false,
+      "category": "Livestream",
+      "contentType": "Live Basho",
+      "official": false,
+      "language": "en",
+      "status": "Active",
+      "communityRank": null,
+      "note": "Kick counterpart of the avoidingthehenka YouTube entry (YouTube embedding is disabled for him, Kick's player is embeddable). Live status comes from the youtube-live Worker's Kick mode (best-effort); set assumeLive to true to force the card on."
     },
     {
       "id": "nhkworld-hls",
