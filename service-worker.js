@@ -3,7 +3,7 @@
 // fixed deploy is never masked by a stale cached copy of the code
 // itself; images/audio (which rarely change) stay cache-first for
 // speed and offline reliability.
-const CACHE_VERSION = "sumo-countdown-v42-hls-password";
+const CACHE_VERSION = "sumo-countdown-v44-layout-spoilers-charts";
 const NETWORK_FIRST_EXT = [".html", ".js", ".css", ".json"];
 const APP_SHELL = [
   "./",
@@ -35,12 +35,15 @@ const APP_SHELL = [
   "./js/watch-tabs.js",
   "./js/pwa.js",
   "./js/notify.js",
+  "./js/quickstrip.js",
+  "./js/layout.js",
   "./js/app.js",
   "./data/schedule.json",
   "./data/venues.json",
   "./data/champions.json",
   "./data/translations.json",
   "./data/news-sources.json",
+  "./data/charts.json",
   "./data/streams.json",
   "./data/videos.json",
   "./assets/icons/icon-192.png",

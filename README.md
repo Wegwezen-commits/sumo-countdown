@@ -15,11 +15,26 @@ GitHub Pages.
   live/upcoming one, independent of whether anything's currently live.
   Shows a release countdown for the upcoming basho until its rank list
   is actually out, the real East/West rank list once it is.
+  **Between tournaments** (basho over, next banzuke not out yet) it
+  defaults to the basho that just ended and adds: links to Fred
+  Pinkerton's three-basho chart (JPG/PDF, `data/charts.json`), rough
+  unofficial ▲/▼ markers for obvious risers and fallers in Makuuchi/Juryo
+  (9+ wins ▲, 11+ ▲▲, 6- ▼, 4- ▼▼), and a short list of possible Juryo
+  promotion candidates — all derived from that basho's records.
+- **Next-banzuke strip** — a slim countdown block right under the hero
+  ("Next banzuke · Hatsu Basho 2027 · 41 days · Mon 21 Dec"), so it's
+  visible at a glance. Counted in Japan calendar days; dates for basho
+  beyond the official seed data are marked "estimated".
+- **Page layout** — Settings → Page layout lets you move the main blocks
+  (banzuke strip, Watch, Torikumi, Banzuke, News, …) up/down; saved per
+  device. Mainly for phones.
 - **Torikumi** — same Basho selector plus Division and Day (1–15), so
   you can look back at any past day of any tournament, or — during a
   live basho — ahead to a day that hasn't started yet, since the next
   day's bout list is typically published in advance. Winner + technique
-  shown once results are in.
+  shown once results are in. **Spoiler-free mode** (checkbox in the panel
+  or Settings → "Hide results") lists decided bouts as plain match-ups
+  with a per-bout Reveal button and Reveal all / Hide all.
 - **Watch Sumo** — a tabbed panel for Live Streams (YouTube/Twitch, with
   real live-status and viewer counts) and Video Channels (auto-updating
   embeds of community-recommended highlight/analysis channels), both
@@ -89,11 +104,11 @@ sumo-countdown/
 ├── css/      main.css, themes.css, animations.css, responsive.css, tvmode.css
 ├── js/       util, language, settings, schedule, venue, live, sumoapi,
 │             banzuke, torikumi, previousbasho, rikishi, animations, audio,
-│             countdown, hero, news, streams, videos, watch-tabs, notify,
+│             countdown, quickstrip, layout, hero, news, streams, videos, watch-tabs, notify,
 │             pwa, app, vendor/hls.light.min.js
 ├── assets/   pixel/ (art), audio/ (composed tracks), icons/ (PWA icons)
 ├── data/     schedule.json, venues.json, champions.json, translations.json,
-│             news-sources.json, streams.json, videos.json
+│             news-sources.json, streams.json, videos.json, charts.json
 ├── workers/  hls-proxy.js (CORS/HTTPS proxy for .m3u8 streams)
 ├── scripts/  check_schedule.py + test (schedule sync), check-channel-health.mjs
 │             (dead-channel sweep), last-health-check.json (keepalive record)
