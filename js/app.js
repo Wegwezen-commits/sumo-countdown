@@ -128,7 +128,6 @@
     renderPreviousPanel();
     renderVenuesPanel();
     updateVenueScene();
-    if (window.QuickStrip) QuickStrip.render();
     if (window.Torikumi) Torikumi.render();
     if (window.Banzuke) Banzuke.render();
   }

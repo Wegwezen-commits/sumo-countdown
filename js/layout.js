@@ -18,7 +18,6 @@
   // block id → translation key for its name in the settings list
   const NAMES = {
     heroPanel: "layoutHero",
-    quickPanel: "layoutQuick",
     watchPanel: "watchSumo",
     torikumiPanel: "torikumi",
     banzukePanel: "banzuke",
