@@ -206,6 +206,35 @@
       "note": "Kick counterpart of the avoidingthehenka YouTube entry (YouTube embedding is disabled for him, Kick's player is embeddable). Live status comes from the youtube-live Worker's Kick mode (best-effort); set assumeLive to true to force the card on."
     },
     {
+      "id": "silentfalconharborspark-youtube",
+      "platform": "youtube",
+      "label": "silentFalconHarborSpark",
+      "channelUrl": "https://www.youtube.com/@silentFalconHarborSpark",
+      "channelId": "UCpsVdeJjRjjBU1Gpt7UtmVA",
+      "category": "Livestream",
+      "contentType": "Live Basho",
+      "official": false,
+      "language": "en",
+      "status": "Active",
+      "communityRank": null,
+      "note": "Alternative channel for AvoidingTheHenka (see avoidingthehenka, avoidingthehenka-twitch, avoidingthehenka-kick). Added per site owner. channelId read from the channel's own page. Whether embedding is allowed on its live streams has not been checked; if not, the card links out."
+    },
+    {
+      "id": "silentfalconharborspark-kick",
+      "platform": "kick",
+      "label": "silentFalconHarborSpark",
+      "channelUrl": "https://kick.com/silentfalconharborspark",
+      "channelName": "silentfalconharborspark",
+      "assumeLive": false,
+      "category": "Livestream",
+      "contentType": "Live Basho",
+      "official": false,
+      "language": "en",
+      "status": "Active",
+      "communityRank": null,
+      "note": "Kick counterpart of the silentfalconharborspark-youtube entry; alternative channel for AvoidingTheHenka. Added per site owner. Live status comes from the youtube-live Worker's Kick mode (best-effort); set assumeLive to true to force the card on."
+    },
+    {
       "id": "nhkworld-hls",
       "platform": "hls",
       "label": "NHK G (HLS)",
