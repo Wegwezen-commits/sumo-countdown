@@ -162,6 +162,21 @@
       "note": "Added per user request; confirmed live by user on 2026-09-27."
     },
     {
+      "id": "lofisumoclub",
+      "platform": "twitch",
+      "label": "LofiSumoClub",
+      "channelUrl": "https://www.twitch.tv/lofisumoclub",
+      "channelName": "lofisumoclub",
+      "assumeLive": false,
+      "category": "Livestream",
+      "contentType": "Live Basho",
+      "official": false,
+      "language": "en",
+      "status": "Active",
+      "communityRank": null,
+      "note": "Added per user request. contentType/language/status are assumed defaults and have not been verified against the channel; adjust if needed. assumeLive is false, so set it to true to force the card on while he's live."
+    },
+    {
       "id": "avoidingthehenka",
       "platform": "youtube",
       "label": "AvoidingTheHenka",
