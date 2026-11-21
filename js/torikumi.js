@@ -22,12 +22,26 @@
 // viewed. Undecided bouts (tomorrow's card, today's not-yet-fought bouts)
 // look exactly as before, so previewing upcoming match-ups is unaffected.
 // Reveals live in memory only: reloading the page hides everything again.
+//
+// BOUT VIDEOS: when CLIPS_ENDPOINT is set (the clips route of workers/youtube-live.js), bouts that
+// the Japan Sumo Association posted a video of on its official YouTube channel
+// get a ▶ button that opens the clip in a modal. The worker matches videos to
+// bouts by rikishiID, so this only has to compare the two IDs. Because the
+// video itself shows who won, the button never appears on a row that
+// spoiler-free mode is hiding — it shows up once that bout is revealed.
 (function (global) {
   "use strict";
 
   const KIMARITE_KEYS = ["kimarite", "technique", "winningTechnique"];
   const DIVISION_KEY = "torikumiDivision";
   const MAX_DAY = 15;
+  // Same Cloudflare Worker as streams.js's YT_LIVE_ENDPOINT (workers/youtube-live.js
+  // answers ?basho=&day= with the clips). Leave "" to switch bout videos off.
+  // Until the updated worker + its CLIPS KV binding are deployed, this just
+  // gets a 400/500 back and the ▶ buttons quietly don't appear.
+  const CLIPS_ENDPOINT = "https://youtube-live-979a.veeken-joost.workers.dev";
+  const CLIPS_TTL_MS = 5 * 60 * 1000;
+  const CLIPS_TIMEOUT_MS = 6000;
 
   let selectableBasho = [];
   let state = { bashoId: null, division: SumoUtil.storage.get(DIVISION_KEY, "Makuuchi"), day: 1 };
@@ -35,6 +49,7 @@
   let lastView = null;                 // { bouts, nameMap } of what's on screen, so reveal clicks repaint without refetching
   const revealed = new Set();          // `${view}|${boutIndex}`
   const revealedAll = new Set();       // view keys with "Reveal all" on
+  const clipCache = new Map();         // `${basho}|${day}` -> { at, clips }
 
   function spoilerFree() { return !!(global.Settings && Settings.prefs.spoilerFree); }
   function viewKey() { return `${state.bashoId}|${state.division}|${state.day}`; }
@@ -75,6 +90,83 @@
       : `<span class="${classes}">${safeName}</span>`;
   }
 
+  // ---- bout videos --------------------------------------------------
+
+  function sameId(a, b) { return a != null && b != null && String(a) === String(b); }
+
+  // The worker only knows "these two wrestlers", not which side was east on the
+  // banzuke, so compare the pair in either order.
+  function clipFor(eastId, westId) {
+    const clips = lastView && lastView.clips;
+    if (!clips || eastId == null || westId == null) return null;
+    return clips.find((c) =>
+      (sameId(c.eastId, eastId) && sameId(c.westId, westId)) ||
+      (sameId(c.eastId, westId) && sameId(c.westId, eastId))) || null;
+  }
+
+  function watchHTML(clip) {
+    if (!clip || !clip.videoId) return "";
+    const id = SumoUtil.escapeHTML(clip.videoId);
+    return clip.embeddable === false
+      ? `<a class="torikumi-watch-wrap torikumi-watch-link" href="https://www.youtube.com/watch?v=${id}" target="_blank" rel="noopener noreferrer">▶ ${I18n.t("torikumiWatchYouTube")} ↗</a>`
+      : `<div class="torikumi-watch-wrap"><button type="button" class="torikumi-watch" data-video-id="${id}">▶ ${I18n.t("torikumiWatch")}</button></div>`;
+  }
+
+  async function loadClips(token) {
+    if (!CLIPS_ENDPOINT || !lastView) return;
+    const key = `${state.bashoId}|${state.day}`;
+    const hit = clipCache.get(key);
+    if (hit && Date.now() - hit.at < CLIPS_TTL_MS) { lastView.clips = hit.clips; if (hit.clips.length) paint(); return; }
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), CLIPS_TIMEOUT_MS);
+    try {
+      const res = await fetch(`${CLIPS_ENDPOINT}?basho=${encodeURIComponent(state.bashoId)}&day=${state.day}`, { signal: controller.signal });
+      if (!res.ok) return;
+      const data = await res.json();
+      const clips = Array.isArray(data && data.clips) ? data.clips : [];
+      clipCache.set(key, { at: Date.now(), clips });
+      if (token !== renderToken || !lastView) return;     // user moved on while this loaded
+      lastView.clips = clips;
+      if (clips.length) paint();
+    } catch (e) { /* videos are a bonus: fail silently, torikumi stays as is */ }
+    finally { clearTimeout(timer); }
+  }
+
+  let clipModalEl = null;
+  function ensureClipModal() {
+    if (clipModalEl) return clipModalEl;
+    clipModalEl = document.createElement("div");
+    clipModalEl.className = "rikishi-modal clip-modal hidden";
+    clipModalEl.innerHTML = `
+      <div class="rikishi-modal-backdrop"></div>
+      <div class="rikishi-modal-body clip-modal-body pixel-corners" role="dialog" aria-modal="true">
+        <button type="button" class="rikishi-modal-close" aria-label="Close">×</button>
+        <div class="clip-modal-content"></div>
+      </div>`;
+    document.body.appendChild(clipModalEl);
+    clipModalEl.querySelector(".rikishi-modal-backdrop").addEventListener("click", closeClip);
+    clipModalEl.querySelector(".rikishi-modal-close").addEventListener("click", closeClip);
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeClip(); });
+    return clipModalEl;
+  }
+
+  function openClip(videoId) {
+    if (!/^[\w-]{11}$/.test(videoId || "")) return;
+    const modal = ensureClipModal();
+    // youtube-nocookie: no tracking cookies until the viewer plays the video.
+    modal.querySelector(".clip-modal-content").innerHTML = `
+      <div class="clip-frame"><iframe src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&playsinline=1"
+        title="Bout video" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+      <a class="panel-external-link" href="https://www.youtube.com/watch?v=${videoId}" target="_blank" rel="noopener noreferrer">${I18n.t("torikumiWatchYouTube")} ↗</a>`;
+    modal.classList.remove("hidden");
+  }
+
+  function closeClip() {
+    if (!clipModalEl || clipModalEl.classList.contains("hidden")) return;
+    clipModalEl.classList.add("hidden");
+    clipModalEl.querySelector(".clip-modal-content").innerHTML = "";   // removing the iframe stops playback
+  }
+
   function boutHTML(bout, nameMap, idx) {
     const eastId = pick(bout, ["eastId", "eastID", "eastRikishiId"]);
     const westId = pick(bout, ["westId", "westID", "westRikishiId"]);
@@ -108,6 +200,7 @@
         <span class="torikumi-vs">–</span>
         ${nameHTML("torikumi-west", westName, westId, String(winnerId) === String(westId))}
         ${resultHTML}
+        ${watchHTML(clipFor(eastId, westId))}
       </div>`;
   }
 
@@ -179,8 +272,9 @@
         body.innerHTML = `<p class="filter-empty">${I18n.t("torikumiNotPosted")}</p>`;
         return;
       }
-      lastView = { bouts, nameMap: buildNameMap(banzuke) };
+      lastView = { bouts, nameMap: buildNameMap(banzuke), clips: null };
       paint();
+      loadClips(token);
     } catch (e) {
       if (token !== renderToken) return;
       lastView = null;
@@ -194,6 +288,8 @@
     wired = true;
     const { body } = els();
     if (body) body.addEventListener("click", (e) => {
+      const watch = e.target.closest(".torikumi-watch");
+      if (watch) { openClip(watch.getAttribute("data-video-id")); return; }
       const one = e.target.closest(".torikumi-reveal");
       if (one) { revealed.add(`${viewKey()}|${one.getAttribute("data-idx")}`); paint(); return; }
       const all = e.target.closest(".spoiler-all");
