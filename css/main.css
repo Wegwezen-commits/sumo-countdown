@@ -1233,6 +1233,18 @@ select.mini { border: 1px solid var(--line); border-radius: 8px; background: var
 }
 .torikumi-reveal:hover, .torikumi-reveal:focus-visible { border-color: var(--accent); color: var(--accent); }
 
+/* Bout video button (js/torikumi.js, only when a JSA clip exists for the bout) */
+.torikumi-watch-wrap { flex: 1 0 100%; text-align: center; }
+.torikumi-watch, .torikumi-watch-link {
+  display: inline-block; font: inherit; font-size: 12px; padding: 4px 14px; cursor: pointer; text-decoration: none;
+  border: 1px solid var(--accent); border-radius: 999px; background: transparent; color: var(--accent);
+}
+.torikumi-watch:hover, .torikumi-watch:focus-visible, .torikumi-watch-link:hover { background: var(--accent); color: var(--paper); }
+.clip-modal-body { max-width: 640px; padding: 12px; }
+.clip-frame { position: relative; aspect-ratio: 16 / 9; background: #000; margin-top: 22px; }
+.clip-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.clip-modal-content .panel-external-link { display: inline-block; margin-top: 8px; }
+
 /* Settings: page layout list (js/layout.js) */
 .layout-list { list-style: none; margin: 0 0 6px; padding: 0; }
 .layout-item { display: flex; align-items: center; gap: 6px; padding: 6px 0; border-bottom: 1px solid var(--line); }
