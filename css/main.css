@@ -840,6 +840,7 @@ button, select, input { font-family: inherit; }
 .torikumi-east, .torikumi-west { font-weight: 600; }
 .torikumi-east.is-winner, .torikumi-west.is-winner { color: var(--accent-deep); }
 .torikumi-vs { color: var(--ink-soft); font-size: 11px; }
+.torikumi-score { color: var(--ink-soft); font-size: 11px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .torikumi-result { flex: 1 0 100%; text-align: center; font-size: 11px; color: var(--ink-soft); }
 
 .rikishi-link {
