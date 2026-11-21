@@ -23,6 +23,12 @@
 // look exactly as before, so previewing upcoming match-ups is unaffected.
 // Reveals live in memory only: reloading the page hides everything again.
 //
+// SCORES: next to each wrestler the win-loss(-absence) record he brings INTO the
+// bout, taken from the banzuke's per-day `record` list (so it never leaks the
+// result of the bout itself, and is safe in spoiler-free mode). Once a decided
+// bout is visible (not hidden by spoiler-free mode) the record after the bout
+// is shown too, e.g. "5-2 → 6-2". Nothing is drawn when the data isn't there.
+//
 // BOUT VIDEOS: when CLIPS_ENDPOINT is set (the clips route of workers/youtube-live.js), bouts that
 // the Japan Sumo Association posted a video of on its official YouTube channel
 // get a ▶ button that opens the clip in a modal. The worker matches videos to
@@ -80,6 +86,44 @@
     const all = [...((banzuke && banzuke.east) || []), ...((banzuke && banzuke.west) || [])];
     all.forEach((r) => { if (r.rikishiID != null) map.set(String(r.rikishiID), r.shikonaEn || r.shikonaJp); });
     return map;
+  }
+
+  // id -> the banzuke entry's per-day record list ([{ result, opponentID, ... }, ...]).
+  function buildRecordMap(banzuke) {
+    const map = new Map();
+    const all = [...((banzuke && banzuke.east) || []), ...((banzuke && banzuke.west) || [])];
+    all.forEach((r) => { if (r.rikishiID != null && Array.isArray(r.record)) map.set(String(r.rikishiID), r.record); });
+    return map;
+  }
+
+  // Tally the first `days` entries of a record list -> { w, l, a } or null.
+  function tallyDays(record, days) {
+    if (!Array.isArray(record) || days < 0) return null;
+    let w = 0, l = 0, a = 0;
+    record.slice(0, days).forEach((b) => {
+      const res = String((b && (b.result || b.outcome)) || "").toLowerCase();
+      if (res === "w" || (res.includes("win") && !res.includes("loss"))) w++;
+      else if (res === "l" || res.includes("loss")) l++;
+      else if (res.includes("absent") || res.includes("fusen") || res.includes("kyujo")) a++;
+    });
+    return { w, l, a };
+  }
+
+  function scoreText(t) { return t ? `${t.w}-${t.l}${t.a ? `-${t.a}` : ""}` : ""; }
+
+  // `after` = also show the record after this bout (only when the result is visible).
+  function scoreHTML(cls, id, recMap, showAfter) {
+    const rec = id != null && recMap ? recMap.get(String(id)) : null;
+    if (!rec) return "";
+    const before = tallyDays(rec, state.day - 1);
+    if (!before) return "";
+    let text = scoreText(before);
+    if (showAfter) {
+      const after = tallyDays(rec, state.day);
+      // Only trust "after" if the list really has an entry for this day.
+      if (after && rec.length >= state.day) text += ` → ${scoreText(after)}`;
+    }
+    return `<span class="torikumi-score ${cls}">${text}</span>`;
   }
 
   function nameHTML(cls, name, id, isWinner) {
@@ -167,7 +211,7 @@
     clipModalEl.querySelector(".clip-modal-content").innerHTML = "";   // removing the iframe stops playback
   }
 
-  function boutHTML(bout, nameMap, idx) {
+  function boutHTML(bout, nameMap, recMap, idx) {
     const eastId = pick(bout, ["eastId", "eastID", "eastRikishiId"]);
     const westId = pick(bout, ["westId", "westID", "westRikishiId"]);
     const winnerId = pick(bout, ["winnerId", "winnerID"]);
@@ -180,9 +224,9 @@
       // No winner info anywhere in this row — not in classes, not in text.
       return `
       <div class="torikumi-row is-hidden-result">
-        ${nameHTML("torikumi-east", eastName, eastId, false)}
+        ${nameHTML("torikumi-east", eastName, eastId, false)}${scoreHTML("torikumi-score-east", eastId, recMap, false)}
         <span class="torikumi-vs">–</span>
-        ${nameHTML("torikumi-west", westName, westId, false)}
+        ${scoreHTML("torikumi-score-west", westId, recMap, false)}${nameHTML("torikumi-west", westName, westId, false)}
         <button type="button" class="torikumi-reveal" data-idx="${idx}" aria-label="${SumoUtil.escapeHTML(I18n.t("spoilerHiddenLabel"))}: ${SumoUtil.escapeHTML(eastName)} – ${SumoUtil.escapeHTML(westName)}">${I18n.t("spoilerReveal")}</button>
       </div>`;
     }
@@ -196,9 +240,9 @@
     }
     return `
       <div class="torikumi-row${winnerId != null ? " is-decided" : ""}">
-        ${nameHTML("torikumi-east", eastName, eastId, String(winnerId) === String(eastId))}
+        ${nameHTML("torikumi-east", eastName, eastId, String(winnerId) === String(eastId))}${scoreHTML("torikumi-score-east", eastId, recMap, winnerId != null)}
         <span class="torikumi-vs">–</span>
-        ${nameHTML("torikumi-west", westName, westId, String(winnerId) === String(westId))}
+        ${scoreHTML("torikumi-score-west", westId, recMap, winnerId != null)}${nameHTML("torikumi-west", westName, westId, String(winnerId) === String(westId))}
         ${resultHTML}
         ${watchHTML(clipFor(eastId, westId))}
       </div>`;
@@ -238,7 +282,7 @@
   function paint() {
     const { body } = els();
     if (!body || !lastView) return;
-    const { bouts, nameMap } = lastView;
+    const { bouts, nameMap, recMap } = lastView;
     let bar = "";
     if (spoilerFree()) {
       const decided = bouts.filter(isDecided).length;
@@ -251,7 +295,7 @@
         </div>`;
       }
     }
-    body.innerHTML = `${bar}<div class="torikumi-list">${bouts.map((b, i) => boutHTML(b, nameMap, i)).join("")}</div>`;
+    body.innerHTML = `${bar}<div class="torikumi-list">${bouts.map((b, i) => boutHTML(b, nameMap, recMap, i)).join("")}</div>`;
   }
 
   async function renderBody() {
@@ -272,7 +316,7 @@
         body.innerHTML = `<p class="filter-empty">${I18n.t("torikumiNotPosted")}</p>`;
         return;
       }
-      lastView = { bouts, nameMap: buildNameMap(banzuke), clips: null };
+      lastView = { bouts, nameMap: buildNameMap(banzuke), recMap: buildRecordMap(banzuke), clips: null };
       paint();
       loadClips(token);
     } catch (e) {
