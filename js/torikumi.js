@@ -29,6 +29,12 @@
 // bout is visible (not hidden by spoiler-free mode) the record after the bout
 // is shown too, e.g. "5-2 → 6-2". Nothing is drawn when the data isn't there.
 //
+// PLAYOFFS: a JSA playoff video (優勝決定戦 / 三人の巴戦) covers 2-3 wrestlers, not one bout,
+// so the worker sends it as { kind: "playoff", ids: [...] } with no eastId/westId. It is
+// never attached to a regular bout row; it gets its own "Playoff" block under the day's
+// list. Because even the existence of a playoff gives away the standings, the block stays
+// hidden in spoiler-free mode until the day is revealed.
+//
 // BOUT VIDEOS: when CLIPS_ENDPOINT is set (the clips route of workers/youtube-live.js), bouts that
 // the Japan Sumo Association posted a video of on its official YouTube channel
 // get a ▶ button that opens the clip in a modal. The worker matches videos to
@@ -143,9 +149,9 @@
   function clipFor(eastId, westId) {
     const clips = lastView && lastView.clips;
     if (!clips || eastId == null || westId == null) return null;
-    return clips.find((c) =>
+    return clips.find((c) => c.kind !== "playoff" && (
       (sameId(c.eastId, eastId) && sameId(c.westId, westId)) ||
-      (sameId(c.eastId, westId) && sameId(c.westId, eastId))) || null;
+      (sameId(c.eastId, westId) && sameId(c.westId, eastId)))) || null;
   }
 
   function watchHTML(clip) {
@@ -154,6 +160,22 @@
     return clip.embeddable === false
       ? `<a class="torikumi-watch-wrap torikumi-watch-link" href="https://www.youtube.com/watch?v=${id}" target="_blank" rel="noopener noreferrer">▶ ${I18n.t("torikumiWatchYouTube")} ↗</a>`
       : `<div class="torikumi-watch-wrap"><button type="button" class="torikumi-watch" data-video-id="${id}">▶ ${I18n.t("torikumiWatch")}</button></div>`;
+  }
+
+  // The playoff block: one row per playoff clip whose wrestlers are all in the division on screen.
+  function playoffHTML() {
+    const clips = ((lastView && lastView.clips) || []).filter((c) => c.kind === "playoff" && Array.isArray(c.ids));
+    if (!clips.length) return "";
+    if (spoilerFree() && !revealedAll.has(viewKey())) return "";
+    const rows = clips.map((c) => {
+      if (!c.ids.every((id) => id != null && lastView.nameMap.has(String(id)))) return "";
+      const names = c.ids.map((id) => nameHTML("torikumi-playoff-name", lastView.nameMap.get(String(id)), id, false))
+        .join('<span class="torikumi-vs">·</span>');
+      return `<div class="torikumi-row torikumi-playoff-row">${names}${watchHTML(c)}</div>`;
+    }).join("");
+    return rows
+      ? `<div class="torikumi-playoff"><h4 class="torikumi-playoff-title">${I18n.t("torikumiPlayoff")}</h4><div class="torikumi-list">${rows}</div></div>`
+      : "";
   }
 
   async function loadClips(token) {
@@ -295,7 +317,7 @@
         </div>`;
       }
     }
-    body.innerHTML = `${bar}<div class="torikumi-list">${bouts.map((b, i) => boutHTML(b, nameMap, recMap, i)).join("")}</div>`;
+    body.innerHTML = `${bar}<div class="torikumi-list">${bouts.map((b, i) => boutHTML(b, nameMap, recMap, i)).join("")}</div>${playoffHTML()}`;
   }
 
   async function renderBody() {
